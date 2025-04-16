@@ -1,2 +1,2 @@
-# CS546_FinalProject
-CS-546 Final Project.
+# CS-546 Gacha Game
+CS-546 Final Project for group 31.
