@@ -1,5 +1,5 @@
 import * as helpers from "../helpers.js";
-import { users } from "../config/mongoCollections.js";
+import { users, collectionIndex } from "../config/mongoCollections.js";
 import { ObjectId } from "mongodb";
 
 /*  Given the user's id, the size of the pull (should be either 1 or 5), and ticket type. Check if player has enough tickets to pull with. */
@@ -55,9 +55,11 @@ try {
     console.log(e);
 }
 // Normal Gacha pull function. Checks if the user can pull and if so, does a pull equal to the given pull count (should only either be 1 or 5) using the odds of a normal ticket. Update user's collection inventory to include new character assuming its not a duplicate.
-export const normalPull = async (userId, pullCount) => {
+export const gachaPull = async (userId, pullCount, pullType) => {
     // check if userId is a valid string
     // check if userId is a valid ObjectID
+
+    // update 'collected' field in collection index to true 
 }
 
 // Golden Gacha pull function. Checks if the user can pull and if so, do a pull using the odds of a golden ticket. (Probability of higher rarity characters is higher). Update user's collection inventory to include new character assuming its not a duplicate.
@@ -68,3 +70,33 @@ export const normalPull = async (userId, pullCount) => {
 
 
 // Update pull history with pulled character assuming its not a duplicate. Include the character's name, rarity, timestamp of pull, and image
+
+
+// Given a name, Add gacha character
+export const addCharacterToGacha = (name, pull_rate, duplicate_currency) => {
+    // verify that name is a valid string
+    name = helpers.addCharacterToGacha(name, "Character name");
+    // verify that pull rate is between 0 and 1
+    if (typeof (pull_rate) !== 'number'
+        || pull_rate < 0
+        || pull_rate > 1
+        || Number.isNaN(pull_rate)) {
+        throw "Pull rate must be a valid number in the range of 0 to 1.";
+    }
+
+    // verify that duplicate currency is at least 1
+
+}
+try {
+
+} catch (e) {
+    console.log(e);
+}
+
+
+// try {
+//     console.log(await helpers.getCharacterId("Leomon"));
+// } catch (e) {
+//     console.log(e);
+// }
+
