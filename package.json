@@ -19,6 +19,7 @@
     "start": "node app.js"
   },
   "dependencies": {
+    "lotto-draw": "^1.0.2",
     "mongodb": "^6.16.0",
     "phaser": "^3.88.2"
   }
