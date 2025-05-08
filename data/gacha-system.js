@@ -8,12 +8,16 @@ const canPull = async (userId, pullCount, ticketType) => {
     userId = helpers.validateString(userId, "User ID");
     // check if userId is a valid objectId
     if (!ObjectId.isValid(userId)) {
-        throw "User ID has invalid Object ID.";
+        throw "Invalid user ID.";
+    }
+    // check that pull count is not undefined
+    if (pullCount === undefined) {
+        throw "Missing pull count.";
     }
     // check that pull count is not 0, negative, or a NaN
     if (typeof (pullCount) !== 'number'
         || Number.isNaN(pullCount)
-        || pullCount === 0
+        || pullCount <= 0
         || !Number.isInteger(pullCount)) {
         throw "Pull count must be a positive whole number that's at least 1.";
     }
@@ -36,7 +40,7 @@ const canPull = async (userId, pullCount, ticketType) => {
         }
         return true; // player has enough tickets to pull
     } else if (ticketType === 'golden') {
-        if (user.metadata.ticket_count.normal < pullCount) {
+        if (user.metadata.ticket_count.golden < pullCount) {
             throw "Player doesn't have enough golden tickets."
         }
         return true; // player has enough tickets to pull
@@ -46,7 +50,7 @@ const canPull = async (userId, pullCount, ticketType) => {
 
 }
 try {
-    console.log(await canPull("67fbccf7bedaaf5edc00dae7", 3, "golden"));
+    console.log(await canPull("67fbccf7bedaaf5edc00dae7", 50, "normal"));
 } catch (e) {
     console.log(e);
 }
