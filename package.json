@@ -1,0 +1,25 @@
+{
+  "name": "cs546_finalproject_gachagame",
+  "version": "1.0.0",
+  "description": "Group 31's final project for CS-546",
+  "homepage": "https://github.com/Bkendle1/CS546_FinalProject#readme",
+  "bugs": {
+    "url": "https://github.com/Bkendle1/CS546_FinalProject/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Bkendle1/CS546_FinalProject.git"
+  },
+  "license": "ISC",
+  "author": "Ivana Lu, Nicholas Wilson, Britt Li Kendle",
+  "type": "module",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "mongodb": "^6.16.0",
+    "phaser": "^3.88.2"
+  }
+}
