@@ -1,4 +1,5 @@
-import { users, collectionIndex, gacha } from "./config/mongoCollections.js";
+import { users, collectionIndex, gacha, shop } from "./config/mongoCollections.js";
+import { ObjectId } from "mongodb";
 
 /**
  * Verifies that the given string is not undefined, empty, not of type string, nor just whitespace, and also returns the string trimmed with trim().
@@ -28,4 +29,19 @@ export const getCharacterId = async (name) => {
         throw "No character with that name.";
     }
     return character._id.toString(); // return string of character id
+}
+
+export function validateObjectId(id, varName) {
+    id = validateString(id, varName);
+    if (!ObjectId.isValid(id)) {
+        throw `${varName} is not a valid ObjectId.`;
+    }
+    return id;
+}
+  
+export function validatePositiveInteger(num, varName) {
+    if (typeof num !== "number" || !Number.isInteger(num) || num <= 0) {
+        throw `${varName} must be a positive integer.`;
+    }
+    return num;
 }
