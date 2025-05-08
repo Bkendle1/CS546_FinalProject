@@ -1,0 +1,30 @@
+<h1>Gacha Login</h1>
+{{#if errors}}
+    <ul id="error" class="error">
+        {{#each errors}}
+        <li>
+            {{this}}
+        </li>
+        {{/each}}
+    </ul>
+{{/if}}
+
+
+<form id="signin-form" action="/" method="POST"> 
+    <label for="email">
+        Email:
+    </label>
+    <input type="text" id="email" name="email">
+
+    <label for="password">
+        Password:
+    </label>
+    <input type="password" id="password" name="password">
+
+    <button type="submit" id="submit_button" name="submit_button">Sign In</button>
+
+    <a id="signuplink" href="/register">Click here to signup!</a>
+</form>
+
+<script src="/public/js/login_form_process.js"></script>
+

@@ -1,0 +1,27 @@
+
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    font-size: 14pt;
+}
+
+body {
+    font-family: Georgia, Cambria, 'Times New Roman', Times, serif;
+}
+
+main {
+    max-width: 75%;
+    margin: auto;
+}
+
+.error {
+    color: #97031f;
+    font-size: 20pt;
+    font-weight: bolder;
+    text-align: center;
+    padding: 0.5em;
+}
