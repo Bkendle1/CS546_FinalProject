@@ -64,7 +64,12 @@ router.route('/').get(async (req, res) => {
 
       // store user information in req.session.user 
       req.session.user = {
-        email: user.email
+        userId: user.userId,
+        username: user.username,
+        email: user.email,
+        image: user.image,
+        metadata: user.metadata,
+        pull_history: user.pull_history
       };
 
       if (req.is('json')) {

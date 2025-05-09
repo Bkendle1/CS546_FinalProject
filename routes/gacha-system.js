@@ -11,11 +11,15 @@ router
         res.render('gacha', { title: "Gacha System", script_partial: 'gacha' })
     });
 
-// router
-//     .route('/normal')
-//     .get(async (req, res) => {
-//         // a single, normal pull
-//     });
+// this route is used so the game can get user's ticket information
+router
+    .route('/tickets')
+    .get(async (req, res) => {
+        const userId = req.session.user.userId; // get user's id
+        const normalTicketCount = await gachaData.getTicketCount(userId, "normal"); // get the current count of normal tickets from the user
+        const goldenTicketCount = await gachaData.getTicketCount(userId, "golden");// get the current count of golden tickets from the user
+        res.json({ normalTicketCount: normalTicketCount, goldenTicketCount: goldenTicketCount }); // return JSON with user's ticket counts
+    });
 // router
 //     .route('/normal/bulk')
 //     .get(async (req, res) => {

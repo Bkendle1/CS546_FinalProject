@@ -93,6 +93,43 @@ const getAllGachaCharacters = async () => {
 }
 
 /**
+ * Given a user's id, return the number of tickets they have of the given ticket type. Ticket type is case-insensitive
+ */
+export const getTicketCount = async (userId, ticketType) => {
+    // verify that userId is a valid string
+    userId = helpers.validateString(userId, "User ID");
+    // verify that userId is a valid ObjectId
+    if (!ObjectId.isValid(userId)) {
+        throw "Invalid user id.";
+    }
+    // verify that ticket type is a valid string 
+    ticketType = helpers.validateString(ticketType, "Ticket type");
+    ticketType = ticketType.toLowerCase();
+
+    // get user object from user collection
+    const userCollection = await users();
+    const user = await userCollection.findOne({ _id: ObjectId.createFromHexString(userId) });
+    // if user doesn't exist, throw
+    if (!user) throw "No user with that id.";
+
+    // return the corresponding ticket type
+    if (ticketType === 'normal') {
+        return user.metadata.ticket_count.normal;
+    } else if (ticketType === 'golden') {
+        return user.metadata.ticket_count.golden;
+    } else {
+        throw "Invalid ticket type, must either be 'normal' or 'golden'.";
+    }
+
+}
+
+// try {
+//     console.log(await getTicketCount("681e470761eacb4e94201ee6", "NORMAL"));
+// } catch (e) {
+//     console.log(e);
+// }
+
+/**
  * This function will check if the user can pull and if so, does a pull equal to the given pull count (should only either be 1 or 5) using the odds based on the pull type (normal or golden). It will also update the user's collection inventory to include the new character(s) assuming they're not duplicates; otherwise, it will update the user’s currency amount to include the duplicate currency. 
  * 
  * Pull type is case-insensitive.
