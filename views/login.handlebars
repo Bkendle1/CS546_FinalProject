@@ -1,0 +1,24 @@
+<h1>Gacha Login</h1>
+
+<ul id="error" class="error"></ul>
+
+{{!-- method="POST" action="/" --}}
+<form id="signin-form"> 
+    
+    <label for="email">
+        Email:
+    </label>
+    <input type="text" id="email" name="email">
+
+    <label for="password">
+        Password:
+    </label>
+    <input type="password" id="password" name="password">
+
+    <button type="submit" id="submit_button" name="submit_button">Sign In</button>
+
+    <a id="signuplink" href="/register">Click here to signup!</a>
+</form>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="/public/js/login_form_process.js"></script>
