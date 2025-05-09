@@ -12,24 +12,29 @@ kaplay({
     background: "#000000" // background color
 });
 
+let normalTicketCount = 0;
+let goldenTicketCount = 0;
+//Set up request config
+let requestConfig = {
+    method: 'GET', // send a GET request
+    url: '/gacha/tickets', // GET request goes to this route
+    // when the AJAX request is successful, update the ticket counts and run the Kaplay scene
+    success: (response) => {
+        normalTicketCount = response.normalTicketCount;
+        goldenTicketCount = response.goldenTicketCount;
+        go("game");
+    }
+};
 
+$.ajax(requestConfig).then(function (response) {
+    console.log(response); // print the response of the request
+})
 
 // load a sprite from an image
 loadSprite("android21", "/public/images/android21.png");
 scene("game", () => {
     // as soon as the webpage loads, send an AJAX request to get the user's ticket counts
-    //Set up request config
-    let requestConfig = {
-        method: 'GET', // send a GET request
-        url: '/gacha/tickets' // GET request goes to this route
-    };
-    let normalTicketCount = 0;
-    let goldenTicketCount = 0;
-    $.ajax(requestConfig).then(function (response) {
-        console.log(response); // print normal ticket count
-        normalTicketCount = response.normalTicketCount;
-        goldenTicketCount = response.goldenTicketCount;
-    })
+    console.log(`Normal count: ${normalTicketCount}`);
     // add user's normal ticket count
     add([
         text(`Normal: ${normalTicketCount}`),
@@ -62,4 +67,3 @@ scene("game", () => {
     })
 
 });
-go("game");
