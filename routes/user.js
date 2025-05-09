@@ -1,23 +1,21 @@
 import {Router} from 'express';
 const router = Router();
 import {register, login } from '../data/users.js';
+import xss from 'xss';
 import {validateString, getCharacterId, validateUsername, validatePassword, validateEmail} from '../helpers.js';
 
 router.route('/').get(async (req, res) => {
     //code here for GET
     try {
-      let isUserLoggedIn = false;
 
       // if user is logged in, redirect to gacha.handlebars (home page)
       if (req.session.user) {
-        isUserLoggedIn = true;
         return res.redirect('/gacha');
       }
   
       // else: render login.handlebars
       res.render('login',{title:"Login Page", 
                           user: req.session.user, 
-                          isUserLoggedIn: isUserLoggedIn, 
                           });
       
     } catch (e) {
@@ -39,6 +37,10 @@ router.route('/').get(async (req, res) => {
 
     // re-render form explaining to user which fields are missing 
     if (errors.length > 0) {
+      // check if ajax request (json)
+      if (req.is('json')) {
+        return res.status(400).json({success:false,errors});
+      }
       return res.status(400).render('login', {
         title: "Login Page",
         user: req.session.user,
@@ -48,6 +50,11 @@ router.route('/').get(async (req, res) => {
 
     // validate request body
     try {
+      // clean inputs
+      formInfo.email = xss(formInfo.email);
+      formInfo.password = xss(formInfo.password);
+      
+      // validate inputs
       formInfo.email = validateEmail(formInfo.email);
       formInfo.password = validatePassword(formInfo.password);
 
@@ -59,10 +66,17 @@ router.route('/').get(async (req, res) => {
         email: user.email
       };
 
+      if (req.is('json')) {
+        return res.status(200).json({success:true});
+      }
+
       // redirect to gacha home page 
       return res.redirect('/gacha');     
 
     } catch (e) {
+      if (req.is('json')) {
+        return res.status(400).json({success: false,errors: ["Either the email or password is invalid"]});
+      }
       return res.status(400).render('login', {
         title: "Login Page",
         user: req.session.user,
@@ -120,6 +134,13 @@ router.route('/register')
 
   // validate request body
   try {
+    // clean inputs
+    formInfo.username = xss(formInfo.username);
+    formInfo.email = xss(formInfo.email);
+    formInfo.password = xss(formInfo.password);
+    formInfo.confirmPassword = xss(formInfo.confirmPassword);
+
+    // validate inputs
     formInfo.username = validateUsername(formInfo.username);
     formInfo.email = validateEmail(formInfo.email);
     formInfo.password = validatePassword(formInfo.password);
