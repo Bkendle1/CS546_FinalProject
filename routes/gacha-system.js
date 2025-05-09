@@ -8,6 +8,7 @@ router
     .route('/')
     .get(async (req, res) => {
         // render a partial for a script that runs the phaser scene for the gacha compnent
+        res.render('gacha', { title: "Gacha System", script_partial: 'gacha' })
     });
 
 router
