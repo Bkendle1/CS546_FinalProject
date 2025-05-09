@@ -11,27 +11,27 @@ router
         res.render('gacha', { title: "Gacha System", script_partial: 'gacha' })
     });
 
-router
-    .route('/normal')
-    .get(async (req, res) => {
-        // a single, normal pull
-    });
-router
-    .route('/normal/bulk')
-    .get(async (req, res) => {
-        // a bulk, normal pull
-    });
+// router
+//     .route('/normal')
+//     .get(async (req, res) => {
+//         // a single, normal pull
+//     });
+// router
+//     .route('/normal/bulk')
+//     .get(async (req, res) => {
+//         // a bulk, normal pull
+//     });
 
 
-router
-    .route('/golden')
-    .get(async (req, res) => {
-        // a single, golden pull
-    });
+// router
+//     .route('/golden')
+//     .get(async (req, res) => {
+//         // a single, golden pull
+//     });
 
-router
-    .route('/golden/bulk')
-    .get(async (req, res) => {
-        // a bulk, golden pull
-    });
+// router
+//     .route('/golden/bulk')
+//     .get(async (req, res) => {
+//         // a bulk, golden pull
+//     });
 export default router;
