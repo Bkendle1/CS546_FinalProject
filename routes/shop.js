@@ -1,7 +1,10 @@
 // routes/shop.js
-import {Router} from "express";
+import { Router } from "express";
 const router = Router();
-import { getAllItems, purchaseItem } from "../data/shop.js";
+import { 
+    getAllItems, 
+    purchaseItem 
+} from "../data/shop.js";
 
 /**
  * GET /shop
@@ -12,8 +15,7 @@ router.get("/", async (req, res) => {
         res.status(200).render("shop", {
             title: "Shop",
             items,
-            // user: req.session.user,
-            error: null
+            user: req.session.user,
         });
     } catch (e) {
         res.status(500).render("error", { 
@@ -27,7 +29,7 @@ router.get("/", async (req, res) => {
  */
 router.post("/purchase", async (req, res) => {
     try {
-        // const userId = req.session.user._id;
+        const userId = req.session.user._id;
         const { itemName, quantity } = req.body;
         await purchaseItem(userId, itemName, parseInt(quantity, 10));
         res.redirect("/shop");
@@ -36,7 +38,7 @@ router.post("/purchase", async (req, res) => {
         res.status(400).render("shop", {
             title: "Shop",
             items,
-            // user: req.session.user,
+            user: req.session.user,
             error: e
         });
     }
