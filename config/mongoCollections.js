@@ -19,3 +19,4 @@ const getCollectionFn = (collection) => {
 export const gacha = getCollectionFn('gacha');
 export const users = getCollectionFn('users');
 export const collectionIndex = getCollectionFn('collectionIndex');
+export const shop = getCollectionFn('shop');
