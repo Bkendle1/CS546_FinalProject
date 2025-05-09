@@ -180,11 +180,11 @@ export const gachaPull = async (userId, pullCount, pullType) => {
 }
 
 
-try {
-    console.log(await gachaPull("67fbccf7bedaaf5edc00dae7", 2, "GOLDEN"));
-} catch (e) {
-    console.log(e);
-}
+// try {
+//     console.log(await gachaPull("67fbccf7bedaaf5edc00dae7", 2, "GOLDEN"));
+// } catch (e) {
+//     console.log(e);
+// }
 
 
 /**

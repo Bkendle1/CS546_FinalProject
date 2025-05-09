@@ -11,12 +11,9 @@
     <main>
         {{body}}
     </main>
-    <script type="module">
-        // import kaplay
-        import kaplay from "https://unpkg.com/kaplay@3001/dist/kaplay.mjs";
-        // start kaplay
-        kaplay();
-    </script>
+    {{}}
+    {{> (lookup . 'script_partial')}}
+
 </body>
 
 </html>

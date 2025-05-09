@@ -20,7 +20,8 @@
     "seed": "node ./tasks/seed.js"
   },
   "dependencies": {
-    "esbuild": "^0.25.4",
+    "express": "^5.1.0",
+    "express-handlebars": "^8.0.1",
     "mongodb": "^6.16.0",
     "weighted": "^1.0.0"
   }
