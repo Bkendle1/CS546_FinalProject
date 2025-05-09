@@ -1,6 +1,7 @@
 import * as helpers from "../helpers.js";
 import { users, collectionIndex, gacha } from "../config/mongoCollections.js";
 import { ObjectId } from "mongodb";
+import weighted from "weighted";
 
 /**  Given the user's id, the size of the pull (should be either 1 or 5), and ticket type. Check if player has enough tickets to pull with. Ticket type is case-insensitive.
 */
@@ -74,7 +75,29 @@ const getGachaCharacterById = async (characterId) => {
 }
 
 /**
- * This function will check if the user can pull and if so, does a pull equal to the given pull count (should only either be 1 or 5) using the odds based on the pull type (normal or golden). It will also update the user's collection inventory to include the new character assuming its not a duplicate; otherwise, it will update the user’s currency amount to include the duplicate currency. Pull type is case-insensitive.
+ * Returns an array of all character documents in the gacha collection with their _id field as a string. If no characters are in the gacha database, return an empty array. 
+ */
+const getAllGachaCharacters = async () => {
+    let gachaCharacters = [];
+    const gachaCollection = await gacha();
+    gachaCharacters = await gachaCollection.find({}).toArray();
+    if (!gachaCharacters) {
+        throw "Could not get all characters from gacha.";
+    }
+    // convert all gacha characters's _id field into a string
+    gachaCharacters = gachaCharacters.map((character) => {
+        character._id = character._id.toString();
+        return character;
+    });
+    return gachaCharacters;
+}
+
+/**
+ * This function will check if the user can pull and if so, does a pull equal to the given pull count (should only either be 1 or 5) using the odds based on the pull type (normal or golden). It will also update the user's collection inventory to include the new character(s) assuming they're not duplicates; otherwise, it will update the user’s currency amount to include the duplicate currency. 
+ * 
+ * Pull type is case-insensitive.
+ * 
+ * Returns all pulled characters as an array even if pullCount was 1.
  */
 export const gachaPull = async (userId, pullCount, pullType) => {
     // check if userId is a valid string
@@ -98,36 +121,76 @@ export const gachaPull = async (userId, pullCount, pullType) => {
     pullType = helpers.validateString(pullType, "Pull type");
     // check if the pull type is a valid option
     pullType = pullType.toLowerCase();
-    if (pullType !== "normal" || pullType !== "golden") {
+    if (pullType !== "normal" && pullType !== "golden") {
         throw "Pull type can only be either 'normal' or 'golden'.";
     }
 
     // check if user has enough tickets for this pull type (either golden or normal)
-    if (canPull(userId, pullCount, pullType)) {
+    let pulledCharacters = []; // store pulled characters in an array
+    if (await canPull(userId, pullCount, pullType)) {
+        // get array of all characters in gacha collection
+        let gachaCharacters = await getAllGachaCharacters();
+
+        if (pullType === 'normal') {
+            // setup an object of character-pull_rate pairs considering normal pull_rates
+            let normalPull = {};
+            gachaCharacters.map((character) => {
+                normalPull[character.name] = character.pull_rate;
+            });
+
+            // do the given amount of pulls
+            for (let i = 0; i < pullCount; i++) {
+                pulledCharacters.push(weighted.select(normalPull, { normal: false }));
+            }
+
+        } else if (pullType === 'golden') {
+            const GOLDEN_RATE = 3; // weight multiplier applied to rare character's pull_rate
+            const RARE_THRESHOLD = 0.2;// weight multiplier is applied to characters whose pull_rate is no more than this threshold 
+            // setup an object of character-pull_rate pairs considering golden pull_rates, i.e. increase odds of pulling rarer characters
+            let goldenPull = {};
+            gachaCharacters.map((character) => {
+                // checks if character is rare enough based on RARE_THRESHOLD
+                if (character.pull_rate <= RARE_THRESHOLD) {
+                    goldenPull[character.name] = character.pull_rate * GOLDEN_RATE; // increase chance of being pulled with weight multiplier
+                } else {
+                    goldenPull[character.name] = character.pull_rate;
+                }
+            });
+            // do the given amount of pulls
+            for (let i = 0; i < pullCount; i++) {
+                pulledCharacters.push(weighted.select(goldenPull, { normal: false })); // normal is an option for whether or not the weights for the characters are normalized, we set this to false so the function normalizes for us
+            }
+        } else {
+            throw "Pull type must either be 'normal' or 'golden'.";
+        }
+
+        // TODO: using a collectionInventory.js data function, check if any pulls are duplicates and if so, increase user's currency with the corresponding duplicate currency
+
+        // TODO: using a collectionInventory.js data function, update the user's collection inventory to include the new character(s) assuming they're not duplicates
+
         // decrement user's corresponding ticket count 
         helpers.updateTicketCount(userId, pullType, -pullCount);
-        // store pulled characters in an array
-        let pulledCharacters = [];
-        // do the given amount of pulls
-        for (let i = 0; i < pullCount; i++) {
-
-        }
     }
 
-    // update 'collected' field in collection index to true 
+    // TODO: update 'collected' field in collection index to true (call function from collectionIndex.js data function) for each of the pulled characters
+
+    // TODO: Update pull history with pulled character assuming its not a duplicate. Include the character's name, rarity, timestamp of pull, and image
+
+    return pulledCharacters;
 }
 
-// Golden Gacha pull function. Checks if the user can pull and if so, do a pull using the odds of a golden ticket. (Probability of higher rarity characters is higher). Update user's collection inventory to include new character assuming its not a duplicate.
 
-// Check if pull is a duplicate. If so, give the user currency in exchange which varies depending on the rarity of the pulled character
-
-// Update pull history with pulled character assuming its not a duplicate. Include the character's name, rarity, timestamp of pull, and image
+try {
+    console.log(await gachaPull("67fbccf7bedaaf5edc00dae7", 2, "GOLDEN"));
+} catch (e) {
+    console.log(e);
+}
 
 
 /**
  * Given a name, pull_rate, and duplicate currency, add a new character to the gacha system.
  * IMPORTANT: Since characters will share the same _id across different collections, the new character must already exist in the collection index collection as that's where we copy the _id field from.
- * Name is also case-insensitive
+ * Name is also case-insensitive. 
 */
 export const addCharacterToGacha = async (name, pull_rate, duplicate_currency) => {
     // verify that name is a valid string
@@ -172,29 +235,3 @@ export const addCharacterToGacha = async (name, pull_rate, duplicate_currency) =
 
     return gachaCharacter; // return object of new gacha character
 }
-
-// try {
-//     console.log(await addCharacterToGacha("Leomon", 0.5, 400));
-// } catch (e) {
-//     console.log(e);
-// }
-
-
-// try {
-//     console.log(await addCharacterToGacha("deeznuts", 0.5, 1.));
-// } catch (e) {
-//     console.log(e);
-// }
-
-
-// try {
-//     console.log(await helpers.getCharacterId("Leomon"));
-// } catch (e) {
-//     console.log(e);
-// }
-
-// try {
-//     console.log(await canPull("67fbccf7bedaaf5edc00dae7", 1, "normal"));
-// } catch (e) {
-//     console.log(e);
-// }
