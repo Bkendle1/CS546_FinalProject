@@ -1,7 +1,7 @@
 import userRoutes from "./user.js";
 import shopRoutes from "./shop.js";
-
 import gachaRoutes from "./gacha-system.js";
+
 const constructorMethod = (app) => {
   app.use("/gacha", gachaRoutes);
   app.use("/shop", shopRoutes);
