@@ -9,7 +9,7 @@ import {
 /**
  * GET /shop
  */
-router.get("/", async (req, res) => {
+router.get("/shop", async (req, res) => {
     try {
         const items = await getAllItems();
         res.status(200).render("shop", {
@@ -18,16 +18,28 @@ router.get("/", async (req, res) => {
             user: req.session.user,
         });
     } catch (e) {
-        res.status(500).render("error", { 
-            error: e 
+        res.status(500).render("error", {
+            error: e
         });
+    }
+});
+
+/**
+ * GET /shop/items
+ */
+router.get("/shop/items", async (req, res) => {
+    try {
+        const items = await getAllItems();
+        res.status(200).json(items)
+    } catch (e) {
+        res.status(500).json({ error: e.toString() });
     }
 });
 
 /**
  * POST /shop/purchase
  */
-router.post("/purchase", async (req, res) => {
+router.post("/shop/purchase", async (req, res) => {
     try {
         const userId = req.session.user._id;
         const { itemName, quantity } = req.body;
