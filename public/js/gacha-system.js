@@ -18,7 +18,7 @@ let goldenTicketCount = 0;
 let requestConfig = {
     method: 'GET', // send a GET request
     url: '/gacha/tickets', // GET request goes to this route
-    // when the AJAX request is successful, update the ticket counts and run the Kaplay scene
+    // when the AJAX request is successful, update the ticket counts and run the Kaplay scene (we need this because AJAX isx asynchronous and the scene can't start if the request isn't done yet)
     success: (response) => {
         normalTicketCount = response.normalTicketCount;
         goldenTicketCount = response.goldenTicketCount;
@@ -47,7 +47,20 @@ scene("game", () => {
         pos(500),
         anchor("center"),
     ]);
+
     // add button for single normal pull
+    const normalSingleBtn = add([
+        rect(200, 50, { radius: 5 }),
+        pos(10, height() - 60),
+        outline(3),
+        color(127, 200, 255),
+    ]);
+    normalSingleBtn.add([
+        text("Normal x1")],
+        pos(100, 30),
+        anchor("center"),
+    );
+
     // add button for bulk normal pull
 
     // add button for single golden pull
