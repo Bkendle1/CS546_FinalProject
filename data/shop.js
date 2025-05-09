@@ -10,19 +10,19 @@ import {
  * Fetches all shop items.
  */
 export async function getAllItems() {
-    const shopCollection = await shop();
-    return await shopCollection.find({}).toArray();
+    const shopCol = await shop();
+    return await shopCol.find({}).toArray();
 }
 
 /**
  * Fetches a single item by its name.
  */
-export async function getItemByName(name) {
+export async function getOneItem(name) {
     name = validateString(name, "Item name");
-    const shopCollection = await shop();
-    const item = await shopCollection.findOne({ name });
+    const shopCol = await shop();
+    const item = await shopCol.findOne({ name });
     if (!item) {
-        throw `No item with name '${name}' found.`;
+        throw "Error: No item with name " + name + " found.";
     }
     return item;
 }
@@ -37,51 +37,42 @@ export async function purchaseItem(userId, itemName, quantity = 1) {
     quantity = validatePositiveInteger(quantity, "Quantity");
 
     // Load item and compute cost
-    const item = await getItemByName(itemName);
+    const item = await getOneItem(itemName);
     const totalCost = item.cost * quantity;
 
     // Load user
-    if (!ObjectId.isValid(userId)) {
-        throw "Invalid user ID.";
-    }
-    const userCollection = await users();
-    const user = await userCollection.findOne({ _id: new ObjectId(userId) });
+    const userCol = await users();
+    const user = await userCol.findOne({ _id: new ObjectId(userId) });
     if (!user) {
-        throw "User not found.";
+        throw "Error: User not found.";
     }
 
     // Check funds
-    const currentCurrency = user.metadata.currency;
-    if (currentCurrency < totalCost) {
-        throw "Insufficient currency for purchase.";
+    const userFunds = user.metadata.currency;
+    if (userFunds < totalCost) {
+        throw "Error: Insufficient currency for purchase.";
     }
 
-    // Build the $inc update
-    const updateOps = { $inc: { "metadata.currency": -totalCost } };
-    const lower = itemName.toLowerCase();
-    if (lower.includes("golden ticket")) {
-        updateOps.$inc["metadata.ticket_count.golden"] = quantity;
-    } else if (lower.includes("ticket")) {
-        updateOps.$inc["metadata.ticket_count.normal"] = quantity;
-    } else if (lower.includes("food")) {
-        updateOps.$inc["metadata.food_count"] = quantity;
-    } 
+    // Update shop
+    const updateShop = { $inc: { "metadata.currency": -totalCost } };
+    const lowItem = itemName.toLowerCase();
+    if (lowItem.includes("golden ticket")) {
+        updateShop.$inc["metadata.ticket_count.golden"] = quantity;
+    } else if (lowItem.includes("ticket")) {
+        updateShop.$inc["metadata.ticket_count.normal"] = quantity;
+    } else if (lowItem.includes("food")) {
+        updateShop.$inc["metadata.food_count"] = quantity;
+    } else {
+        throw "Error: " + lowItem + " is an unhandled shop item."
+    }
 
-    const result = await userCollection.updateOne(
+    const result = await userCol.updateOne(
         { _id: new ObjectId(userId) },
-        updateOps
+        updateShop
     );
-    if (result.modifiedCount === 0) {
-        throw "Purchase failed.";
+    if (result.modifiedCount == 0) {
+        throw "Error: Purchase failed.";
     }
 
     return { itemPurchased: itemName, quantity, totalCost };
 }
-
-/*
-export default {
-    getAllItems,
-    getItemByName,
-    purchaseItem,
-};
-*/
