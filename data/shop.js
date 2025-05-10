@@ -44,11 +44,7 @@ export async function getOneItem(name) {
     }
     return item;
 }
-try {
-    console.log(await getOneItem("Rare candy"))
-} catch (e) {
-    console.log(e);
-}
+
 /**
  * Purchases “quantity” of itemName for the given user, deducting currency
  * and incrementing the appropriate field (tickets or food).
