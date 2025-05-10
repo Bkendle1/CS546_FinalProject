@@ -121,8 +121,8 @@ function requestPull(pullType, pullCount) {
     }
 };
 
-// load a sprite from an image
-loadSprite("banner", "/public/images/gachaBanner.png");
+loadSprite("banner", "/public/images/gachaBanner.png"); // load banner image as a sprite
+
 scene("Gacha", () => {
     // render gacha's banner
     add([
@@ -169,16 +169,20 @@ scene("Gacha", () => {
     onUpdate(() => {
         normalCounter.text = `Normal: ${normalTicketCount}`; // on every frame, it keeps the counter up-to-date
         goldenCounter.text = `Golden: ${goldenTicketCount}`; // on every frame, it keeps the counter up-to-date
-        if (normalCounter <= 0) {
+        if (normalTicketCount <= 0) {
             // remove the area() from the normal buttons to prevent being clicked, i.e. add button again without area()
-
             // change color of buttons so they're greyed out
         } else {
-
+            // restore button back to normal
         }
-        if (goldenCounter <= 0) {
+        // TODO: I don't think this check should be done in the update()
+
+        if (goldenTicketCount <= 0) {
             // remove the area() from the normal buttons to prevent being clicked
-            goldenSingleBtn.area = false;
+            goldenSingleBtn.area.scale = vec2(0);
+
+            goldenSingleBtn.color = Color.fromHex("#36454F"); // grey out button to indicate its unavailable
+            // goldenSingle
             // change color of buttons so they're greyed out
         }
     });
