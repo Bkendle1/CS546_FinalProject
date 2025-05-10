@@ -1,5 +1,9 @@
 import { dbConnection, closeConnection } from "../config/mongoConnection.js";
-import { gachaData, shopData } from "../data/index.js";
+import { 
+    gachaData, 
+    shopData, 
+    indexData
+} from "../data/index.js";
 
 const db = await dbConnection();
 // await db.dropDatabase();
@@ -40,5 +44,16 @@ await shopData.addItemToShop(
 
 console.log("Done seeding shop collection.");
 
+// collection index
+/* const indexIds = {};
+for (const c of chars) {
+    const id = await collectionIndexData.addIndexEntry (
+        c.name,
+        c.rarity,
+        c.image,
+        c.description
+    );
+    indexIds[c.name] = id;
+} */
 
 await closeConnection();
