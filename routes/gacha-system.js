@@ -9,8 +9,8 @@ const BULK_PULL_COUNT = 5; // number of pulls for a bulk pull. IF YOU CHANGE THI
 router
     .route('/')
     .get(async (req, res) => {
-        // render a partial for a script that runs the phaser scene for the gacha compnent
-        res.render('gacha', { title: "Gacha System", script_partial: 'gacha' })
+        // render the gacha template 
+        res.render('gacha', { title: "Gacha System" })
     });
 
 // this route is used so the game can get user's ticket information
