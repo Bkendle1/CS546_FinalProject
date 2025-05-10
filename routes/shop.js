@@ -1,15 +1,15 @@
 // routes/shop.js
 import { Router } from "express";
 const router = Router();
-import { 
-    getAllItems, 
-    purchaseItem 
+import {
+    getAllItems,
+    purchaseItem
 } from "../data/shop.js";
 
 /**
  * GET /shop
  */
-router.get("/shop", async (req, res) => {
+router.get("/", async (req, res) => {
     try {
         const items = await getAllItems();
         res.status(200).render("shop", {
@@ -27,7 +27,7 @@ router.get("/shop", async (req, res) => {
 /**
  * GET /shop/items
  */
-router.get("/shop/items", async (req, res) => {
+router.get("/items", async (req, res) => {
     try {
         const items = await getAllItems();
         res.status(200).json(items)
@@ -39,7 +39,7 @@ router.get("/shop/items", async (req, res) => {
 /**
  * POST /shop/purchase
  */
-router.post("/shop/purchase", async (req, res) => {
+router.post("/purchase", async (req, res) => {
     try {
         const userId = req.session.user._id;
         const { itemName, quantity } = req.body;
