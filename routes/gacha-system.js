@@ -15,17 +15,34 @@ router
 router
     .route('/tickets')
     .get(async (req, res) => {
-        const userId = req.session.user.userId; // get user's id
-        const normalTicketCount = await gachaData.getTicketCount(userId, "normal"); // get the current count of normal tickets from the user
-        const goldenTicketCount = await gachaData.getTicketCount(userId, "golden");// get the current count of golden tickets from the user
-        res.json({ normalTicketCount: normalTicketCount, goldenTicketCount: goldenTicketCount }); // return JSON with user's ticket counts
+        let userId = req.session.user.userId; // get user's id
+        // error handling
+        try {
+            userId = helpers.validateString(userId, "User ID");
+            helpers.validateObjectId(userId, "User ID");
+        } catch (e) {
+            res.status(404).render('error', { title: "Error: 404", error: e });
+        }
+        // attempt to get ticket counts
+        try {
+            const normalTicketCount = await gachaData.getTicketCount(userId, "normal"); // get the current count of normal tickets from the user
+            const goldenTicketCount = await gachaData.getTicketCount(userId, "golden");// get the current count of golden tickets from the user
+            res.json({ normalTicketCount: normalTicketCount, goldenTicketCount: goldenTicketCount }); // return JSON with user's ticket counts
+        } catch (e) {
+            res.status(500).render('error', { title: "Error: 500", error: e });
+        }
     });
-// router
-//     .route('/normal/bulk')
-//     .get(async (req, res) => {
-//         // a bulk, normal pull
-//     });
+router
+    .route('/normal/bulk')
+    .get(async (req, res) => {
+        // a bulk, normal pull
+    });
 
+router
+    .route('/normal')
+    .get(async (req, res) => {
+        // a single, normal pull
+    });
 
 // router
 //     .route('/golden')
