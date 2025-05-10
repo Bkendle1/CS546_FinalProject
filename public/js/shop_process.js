@@ -1,11 +1,4 @@
-import kaplay, {
-    sprite,
-    pos,
-    area,
-    onClick,
-    drawText,
-    loadSprite
-} from 'kaplay';
+import kaplay from "https://unpkg.com/kaplay@3001/dist/kaplay.mjs";
 
 // Get all availabile items from the shop
 async function fetchShopItems() {
@@ -56,10 +49,11 @@ async function main() {
     }
 
     // Initialize Kaplay
+    const canvas = document.getElementById("shop-canvas");
     kaplay({
-        canvas: document.getElementById("shop-canvas"),
-        width: 800,
-        height: 600
+        canvas,
+        width: canvas.width,
+        height: canvas.height
     });
 
     // Preload sprites
