@@ -213,6 +213,7 @@ export const gachaPull = async (userId, pullCount, pullType) => {
 
     // TODO: Update pull history with pulled character assuming its not a duplicate. Include the character's name, rarity, timestamp of pull, and image
 
+    console.log(`DEBUG-DATA: ${pulledCharacters}`);
     return pulledCharacters;
 }
 

@@ -4,6 +4,8 @@ import { gachaData } from '../data/index.js';
 import * as helpers from '../helpers.js';
 import { ObjectId } from 'mongodb';
 
+const BULK_PULL_COUNT = 5; // number of pulls for a bulk pull. IF YOU CHANGE THIS VALUE THEN MAKE SURE TO ALSO CHANGE THIS CONSTANT IN THE CORRESPONDING CLIENT-SIDE JS FILE
+
 router
     .route('/')
     .get(async (req, res) => {
@@ -15,14 +17,8 @@ router
 router
     .route('/tickets')
     .get(async (req, res) => {
-        let userId = req.session.user.userId; // get user's id
-        // error handling
-        try {
-            userId = helpers.validateString(userId, "User ID");
-            helpers.validateObjectId(userId, "User ID");
-        } catch (e) {
-            res.status(404).render('error', { title: "Error: 404", error: e });
-        }
+        const userId = req.session.user.userId; // get user's id
+
         // attempt to get ticket counts
         try {
             const normalTicketCount = await gachaData.getTicketCount(userId, "normal"); // get the current count of normal tickets from the user
@@ -32,23 +28,49 @@ router
             res.status(500).render('error', { title: "Error: 500", error: e });
         }
     });
-router
-    .route('/normal/bulk')
-    .get(async (req, res) => {
-        // a bulk, normal pull
-    });
+
 
 router
     .route('/normal')
     .get(async (req, res) => {
-        // a single, normal pull
+        // makes a single, normal pull
+        const userId = req.session.user.userId;
+        // attempt to make a single normal pull
+        try {
+            const character = await gachaData.gachaPull(userId, 1, "normal");
+            res.json({ pulled: character[0] }); // gachaPull returns an array even if it was a single pull
+        } catch (e) {
+            res.status(500).render('error', { title: "Error: 500", error: e });
+        }
     });
 
-// router
-//     .route('/golden')
-//     .get(async (req, res) => {
-//         // a single, golden pull
-//     });
+router
+    .route('/normal/bulk')
+    .get(async (req, res) => {
+        // makes a bulk, normal pull
+        const userId = req.session.user.userId;
+        // attempt to make a bulk normal pull
+        try {
+            const characters = await gachaData.gachaPull(userId, BULK_PULL_COUNT, "normal");
+            res.json({ pulled: characters }); // gachaPull returns an array
+        } catch (e) {
+            res.status(500).render('error', { title: "Error: 500", error: e });
+        }
+    });
+router
+    .route('/golden')
+    .get(async (req, res) => {
+        // makes a single, golden pull
+        const userId = req.session.user.userId;
+        // attempt to make a single, golden pull
+        try {
+            const character = await gachaData.gachaPull(userId, 1, 'golden');
+            res.json({ pulled: character[0] });  // gachaPull returns an array even if it was a single pull
+        } catch (e) {
+            // user doesn't have enough tickets
+            res.status(500).render('error', { title: "Error: 500", error: e });
+        }
+    });
 
 // router
 //     .route('/golden/bulk')
