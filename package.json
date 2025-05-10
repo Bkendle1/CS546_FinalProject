@@ -20,6 +20,7 @@
     "seed": "node ./tasks/seed.js"
   },
   "dependencies": {
+    "kaplay": "^3001.0.17",
     "axios": "^1.9.0",
     "bcrypt": "^5.1.1",
     "express": "^5.1.0",
