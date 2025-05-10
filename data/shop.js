@@ -1,20 +1,29 @@
 import { shop, users } from "../config/mongoCollections.js";
 import { ObjectId } from "mongodb";
-import { 
-    validateString, 
+import {
+    validateString,
     validateObjectId,
     validatePositiveInteger
 } from "../helpers.js";
 
 /**
- * Adds a new shop item document.
+ * Adds a new shop item document. Name is case-insentitive. Doesn't allow duplicate items.
  */
 export async function addItemToShop(name, cost, description, image) {
     name = validateString(name, "Item name");
+    name = name.toLowerCase();
     cost = validatePositiveInteger(cost, "Cost");
     description = validateString(description, "Description");
     image = validateString(image, "Image URL");
 
+    // check if new item is already in the shop collection
+    const shopCol = await shop();
+    const item = await shopCol.findOne({ name });
+    if (item) {
+        throw `${name} is already in the shop.`;
+    }
+
+    // insert new item into shop collection
     const shopCollection = await shop();
     const newItem = { name, cost, description, image };
     const result = await shopCollection.insertOne(newItem);
@@ -23,6 +32,7 @@ export async function addItemToShop(name, cost, description, image) {
     }
     return result.insertedId.toString();
 }
+
 
 /**
  * Fetches all shop items.
@@ -33,15 +43,17 @@ export async function getAllItems() {
 }
 
 /**
- * Fetches a single item by its name.
+ * Fetches a single item by its name. Name is case-insensitive.
  */
 export async function getOneItem(name) {
     name = validateString(name, "Item name");
+    name = name.toLowerCase();
     const shopCol = await shop();
     const item = await shopCol.findOne({ name });
     if (!item) {
         throw "Error: No item with name " + name + " found.";
     }
+    item._id = item._id.toString();
     return item;
 }
 
@@ -52,6 +64,7 @@ export async function getOneItem(name) {
 export async function purchaseItem(userId, itemName, quantity = 1) {
     userId = validateObjectId(userId, "User ID");
     itemName = validateString(itemName, "Item name");
+    itemName = itemName.toLowerCase();
     quantity = validatePositiveInteger(quantity, "Quantity");
 
     // Load item and compute cost
@@ -60,7 +73,7 @@ export async function purchaseItem(userId, itemName, quantity = 1) {
 
     // Load user
     const userCol = await users();
-    const user = await userCol.findOne({ _id: new ObjectId(userId) });
+    const user = await userCol.findOne({ _id: ObjectId.createFromHexString(userId) });
     if (!user) {
         throw "Error: User not found.";
     }
@@ -73,19 +86,18 @@ export async function purchaseItem(userId, itemName, quantity = 1) {
 
     // Update shop
     const updateShop = { $inc: { "metadata.currency": -totalCost } };
-    const lowItem = itemName.toLowerCase();
-    if (lowItem.includes("golden ticket")) {
+    if (itemName === "golden ticket") {
         updateShop.$inc["metadata.ticket_count.golden"] = quantity;
-    } else if (lowItem.includes("ticket")) {
+    } else if (itemName === "ticket") {
         updateShop.$inc["metadata.ticket_count.normal"] = quantity;
-    } else if (lowItem.includes("food")) {
+    } else if (itemName === "food") {
         updateShop.$inc["metadata.food_count"] = quantity;
     } else {
-        throw "Error: " + lowItem + " is an unhandled shop item."
+        throw "Error: " + itemName + " is an unhandled shop item."
     }
 
     const result = await userCol.updateOne(
-        { _id: new ObjectId(userId) },
+        { _id: ObjectId.createFromHexString(userId) },
         updateShop
     );
     if (result.modifiedCount == 0) {
