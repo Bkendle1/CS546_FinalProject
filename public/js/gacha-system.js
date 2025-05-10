@@ -33,7 +33,7 @@ const BUTTON_HOVER_COLOR = "#93E1D8" // hexcolor for buttons on hover
 const BUTTON_TEXT_COLOR = "#28262C" // hexcolor for text of buttons
 const BULK_PULL_COUNT = 5; // number of pulls for a bulk pull. IF YOU CHANGE THIS VALUE THEN MAKE SURE TO ALSO CHANGE THIS CONSTANT IN THE CORRESPONDING ROUTER JS FILE
 const DISABLED_BUTTON_COLOR = "#36454F" // hexcolor for a disabled button
-
+const TEXT_COLOR = "#A4B0F5" // hexcolor for general text
 // Create a button with the given text, at the give position, that executes the given callback function when clicked on
 function addBtn(str, position, callback) {
     // create button
@@ -69,17 +69,27 @@ function addBtn(str, position, callback) {
     });
 
     // run callback on click
-    btn.onClick(callback);
+    btn.onClick(() => {
+        callback();
+    });
     return btn;
 }
 
 function requestPull(pullType, pullCount) {
     pullType = pullType.toLowerCase(); // make pull type case-insensitive
+    let requestConfig = {
+        method: 'GET',
+        success: (response) => {
+            // check if it was a single or bulk pull 
+            if (pullCount === 1) {
+                go("GachaDisplaySingle", response.pulled); // after the player does a pull, render this new scene that displays their new character
+            } else {
+                go("GachaDisplayBulk", response.pulled); // after the player does a pull, render this new scene that displays their new characters
+            }
+        }
+    };
     // request a normal pull
     if (pullType === 'normal') {
-        let requestConfig = {
-            method: 'GET',
-        };
         // make request to corresponding route
         if (pullCount === 1) {
             requestConfig["url"] = '/gacha/normal'; // request a single, normal pull
@@ -99,9 +109,6 @@ function requestPull(pullType, pullCount) {
 
     }
     else if (pullType === 'golden') { // request a golden pull
-        let requestConfig = {
-            method: 'GET',
-        };
         // make request to corresponding route
         if (pullCount === 1) {
             requestConfig["url"] = '/gacha/golden'; // request a single, golden pull
@@ -122,30 +129,38 @@ function requestPull(pullType, pullCount) {
     }
 };
 
-loadSprite("banner", "/public/images/gachaBanner.png"); // load banner image as a sprite
+// TODO: get the data of a character using a route for the collectionIndex collection
+function requestCharacterData(characterId) {
 
+}
+
+loadSprite("banner", "/public/images/gachaBanner.png"); // load banner image as a sprite
+loadSprite("blackBG", "/public/images/abstractBlackBG.png");
+loadFont("digiFont", "/public/fonts/PixelDigivolve.otf", 8, 8);
 scene("Gacha", () => {
     // render gacha's banner
     add([
         sprite("banner"),
         scale(1.1),
+        color(150, 150, 150), // makes the background darker, smaller = darker 
         pos(center()),
         anchor("center"),
     ]);
 
     // add user's normal ticket count
     const normalCounter = add([
-        text(`Normal: ${normalTicketCount}`),
+        text(`Normal: ${normalTicketCount}`, { font: "digiFont" }),
+        color(TEXT_COLOR),
         pos(vec2(width() - 1100, 90)),
         anchor("center"),
     ]);
     // add user's golden ticket count
     const goldenCounter = add([
-        text(`Golden: ${goldenTicketCount}`),
+        text(`Golden: ${goldenTicketCount}`, { font: "digiFont" }),
+        color(TEXT_COLOR),
         pos(vec2(width() - 200, 90)),
         anchor("center"),
     ]);
-    // TODO: when any of these buttons are pressed, if successful then we need to load a new scene to display the new characters which has a button to go back to the gacha scene
 
     // add button for single normal pull
     const normalSingleBtn = addBtn("Normal x1", vec2(300, 200), () => {
@@ -165,7 +180,7 @@ scene("Gacha", () => {
         requestPull('golden', BULK_PULL_COUNT); // request a golden bulk pull
     });
 
-    // A button that goes to the shop menu
+    // TODO: Menu
 
 
     onUpdate(() => {
@@ -215,3 +230,46 @@ scene("Gacha", () => {
 
 });
 
+scene("GachaDisplaySingle", (character) => {
+    // render scene's background
+    add([
+        sprite("blackBG"),
+        scale(1),
+        pos(center()),
+        anchor("center"),
+    ]);
+
+    // TODO: display character's information from index using AJAX request to collectionIndex route
+    add([
+        text(`DEBUG: You got: ${character}`, { font: "digiFont" }),
+        pos(center()),
+        anchor("center")
+    ]);
+    // add a back button so the player can do more pulls
+    addBtn("Back", vec2(width() - 640, height() - 60), () => {
+        go("Gacha");
+    })
+});
+
+
+scene("GachaDisplayBulk", (characters) => {
+    // render scene's background
+    add([
+        sprite("blackBG"),
+        scale(1),
+        pos(center()),
+        anchor("center"),
+    ]);
+
+    // TODO: display character's information from index using AJAX request to collectionIndex route
+    add([
+        text(`DEBUG: You got: ${characters}`, { font: "digiFont" }),
+        pos(center()),
+        anchor("center")
+    ]);
+
+    // add a back button so the player can do more pulls
+    addBtn("Back", vec2(width() - 640, height() - 60), () => {
+        go("Gacha");
+    })
+});

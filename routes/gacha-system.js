@@ -82,7 +82,7 @@ router
         // attempt to make a bulk, golden pull
         try {
             const characters = await gachaData.gachaPull(userId, BULK_PULL_COUNT, "golden");
-            res.json({ pulled: characters });
+            res.json({ pulled: characters }); // return the array of all the pulled characters
         } catch (e) {
             // user doesn't have enough tickets (this shouldn't happen as the button that makes this request should've been disabled)
             res.status(500).render('error', { title: "Error: 500", error: e });
