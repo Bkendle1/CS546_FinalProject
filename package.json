@@ -20,6 +20,7 @@
     "seed": "node ./tasks/seed.js"
   },
   "dependencies": {
+    "kaplay": "^3001.0.17",
     "mongodb": "^6.16.0",
     "phaser": "^3.88.2",
     "weighted": "^1.0.0"
