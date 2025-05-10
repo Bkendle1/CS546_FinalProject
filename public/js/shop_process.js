@@ -1,3 +1,12 @@
+import kaplay, {
+    sprite,
+    pos,
+    area,
+    onClick,
+    drawText,
+    loadSprite
+} from 'kaplay';
+
 // Get all availabile items from the shop
 async function fetchShopItems() {
     const res = await fetch("/shop/items");
@@ -8,10 +17,13 @@ async function fetchShopItems() {
 }
 
 // Lay out entities in a grid and hook up click → purchase
-function setupShopScene(game, items) {
+function setupShop(items) {
     const cols = Math.ceil(Math.sqrt(items.length));
-    const spacingX = game.width  / cols;
-    const spacingY = game.height / cols;
+    const canvas = document.getElementById("shop-canvas");
+    const width = canvas.width;
+    const height = canvas.height;
+    const spacingX = width / cols;
+    const spacingY = height / cols;
 
     items.forEach((item, idx) => {
         const row = Math.floor(idx / cols);
@@ -19,15 +31,16 @@ function setupShopScene(game, items) {
         const x = spacingX * col + spacingX / 2;
         const y = spacingY * row + spacingY / 2;
 
-        game.add([
+        add([
             sprite(item.name, { src: item.image }),
             pos(x, y),
+            area(),
             onClick(() => {
-            document.getElementById("pf-itemName").value = item.name;
-            document.getElementById("purchase-form").submit();
+                document.getElementById("pf-itemName").value = item.name;
+                document.getElementById("purchase-form").submit();
             }),
-            drawText(item.name, { x, y: y + 40, font: "16px Arial" }),
-            drawText("Cost: " + item.cost, { x, y: y + 60, font: "14px Arial" })
+            drawText(item.name),
+            drawText("Cost: " + item.cost)
         ]);
     });
 }
@@ -42,22 +55,17 @@ async function main() {
         return;
     }
 
-    // Initialize Kaplay on the existing <canvas> or container
-    const game = kaplay({
-        canvas: document.getElementById("phaser-shop"),
+    // Initialize Kaplay
+    kaplay({
+        canvas: document.getElementById("shop-canvas"),
         width: 800,
-        height: 600,
-        background: "#222"
+        height: 600
     });
 
-    // Load each image asset
-    await Promise.all(
-        shopItems.map(item =>
-            game.assets.load(item.name, item.image)
-        )
-    );
+    // Preload sprites
+    for (const item of shopItems) {
+        loadSprite(item.name, item.image);
+    }
 
-    // Start the game loop
-    setupShopScene(game, shopItems);
-    game.start();
+    setupShop(shopItems);
 }
