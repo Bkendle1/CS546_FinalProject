@@ -21,8 +21,14 @@
   },
   "dependencies": {
     "kaplay": "^3001.0.17",
+    "axios": "^1.9.0",
+    "bcrypt": "^5.1.1",
+    "express": "^5.1.0",
+    "express-handlebars": "^8.0.1",
+    "express-session": "^1.18.1",
     "mongodb": "^6.16.0",
     "phaser": "^3.88.2",
-    "weighted": "^1.0.0"
+    "weighted": "^1.0.0",
+    "xss": "^1.0.15"
   }
 }
