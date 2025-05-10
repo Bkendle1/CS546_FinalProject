@@ -7,6 +7,24 @@ import {
 } from "../helpers.js";
 
 /**
+ * Adds a new shop item document.
+ */
+export async function addItemToShop(name, cost, description, image) {
+    name = validateString(name, "Item name");
+    cost = validatePositiveInteger(cost, "Cost");
+    description = validateString(description, "Description");
+    image = validateString(image, "Image URL");
+
+    const shopCollection = await shop();
+    const newItem = { name, cost, description, image };
+    const result = await shopCollection.insertOne(newItem);
+    if (!result.acknowledged) {
+        throw "Error: Could not add shop item.";
+    }
+    return result.insertedId.toString();
+}
+
+/**
  * Fetches all shop items.
  */
 export async function getAllItems() {
