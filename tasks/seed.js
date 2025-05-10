@@ -47,7 +47,7 @@ console.log("Done seeding shop collection.");
 // collection index
 /* const indexIds = {};
 for (const c of chars) {
-    const id = await collectionIndexData.addIndexEntry (
+    const id = await indexData.addIndexEntry (
         c.name,
         c.rarity,
         c.image,
