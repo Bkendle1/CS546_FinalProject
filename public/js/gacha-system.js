@@ -32,6 +32,7 @@ const BUTTON_COLOR = "#DDFFF7" // hexcolor for buttons
 const BUTTON_HOVER_COLOR = "#93E1D8" // hexcolor for buttons on hover
 const BUTTON_TEXT_COLOR = "#28262C" // hexcolor for text of buttons
 const BULK_PULL_COUNT = 5; // number of pulls for a bulk pull. IF YOU CHANGE THIS VALUE THEN MAKE SURE TO ALSO CHANGE THIS CONSTANT IN THE CORRESPONDING ROUTER JS FILE
+const DISABLED_BUTTON_COLOR = "#36454F" // hexcolor for a disabled button
 
 // Create a button with the given text, at the give position, that executes the given callback function when clicked on
 function addBtn(str, position, callback) {
@@ -144,7 +145,8 @@ scene("Gacha", () => {
         pos(vec2(width() - 200, 90)),
         anchor("center"),
     ]);
-    // TODO: when any of these buttons are pressed, if successful then we need to load a new scene to display the new characters
+    // TODO: when any of these buttons are pressed, if successful then we need to load a new scene to display the new characters which has a button to go back to the gacha scene
+
     // add button for single normal pull
     const normalSingleBtn = addBtn("Normal x1", vec2(300, 200), () => {
         requestPull('normal', 1)
@@ -156,12 +158,12 @@ scene("Gacha", () => {
 
     // add button for single golden pull
     const goldenSingleBtn = addBtn("Golden x1", vec2(950, 200), () => {
-        requestPull('golden', 1)
+        requestPull('golden', 1); // request a golden single pull
     });
     // add button for bulk golden pull
-    // const goldenBulkBtn = addBtn("Golden x5", vec2(600, 200), () => {
-    //     requestPull('golden', BULK_PULL_COUNT)
-    // });
+    const goldenBulkBtn = addBtn("Golden x5", vec2(950, 300), () => {
+        requestPull('golden', BULK_PULL_COUNT); // request a golden bulk pull
+    });
 
     // A button that goes to the shop menu
 
@@ -169,21 +171,45 @@ scene("Gacha", () => {
     onUpdate(() => {
         normalCounter.text = `Normal: ${normalTicketCount}`; // on every frame, it keeps the counter up-to-date
         goldenCounter.text = `Golden: ${goldenTicketCount}`; // on every frame, it keeps the counter up-to-date
-        if (normalTicketCount <= 0) {
-            // remove the area() from the normal buttons to prevent being clicked, i.e. add button again without area()
-            // change color of buttons so they're greyed out
+
+        // enable/disable normal tickets depending on current count
+        if (normalTicketCount < BULK_PULL_COUNT) {
+            // disable normal bulk pull button
+            normalBulkBtn.area.scale = vec2(0); // removing collision area so button can't be pressed
+            normalBulkBtn.color = Color.fromHex(DISABLED_BUTTON_COLOR); // grey out button to show its disabled
+
+            // disable normal single pull button
+            if (normalTicketCount <= 0) {
+                normalSingleBtn.area.scale = vec2(0); // removing collision area so button can't be pressed
+                normalSingleBtn.color = Color.fromHex(DISABLED_BUTTON_COLOR); // grey out button to show its disabled
+            }
         } else {
-            // restore button back to normal
+            // restore buttons back to normal
+            normalBulkBtn.area.scale = vec2(1);
+            normalBulkBtn.color = Color.fromHex(BUTTON_COLOR);
+            normalSingleBtn.area.scale = vec2(1);
+            normalSingleBtn.color = Color.fromHex(BUTTON_COLOR);
         }
-        // TODO: I don't think this check should be done in the update()
 
-        if (goldenTicketCount <= 0) {
-            // remove the area() from the normal buttons to prevent being clicked
-            goldenSingleBtn.area.scale = vec2(0);
+        // enable/disable golden tickets depending on current count
+        if (goldenTicketCount < BULK_PULL_COUNT) {
+            // disable golden bulk pull button
+            goldenBulkBtn.area.scale = vec2(0); // remove collision area so button can't be pressed
+            goldenBulkBtn.color = Color.fromHex(DISABLED_BUTTON_COLOR); // grey out button to indicate its unavailable
 
-            goldenSingleBtn.color = Color.fromHex("#36454F"); // grey out button to indicate its unavailable
-            // goldenSingle
-            // change color of buttons so they're greyed out
+            // disable golden single pull button
+            if (goldenTicketCount <= 0) {
+                goldenSingleBtn.area.scale = vec2(0);
+                goldenSingleBtn.color = Color.fromHex(DISABLED_BUTTON_COLOR);
+            }
+        } else {
+            // restore buttons back to normal
+            goldenSingleBtn.area.scale = vec2(1);
+            goldenSingleBtn.color = Color.fromHex(BUTTON_COLOR);
+
+            goldenBulkBtn.area.scale = vec2(1);
+            goldenBulkBtn.color = Color.fromHex(BUTTON_COLOR);
+
         }
     });
 

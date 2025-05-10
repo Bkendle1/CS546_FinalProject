@@ -40,6 +40,7 @@ router
             const character = await gachaData.gachaPull(userId, 1, "normal");
             res.json({ pulled: character[0] }); // gachaPull returns an array even if it was a single pull
         } catch (e) {
+            // user doesn't have enough tickets (this shouldn't happen as the button that makes this request should've been disabled)
             res.status(500).render('error', { title: "Error: 500", error: e });
         }
     });
@@ -54,6 +55,7 @@ router
             const characters = await gachaData.gachaPull(userId, BULK_PULL_COUNT, "normal");
             res.json({ pulled: characters }); // gachaPull returns an array
         } catch (e) {
+            // user doesn't have enough tickets (this shouldn't happen as the button that makes this request should've been disabled)
             res.status(500).render('error', { title: "Error: 500", error: e });
         }
     });
@@ -67,14 +69,23 @@ router
             const character = await gachaData.gachaPull(userId, 1, 'golden');
             res.json({ pulled: character[0] });  // gachaPull returns an array even if it was a single pull
         } catch (e) {
-            // user doesn't have enough tickets
+            // user doesn't have enough tickets (this shouldn't happen as the button that makes this request should've been disabled)
             res.status(500).render('error', { title: "Error: 500", error: e });
         }
     });
 
-// router
-//     .route('/golden/bulk')
-//     .get(async (req, res) => {
-//         // a bulk, golden pull
-//     });
+router
+    .route('/golden/bulk')
+    .get(async (req, res) => {
+        // makes a bulk, golden pull
+        const userId = req.session.user.userId;
+        // attempt to make a bulk, golden pull
+        try {
+            const characters = await gachaData.gachaPull(userId, BULK_PULL_COUNT, "golden");
+            res.json({ pulled: characters });
+        } catch (e) {
+            // user doesn't have enough tickets (this shouldn't happen as the button that makes this request should've been disabled)
+            res.status(500).render('error', { title: "Error: 500", error: e });
+        }
+    });
 export default router;
