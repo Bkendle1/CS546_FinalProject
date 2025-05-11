@@ -144,8 +144,14 @@ const updatePullHistory = async (userId, characters) => {
     }
 
     // add new pull object to the current pull history
-
-    console.log(user.pull_history.unshift(newPull))
+    user.pull_history.unshift(newPull)
+    const MAX_HISTORY_LENGTH = 10;
+    // if the new pull history has more than the fixed amount of pulls specified, we pop the oldest pull 
+    if (user.pull_history.length > MAX_HISTORY_LENGTH) {
+        user.pull_history.pop();
+    }
+    const updateInfo = await userCollection.updateOne({ _id: ObjectId.createFromHexString(userId) }, { $set: { "pull_history": user.pull_history } });
+    if (updateInfo.modifiedCount === 0) throw `Could not update the pull history of user with id: ${userId}`;
 }
 
 /**
@@ -277,7 +283,7 @@ export const gachaPull = async (userId, pullCount, pullType) => {
             }
         }
 
-        // TODO: Update pull history with pulled character. Include the character's name, rarity, timestamp of pull, and image
+        // TODO: Update pull history with pulled character(s). Include the character's name, rarity, timestamp of pull, and image
         await updatePullHistory(userId, pulledCharacters.pulled);
 
         // decrement user's corresponding ticket count 
