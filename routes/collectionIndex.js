@@ -6,7 +6,7 @@ import {
 } from "../data/collectionIndex.js";
 
 // GET /collectionIndex
-router.get("/collectionIndex", async (req, res) => {
+router.get("/", async (req, res) => {
     try {
         const entries = await getAllIndexEntries();
         res.status(200).render("collectionIndex", {
@@ -22,7 +22,7 @@ router.get("/collectionIndex", async (req, res) => {
 });
 
 // GET /collectionIndex/entries 
-router.get("/collectionIndex/entries", async (req, res) => {
+router.get("/entries", async (req, res) => {
     try {
         const entries = await getAllIndexEntries();
         res.status(200).json(entries);
@@ -32,7 +32,7 @@ router.get("/collectionIndex/entries", async (req, res) => {
 });
 
 // GET /collectionIndex/entries/:id
-router.get("/collectionIndex/entries/:id", async (req, res) => {
+router.get("/entries/:id", async (req, res) => {
     try {
         const entry = await getEntryById(req.params.id);
         res.status(200).json(entry);

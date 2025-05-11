@@ -58,9 +58,9 @@ router.post("/purchase", async (req, res) => {
 });
 
 /**
- * GET /balance
+ * GET /shop/balance
  */
-router.get("/shop/balance", async (req, res) => {
+router.get("/balance", async (req, res) => {
     try {
         const userCol = await users();
         const user = await userCol.findOne({ _id: new ObjectId(req.session.user._id) });
