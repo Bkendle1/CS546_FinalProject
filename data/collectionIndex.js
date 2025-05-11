@@ -1,9 +1,10 @@
 import { collectionIndex } from "../config/mongoCollections.js";
 import { ObjectId } from "mongodb";
-import { 
+import {
     validateString,
-    validateObjectId 
+    validateObjectId
 } from "../helpers.js";
+import { addCharacterToGacha } from "./gacha-system.js";
 
 /**
  * Inserts a new character into the collection-index.
@@ -26,6 +27,8 @@ export async function addIndexEntry(name, rarity, image, description) {
     if (!result.acknowledged) {
         throw "Error: Could not add index entry for '" + name + "'.";
     }
+    // after a character is added to the index, it should also be added to the gacha system
+    // addCharacterToGacha(name,)
     return result.insertedId.toString();
 }
 

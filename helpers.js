@@ -1,5 +1,6 @@
 import { users, collectionIndex, gacha } from "./config/mongoCollections.js";
 import { ObjectId } from "mongodb";
+import random from 'simple-random-number-generator';
 
 /**
  * Verifies that the given string is not undefined, empty, not of type string, nor just whitespace, and also returns the string trimmed with trim().
@@ -38,7 +39,7 @@ export function validateObjectId(id, varName) {
     }
     return id;
 }
-  
+
 export function validatePositiveInteger(num, varName) {
     if (typeof num != "number" || !Number.isInteger(num) || num <= 0) {
         throw "Error: " + varName + "must be a positive integer.";
@@ -95,7 +96,7 @@ export const updateTicketCount = async (userId, ticketType, amount) => {
  * Given a username, verify that it is valid 
  */
 export function validateUsername(str) {
-    str = validateString(str,"Username");
+    str = validateString(str, "Username");
 
     // A-Z: 65 to 90
     // a-z: 97 to 122
@@ -121,8 +122,8 @@ export function validateUsername(str) {
  * Given a email, verify that it is valid 
  */
 export function validateEmail(str) {
-    str = validateString(str,"Email");
-    let isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
+    str = validateString(str, "Email");
+    let isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!isValidEmail.test(str)) {
         throw new Error("Email must be a valid: no spaces, contains an @ and .<domain>");
     }
@@ -170,4 +171,32 @@ export function validatePassword(str) {
     }
 
     return str;
+}
+
+
+/**
+ * Return a pull rate that's between 0 and 1 (both exclusive) that fits the given rarity.
+ */
+export function rarityToPullRate(rarity) {
+    // verify that rarity is a valid string
+    rarity = validateString(rarity, "Rarity");
+    // set the rates of all rarities
+    const commonRates = { max: 0.99, min: 0.80 }
+    const uncommonRates = { max: 0.64, min: 0.50 }
+    const rareRates = { max: 0.30, min: 0.20 }
+    const legendaryRates = { max: 0.1, min: 0.01 }
+
+    // return a pull rate within the range of the corresponding rarities
+    if (rarity === 'common') {
+        return random(commonRates);
+    } else if (rarity === 'uncommon') {
+        return random(uncommonRates);
+    } else if (rarity === 'rare') {
+        return random(rareRates);
+    } else if (rarity === 'legendary') {
+        return random(legendaryRates)
+    } else {
+        throw "Invalid rarity must be: 'common', 'uncommon', 'rare', or 'legendary'"
+    }
+
 }
