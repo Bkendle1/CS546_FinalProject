@@ -2,6 +2,8 @@ import * as helpers from "../helpers.js";
 import { users, collectionIndex, gacha } from "../config/mongoCollections.js";
 import { ObjectId } from "mongodb";
 import weighted from "weighted";
+import { getEntryById } from "./collectionIndex.js";
+import { markCollected } from "./collectionIndex.js";
 
 /**  Given the user's id, the size of the pull (should be either 1 or 5), and ticket type. Check if player has enough tickets to pull with. Ticket type is case-insensitive.
 */
@@ -58,7 +60,7 @@ const canPull = async (userId, pullCount, ticketType) => {
  */
 const getGachaCharacterById = async (characterId) => {
     // verify that characterId is a valid string
-    characterId = helpers.validateString(characterId, "Character IDd");
+    characterId = helpers.validateString(characterId, "Character ID");
     // verify that characterId is a valid ObjectID
     if (!ObjectId.isValid(characterId)) {
         throw "Invalid character ID.";
@@ -68,7 +70,7 @@ const getGachaCharacterById = async (characterId) => {
     const gachaCharacter = await gachaCollection.findOne({ _id: ObjectId.createFromHexString(characterId) });
 
     // if there's no character, throw
-    if (gachaCharacter === null) throw "No gacha character with that id.";
+    if (gachaCharacter === null) throw `No gacha character with id of ${characterId}.`;
     // return character object with its id as a string
     gachaCharacter._id = gachaCharacter._id.toString();
     return gachaCharacter;
@@ -90,6 +92,68 @@ const getAllGachaCharacters = async () => {
         return character;
     });
     return gachaCharacters;
+}
+
+/**
+ * Updates the pull history of the user with the given id.
+ */
+const updatePullHistory = async (userId, characters) => {
+    // verify thatt userId is a valid string and ObjectId
+    userId = helpers.validateObjectId(userId, "User ID");
+    // verify that characters was passed in
+    if (!characters) throw "Missing array of pulled characters.";
+    // verify that characters is a valid array
+    if (!Array.isArray(characters) || characters.length === 0) throw "Pulled characters must be in an array of at least one character.";
+    // check if user exists with that id
+    const userCollection = await users();
+    const user = await userCollection.findOne({ _id: ObjectId.createFromHexString(userId) });
+
+    if (!user) throw `No user with id ${userId}.`;
+    // check pull type
+    let pull_type = "single"
+    if (characters.length > 1) {
+        pull_type = "bulk";
+    }
+
+    // compute the array for the 'pulled' field for the user's pull history
+    let pulled = [];
+    for (let i = 0; i < characters.length; i++) {
+        // get the character's id from the index
+        // let charId = await helpers.getCharacterIdByName(charName);
+        let charId = characters[i];
+        let character = await getEntryById(charId);
+        // let charName = characters[i];
+        let charName = character.name;
+        // get the character's rarity from the index
+        let rarity = character.rarity;
+        // get the image from index 
+        let image = character.image;
+        // get the current time as MM/DD/YY HH:MM:SS to reflect the pull date
+        let currDate = helpers.getCurrentDateAndTime();
+        let pullChar = {
+            _id: ObjectId.createFromHexString(charId),
+            name: charName,
+            rarity: rarity,
+            timestamp: currDate,
+            image: image
+        };
+        pulled.push(pullChar);
+    }
+    // construct new pull object for pull history
+    const newPull = {
+        pull_type: pull_type,
+        pulled: pulled
+    }
+
+    // add new pull object to the current pull history
+    user.pull_history.unshift(newPull)
+    const MAX_HISTORY_LENGTH = 10;
+    // if the new pull history has more than the fixed amount of pulls specified, we pop the oldest pull 
+    if (user.pull_history.length > MAX_HISTORY_LENGTH) {
+        user.pull_history.pop();
+    }
+    const updateInfo = await userCollection.updateOne({ _id: ObjectId.createFromHexString(userId) }, { $set: { "pull_history": user.pull_history } });
+    if (updateInfo.modifiedCount === 0) throw `Could not update the pull history of user with id: ${userId}`;
 }
 
 /**
@@ -123,18 +187,17 @@ export const getTicketCount = async (userId, ticketType) => {
 
 }
 
-// try {
-//     console.log(await getTicketCount("681e470761eacb4e94201ee6", "NORMAL"));
-// } catch (e) {
-//     console.log(e);
-// }
 
 /**
- * This function will check if the user can pull and if so, does a pull equal to the given pull count (should only either be 1 or 5) using the odds based on the pull type (normal or golden). It will also update the user's collection inventory to include the new character(s) assuming they're not duplicates; otherwise, it will update the user’s currency amount to include the duplicate currency. 
+ * This function will check if the user can pull and if so, does a pull equal to the given pull count (should only either be 1 or 5) using the odds based on the pull type (normal or golden). 
+ * 
+ * It will update the user's collection inventory to include the new character(s) assuming they're not duplicates; otherwise, it will update the user’s currency amount to include the duplicate currency. 
  * 
  * Pull type is case-insensitive.
  * 
- * Returns all pulled characters as an array even if pullCount was 1.
+ * It will update pull history with all pulled characters both new and duplicates.
+ * 
+ * Returns an object containing an array of all pulled characters and an array of booleans stating whether they're duplicates. Object always has an array even if pullCount was 1.
  */
 export const gachaPull = async (userId, pullCount, pullType) => {
     // check if userId is a valid string
@@ -163,21 +226,30 @@ export const gachaPull = async (userId, pullCount, pullType) => {
     }
 
     // check if user has enough tickets for this pull type (either golden or normal)
-    let pulledCharacters = []; // store pulled characters in an array
+    let pulledCharacters = { // object that stores the pulled characters and whether they were duplicates
+        pulled: [], // store pulled characters in an array
+        duplicates: [] // array of booleans stating whether or not the corresponding pulled character was a duplicate
+    };
+
     if (await canPull(userId, pullCount, pullType)) {
         // get array of all characters in gacha collection
         let gachaCharacters = await getAllGachaCharacters();
 
+<<<<<<< HEAD
         if (pullType === "normal") {
             // setup an object of character-pull_rate pairs considering normal pull_rates
+=======
+        if (pullType === 'normal') {
+            // setup an object of (characterId, pull_rate) pairs considering normal pull_rates
+>>>>>>> origin/main
             let normalPull = {};
             gachaCharacters.map((character) => {
-                normalPull[character.name] = character.pull_rate;
+                normalPull[character._id] = character.pull_rate;
             });
 
             // do the given amount of pulls
             for (let i = 0; i < pullCount; i++) {
-                pulledCharacters.push(weighted.select(normalPull, { normal: false }));
+                pulledCharacters.pulled.push(weighted.select(normalPull, { normal: false }));
             }
 
         } else if (pullType === "golden") {
@@ -188,35 +260,50 @@ export const gachaPull = async (userId, pullCount, pullType) => {
             gachaCharacters.map((character) => {
                 // checks if character is rare enough based on RARE_THRESHOLD
                 if (character.pull_rate <= RARE_THRESHOLD) {
-                    goldenPull[character.name] = character.pull_rate * GOLDEN_RATE; // increase chance of being pulled with weight multiplier
+                    goldenPull[character._id] = character.pull_rate * GOLDEN_RATE; // increase chance of being pulled with weight multiplier
                 } else {
-                    goldenPull[character.name] = character.pull_rate;
+                    goldenPull[character._id] = character.pull_rate;
                 }
             });
+
             // do the given amount of pulls
             for (let i = 0; i < pullCount; i++) {
-                pulledCharacters.push(weighted.select(goldenPull, { normal: false })); // normal is an option for whether or not the weights for the characters are normalized, we set this to false so the function normalizes for us
+                pulledCharacters.pulled.push(weighted.select(goldenPull, { normal: false })); // normal is an option for whether or not the weights for the characters are normalized, we set this to false so the function normalizes for us
             }
         } else {
             throw "Pull type must either be 'normal' or 'golden'.";
         }
 
-        // TODO: using a collectionInventory.js data function, check if any pulls are duplicates and if so, increase user's currency with the corresponding duplicate currency
+        // Check if any pulls are duplicates and if so, increase user's currency with the corresponding duplicate currency
+        for (let i = 0; i < pulledCharacters.pulled.length; i++) {
+            let characterId = pulledCharacters.pulled[i];
+            // let charName = pulledCharacters.pulled[i];
+            // let characterId = await helpers.getCharacterIdByName(charName);
+            let collected = await markCollected(characterId); // update 'collected' field in collection index to true for each of the new pulled characters
+            let character = await getGachaCharacterById(characterId); // get gacha document of character with corresponding character id 
+            if (collected) {
+                // TODO using a collectionInventory.js data function, update the user's collection inventory to include the new character(s) assuming they're not duplicates
 
-        // TODO: using a collectionInventory.js data function, update the user's collection inventory to include the new character(s) assuming they're not duplicates
+                pulledCharacters.duplicates.push(false); // this character isn't a duplicate
+            } else {
+                // Give user the corresponding duplicate currency
+                pulledCharacters.duplicates.push(true);
+                console.log(await helpers.updateCurrencyCount(userId, character.duplicate_currency));
+            }
+        }
+
+        // Update pull history with pulled character(s). Include the character's name, rarity, timestamp of pull, and image
+        await updatePullHistory(userId, pulledCharacters.pulled);
 
         // decrement user's corresponding ticket count 
-        helpers.updateTicketCount(userId, pullType, -pullCount);
+        await helpers.updateTicketCount(userId, pullType, -pullCount);
     }
 
-    // TODO: update 'collected' field in collection index to true (call function from collectionIndex.js data function) for each of the pulled characters
-
-    // TODO: Update pull history with pulled character assuming its not a duplicate. Include the character's name, rarity, timestamp of pull, and image
-
-    console.log(`DEBUG-DATA: ${pulledCharacters}`);
+    console.log(`DEBUG-DATA: ${pulledCharacters.pulled}:\n${pulledCharacters.duplicates}`);
     return pulledCharacters;
 }
 
+<<<<<<< HEAD
 
 // try {
 //     console.log(await gachaPull("67fbccf7bedaaf5edc00dae7", 2, "GOLDEN"));
@@ -225,6 +312,8 @@ export const gachaPull = async (userId, pullCount, pullType) => {
 // }
 
 
+=======
+>>>>>>> origin/main
 /**
  * Given a name, pull_rate, and duplicate currency, add a new character to the gacha system.
  * IMPORTANT: Since characters will share the same _id across different collections, the new character must already exist in the collection index collection as that's where we copy the _id field from.
@@ -261,6 +350,10 @@ export const addCharacterToGacha = async (name, pull_rate, duplicate_currency) =
     }
 
     const gachaCollection = await gacha(); // get reference to gacha collection
+    // check if character is already in the gacha
+    const character = await gachaCollection.findOne({ _id: ObjectId.createFromHexString(character_id) });
+    if (character) throw `${name} is already in the gacha with id: ${character_id}.`;
+
     const insertInfo = await gachaCollection.insertOne(newGachaCharacter); // insert new character into gacha system
     // if character wasn't created, throw
     if (!insertInfo.acknowledged || !insertInfo.insertedId)

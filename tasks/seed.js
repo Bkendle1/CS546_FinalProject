@@ -1,8 +1,10 @@
 import { dbConnection, closeConnection } from "../config/mongoConnection.js";
-import { 
-    gachaData, 
-    shopData, 
-    indexData
+import {
+    gachaData,
+    shopData,
+    indexData,
+    userData,
+    collectionInventoryData
 } from "../data/index.js";
 import {
     rarityToPullRate,
@@ -169,8 +171,8 @@ async function main() {
     try {
         for (const c of characters) {
             const pullRate = rarityToPullRate(c.rarity);
-            const dupCur   = rarityToDupCurrency(c.rarity);
-            await gachaData.addCharacterToGacha(
+            const dupCur = rarityToDupCurrency(c.rarity);
+            await gachaData.addCharacterToGacha (
                 c.name,
                 pullRate,
                 dupCur

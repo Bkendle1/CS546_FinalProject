@@ -41,8 +41,8 @@ export function validateObjectId(id, varName) {
 }
 
 export function validatePositiveInteger(num, varName) {
-    if (typeof num != "number" || !Number.isInteger(num) || num <= 0) {
-        throw "Error: " + varName + "must be a positive integer.";
+    if (typeof num != "number" || !Number.isInteger(num) || num <= 0 || Number.isNaN(num)) {
+        throw "Error: " + varName + " must be a positive integer.";
     }
     return num;
 }
@@ -82,16 +82,53 @@ export const updateTicketCount = async (userId, ticketType, amount) => {
     // otherwise, update the ticketType count by the given amount
     if (ticketType === 'normal') {
         const newCount = Math.max(0, user.metadata.ticket_count.normal += amount); // compute new ticket count 
-        await userCollection.updateOne({ _id: ObjectId.createFromHexString(userId) }, { $set: { "metadata.ticket_count.normal": newCount } });
+        const updateInfo = await userCollection.updateOne({ _id: ObjectId.createFromHexString(userId) }, { $set: { "metadata.ticket_count.normal": newCount } });
+        if (updateInfo.matchedCount === 0) {
+            throw `Could not update user's normal ticket count.`
+        }
+
         return `${user.username} now has ${newCount} normal tickets.`
     } else if (ticketType === 'golden') {
         const newCount = Math.max(0, user.metadata.ticket_count.golden += amount); // compute new ticket count
-        await userCollection.updateOne({ _id: ObjectId.createFromHexString(userId) }, { $set: { "metadata.ticket_count.golden": newCount } });
+        const updateInfo = await userCollection.updateOne({ _id: ObjectId.createFromHexString(userId) }, { $set: { "metadata.ticket_count.golden": newCount } });
+        if (updateInfo.matchedCount === 0) {
+            throw `Could not update user's golden ticket count.`
+        }
+
         return `${user.username} now has ${newCount} golden tickets.`
     } else {
         throw "Ticket type must be 'normal' or 'golden'.";
     }
 }
+
+/**
+ * Update user's currency count by a given amount. Note: You can pass negatives to decrement currency count.
+ */
+export const updateCurrencyCount = async (userId, amount) => {
+    // verify that userId is a valid string and ObjectId
+    userId = validateObjectId(userId);
+    // verify that amount is a valid integer
+    if (typeof (amount) !== 'number'
+        || !Number.isInteger(amount)
+        || Number.isNaN(amount)
+        || amount === 0) {
+        throw "Currency amount must be a valid integer that's not 0.";
+    }
+
+    // check if a user with that id exists
+    const userCollection = await users();
+    const user = await userCollection.findOne({ _id: ObjectId.createFromHexString(userId) });
+    if (!user) throw `No user with the id of ${userId}`;
+
+    // update user's currency amount
+    const newCount = Math.max(0, user.metadata.currency += amount); // currency count can't be less than 0
+    const updateInfo = await userCollection.updateOne({ _id: ObjectId.createFromHexString(userId) }, { $set: { "metadata.currency": newCount } });
+    if (updateInfo.matchedCount === 0) {
+        throw "Could not update user's currency count.";
+    }
+    return `${user.username} now has ${newCount} in in-game currency.`;
+}
+
 /**
  * Given a username, verify that it is valid 
  */
@@ -228,3 +265,115 @@ export const rarityToDupCurrency = (rarity) => {
         throw "Invalid rarity. It must be: 'common', 'uncommon', 'rare', or 'legendary'."
     }
 }
+
+
+/**
+ * Returns the current date and time in the format of MM/DD/YY HH:MM:SSAM/PM and pads the month/day with a 0 if its 1 digit.
+ */
+export const getCurrentDateAndTime = () => {
+    let currDate = new Date();
+    // get month
+    let month = currDate.getMonth() + 1; // getMonth() returns month as a 0 index
+    if (month.toString().length < 2) {
+        month = '0' + month
+    }
+
+    // get day
+    let day = currDate.getDate();
+    if (day.toString().length < 2) {
+        day = '0' + day;
+    }
+    // get year
+    let year = currDate.getFullYear().toString().substring(2);
+
+    // get hours
+    let hours = currDate.getHours() % 12;
+    // edge case: if its 12pm then currDate.getHours() % 12 = 0 which isn't correct so we do the following
+    if (currDate.getHours() === 12) {
+        hours = 12;
+    }
+
+    if (hours.toString().length < 2) {
+        hours = '0' + hours;
+    }
+    // get minutes
+    let minutes = currDate.getMinutes();
+    if (minutes.toString().length < 2) {
+        minutes = '0' + minutes;
+    }
+    // get seconds
+    let seconds = currDate.getSeconds();
+    if (seconds.toString().length < 2) {
+        seconds = '0' + seconds;
+    }
+
+    // get meridiem (AM/PM)
+    let meridiem = "AM";
+    if (currDate.getHours() >= 12) {
+        meridiem = "PM";
+    }
+
+    // combine to get current date
+    return `${month}/${day}/${year} ${hours}:${minutes}:${seconds}${meridiem}`;
+}
+/**
+ * Given experience number, verify that it is valid
+ */
+export function validateExperience(exp) {
+    if (exp === undefined || exp === null) {
+        throw new Error("Experience missing!");
+    }
+    if (typeof exp !== "number" || isNaN(exp) || exp == Infinity || exp == -Infinity || !Number.isInteger(exp)) {
+        throw new Error("Experience must be a finite whole number!");
+    }
+    if (exp <= 0) {
+        throw new Error("Experience must be a positive non-zero number");
+    }
+
+    return exp;
+}
+
+/**
+ * Given nickname, verify that it is valid 
+ */
+export function validateNickName(str) {
+    str = validateString(str, "Nickname");
+    if (str.length > 20) {
+        throw new Error("Nicknames can be a max of 20 characters");
+    }
+
+    return str;
+}
+
+/**
+ * Given rarity and level, return the income rate 
+ */
+export function calculateIncome(rarity, level = 1) {
+    // default values for now, we can change it later
+    let baseIncome = 0;
+    rarity = rarity.toLowerCase().trim();
+
+    if (rarity === "common") {
+        baseIncome = 50;
+    }
+    else if (rarity === "uncommon") {
+        baseIncome = 100;
+    }
+    else if (rarity === "rare") {
+        baseIncome = 200;
+    }
+    else if (rarity === "legendary") {
+        baseIncome = 500;
+    }
+    else {
+        throw new Error("Invalid rarity given");
+    }
+
+    // increase by 10% after level 1
+    let income = Math.floor(baseIncome * Math.pow(1.1, level - 1));
+
+    return income;
+}
+
+
+
