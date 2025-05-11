@@ -139,7 +139,7 @@ async function requestCharacterData(characterId) {
         if (!response.ok) throw response.status;
         return await response.json(); // return JSON of response, i.e. character index data
     } catch (e) {
-        console.log(e);
+        console.error(e);
     }
 }
 
@@ -262,16 +262,19 @@ scene("GachaDisplaySingle", async ({ pulled, duplicate }) => {
     tween(
         0,
         1,
-        2,
+        1,
         (v) => {
+            character.scale = vec2(v);
+        },
+        easings.linear
+    );
 
-        }
-    )
-    add([
-        text(`DEBUG: You got: ${pulled}`, { font: "digiFont" }),
-        pos(center()),
-        anchor("center")
-    ]);
+    // THIS IS JUST FOR DEBUGGING
+    // add([
+    //     text(`DEBUG: You got: ${pulled}`, { font: "digiFont" }),
+    //     pos(center()),
+    //     anchor("center")
+    // ]);
     // add a back button so the player can do more pulls
     addBtn("Back", vec2(width() - 640, height() - 60), () => {
         go("Gacha");
