@@ -29,14 +29,14 @@ function setupIndex(entries, canvas) {
 
         // name
         add([
-            drawText(e.name),
+            drawText({ text: e.name }),
             pos(x - spacingX/4, y + spacingY/4),
             layer("ui")
         ]);
 
         // rarity
         add([
-            drawText(e.rarity),
+            drawText({ text: e.rarity }),
             pos(x - spacingX/4, y + spacingY/4 + 20),
             layer("ui")
         ]);
@@ -50,7 +50,7 @@ function setupIndex(entries, canvas) {
 
         // description
         add([
-            drawText(e.description),
+            drawText({ text: e.description }),
             pos(x - spacingX/4, y + spacingY/4),
             layer("ui")
         ]);
@@ -58,7 +58,7 @@ function setupIndex(entries, canvas) {
         // collected flag
         if (e.collected) {
             add([
-                drawText("✔️"),
+                drawText({ text: "✔️" }),
                 pos(x + spacingX/4, y - spacingY/4),
                 layer("ui")
             ]);
@@ -84,10 +84,9 @@ async function main() {
         height: canvas.height 
     });
 
-    // preload each image under a key of its _id
-    for (const e of entries) {
-        loadSprite(e._id, e.image);
-    }
+    entries.forEach(entry => 
+        loadSprite(entry._id, entry.image
+    ));
 
     setupIndex(entries, canvas);
 };

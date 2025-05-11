@@ -35,30 +35,36 @@ function setupShop(items, canvas) {
             pos(x, y),
             area(),
             layer("sprite"),
-            onClick(() => {
-                document.getElementById("pf-itemName").value = item.name;
-                document.getElementById("purchase-form").submit();
-            }),
+            (() => {
+                const x = () => {
+                    document.getElementById("pf-itemName").value = item.name;
+                    document.getElementById("purchase-form").submit();
+                };
+            return { onClick: x };
+            })()
         ]);
 
         // name label
         add([
-            drawText(item.name),
+            drawText({ text: item.name }),
             pos(x - spacingX/4, y + spacingY/4),
+            anchor("center"),
             layer("ui")
         ]);
 
         // cost label
         add([
-            drawText(cost.name),
+            drawText({ text: "Cost: " + item.cost }),
             pos(x - spacingX/4, y + spacingY/4),
+            anchor("center"),
             layer("ui")
         ]);
 
         // description label
         add([
-            drawText(item.description),
+            drawText({ text: item.description }),
             pos(x - spacingX/4, y + spacingY/4),
+            anchor("center"),
             layer("ui")
         ]);
 
@@ -94,10 +100,9 @@ async function main() {
         height: canvas.height
     });
 
-    // Preload sprites
-    for (const item of items) {
-        loadSprite(item.name, item.image);
-    }
+    items.forEach(item =>
+        loadSprite(item.name, item.image)
+    );
 
     setupShop(items, canvas);
 }
