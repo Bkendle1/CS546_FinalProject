@@ -177,26 +177,54 @@ export function validatePassword(str) {
 /**
  * Return a pull rate that's between 0 and 1 (both exclusive) that fits the given rarity.
  */
-export function rarityToPullRate(rarity) {
+export const rarityToPullRate = (rarity) => {
     // verify that rarity is a valid string
     rarity = validateString(rarity, "Rarity");
     // set the rates of all rarities
-    const commonRates = { max: 0.99, min: 0.80 }
-    const uncommonRates = { max: 0.64, min: 0.50 }
-    const rareRates = { max: 0.30, min: 0.20 }
-    const legendaryRates = { max: 0.1, min: 0.01 }
-
+    const commonRates = { max: 0.99, min: 0.80 };
+    const uncommonRates = { max: 0.64, min: 0.50 };
+    const rareRates = { max: 0.30, min: 0.20 };
+    const legendaryRates = { max: 0.1, min: 0.01 };
+    const PRECISION = 4; // how many significant digits to keep from the pull rate
+    let pullRate = 0;
     // return a pull rate within the range of the corresponding rarities
     if (rarity === 'common') {
-        return random(commonRates);
+        pullRate = random(commonRates);
     } else if (rarity === 'uncommon') {
-        return random(uncommonRates);
+        pullRate = random(uncommonRates);
     } else if (rarity === 'rare') {
-        return random(rareRates);
+        pullRate = random(rareRates);
     } else if (rarity === 'legendary') {
-        return random(legendaryRates)
+        pullRate = random(legendaryRates)
     } else {
-        throw "Invalid rarity must be: 'common', 'uncommon', 'rare', or 'legendary'"
+        throw "Invalid rarity. It must be: 'common', 'uncommon', 'rare', or 'legendary'."
     }
+    return parseFloat(pullRate.toPrecision(PRECISION)); // toPrecision returns a string representation of the float so we convert it back into a float before returning it
+};
 
+/**
+ * Returns a duplicate currency based on the given rarity.
+ */
+export const rarityToDupCurrency = (rarity) => {
+    // make sure rarity is a valid string
+    rarity = validateString(rarity, "Rarity");
+
+    // set the currency ranges based on rarities
+    const commonCurrency = { max: 200, min: 100, integer: true };
+    const uncommonCurrency = { max: 400, min: 300, integer: true };
+    const rareCurrency = { max: 800, min: 600, integer: true };
+    const legendaryCurrency = { max: 1200, min: 1000, integer: true };
+
+    // return a currency amount within the range of the corresponding rarities
+    if (rarity === 'common') {
+        return random(commonCurrency);
+    } else if (rarity === 'uncommon') {
+        return random(uncommonCurrency);
+    } else if (rarity === 'rare') {
+        return random(rareCurrency);
+    } else if (rarity === 'legendary') {
+        return random(legendaryCurrency)
+    } else {
+        throw "Invalid rarity. It must be: 'common', 'uncommon', 'rare', or 'legendary'."
+    }
 }

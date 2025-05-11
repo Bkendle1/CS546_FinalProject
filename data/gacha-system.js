@@ -179,14 +179,6 @@ export const gachaPull = async (userId, pullCount, pullType) => {
     return pulledCharacters;
 }
 
-
-try {
-    console.log(await gachaPull("67fbccf7bedaaf5edc00dae7", 2, "GOLDEN"));
-} catch (e) {
-    console.log(e);
-}
-
-
 /**
  * Given a name, pull_rate, and duplicate currency, add a new character to the gacha system.
  * IMPORTANT: Since characters will share the same _id across different collections, the new character must already exist in the collection index collection as that's where we copy the _id field from.
