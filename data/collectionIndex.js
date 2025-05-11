@@ -23,7 +23,7 @@ export async function addIndexEntry(name, rarity, image, description) {
     // check if character is already in index
     const character = await indexCol.findOne({ name });
     if (character) {
-        throw `${name} is already in the index collection.`;
+        throw "Error: " + name + " is already in the index collection.";
     }
 
     const newEntry = {
@@ -35,7 +35,7 @@ export async function addIndexEntry(name, rarity, image, description) {
     };
     const result = await indexCol.insertOne(newEntry);
     if (!result.acknowledged) {
-        throw "Error: Could not add index entry for '" + name + "'.";
+        throw "Error: Could not add index entry for " + name + ".";
     }
     const pull_rate = rarityToPullRate(rarity);     // get pull rate
     const dupCurrency = rarityToDupCurrency(rarity); // get duplicate currency amount
@@ -44,7 +44,6 @@ export async function addIndexEntry(name, rarity, image, description) {
 
     return result.insertedId.toString();
 }
-
 
 /**
  * Get every character entry in the collection‑index.
@@ -70,7 +69,7 @@ export async function getEntryById(id) {
     const indexCol = await collectionIndex();
     const entry = await indexCol.findOne({ _id: new ObjectId(id) });
     if (!entry) {
-        throw "Error: No index entry with id '" + id + "' found.";
+        throw "Error: No index entry with id " + id + " found.";
     }
     return {
         _id: entry._id.toString(),
@@ -82,7 +81,6 @@ export async function getEntryById(id) {
     };
 }
 
-
 /**
  * Mark a character’s 'collected' flag to true. If the character has already been collected before, return false. Otherwise, return true.
  */
@@ -91,7 +89,9 @@ export async function markCollected(id) {
     const indexCol = await collectionIndex();
     // check if character exists with the id
     const character = await indexCol.findOne({ _id: ObjectId.createFromHexString(id) });
-    if (!character) throw `No character in the index has the id of: ${id}.`;
+    if (!character) {
+        throw "Error: No character in the index has the id of: " + id + ".";
+    }
     // check if character is already marked as collected
     if (character.collected) {
         return false; // character is already marked as collected so we return false

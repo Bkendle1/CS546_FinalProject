@@ -17,7 +17,7 @@ const canPull = async (userId, pullCount, ticketType) => {
         throw "Missing pull count.";
     }
     // check that pull count is not 0, negative, or a NaN
-    if (typeof (pullCount) !== 'number'
+    if (typeof (pullCount) !== "number"
         || Number.isNaN(pullCount)
         || pullCount <= 0
         || !Number.isInteger(pullCount)) {
@@ -36,13 +36,13 @@ const canPull = async (userId, pullCount, ticketType) => {
     // if no user exists with the given id, throw 
     if (user === null) throw "No user with that id.";
 
-    if (ticketType === 'normal') {
+    if (ticketType === "normal") {
         // otherwise, check if the user has enough normal tickets
         if (user.metadata.ticket_count.normal < pullCount) {
             throw "Player doesn't have enough normal tickets."
         }
         return true; // player has enough tickets to pull
-    } else if (ticketType === 'golden') {
+    } else if (ticketType === "golden") {
         if (user.metadata.ticket_count.golden < pullCount) {
             throw "Player doesn't have enough golden tickets."
         }
@@ -113,9 +113,9 @@ export const getTicketCount = async (userId, ticketType) => {
     if (!user) throw "No user with that id.";
 
     // return the corresponding ticket type
-    if (ticketType === 'normal') {
+    if (ticketType === "normal") {
         return user.metadata.ticket_count.normal;
-    } else if (ticketType === 'golden') {
+    } else if (ticketType === "golden") {
         return user.metadata.ticket_count.golden;
     } else {
         throw "Invalid ticket type, must either be 'normal' or 'golden'.";
@@ -148,7 +148,7 @@ export const gachaPull = async (userId, pullCount, pullType) => {
         throw "Pull count is missing.";
     }
     // check that pullCount is a whole number of at least 1
-    if (typeof (pullCount) !== 'number'
+    if (typeof (pullCount) !== "number"
         || pullCount < 1
         || Number.isNaN(pullCount)
         || !Number.isInteger(pullCount)) {
@@ -168,7 +168,7 @@ export const gachaPull = async (userId, pullCount, pullType) => {
         // get array of all characters in gacha collection
         let gachaCharacters = await getAllGachaCharacters();
 
-        if (pullType === 'normal') {
+        if (pullType === "normal") {
             // setup an object of character-pull_rate pairs considering normal pull_rates
             let normalPull = {};
             gachaCharacters.map((character) => {
@@ -180,7 +180,7 @@ export const gachaPull = async (userId, pullCount, pullType) => {
                 pulledCharacters.push(weighted.select(normalPull, { normal: false }));
             }
 
-        } else if (pullType === 'golden') {
+        } else if (pullType === "golden") {
             const GOLDEN_RATE = 3; // weight multiplier applied to rare character's pull_rate
             const RARE_THRESHOLD = 0.2;// weight multiplier is applied to characters whose pull_rate is no more than this threshold 
             // setup an object of character-pull_rate pairs considering golden pull_rates, i.e. increase odds of pulling rarer characters
@@ -235,7 +235,7 @@ export const addCharacterToGacha = async (name, pull_rate, duplicate_currency) =
     name = helpers.validateString(name, "Character name");
     name = name.toLowerCase(); // name is case-insensitive
     // verify that pull rate is between 0 and 1
-    if (typeof (pull_rate) !== 'number'
+    if (typeof (pull_rate) !== "number"
         || pull_rate < 0
         || pull_rate > 1
         || Number.isNaN(pull_rate)) {
@@ -243,7 +243,7 @@ export const addCharacterToGacha = async (name, pull_rate, duplicate_currency) =
     }
 
     // verify that duplicate currency is at least 1
-    if (typeof (duplicate_currency) !== 'number'
+    if (typeof (duplicate_currency) !== "number"
         || duplicate_currency < 1
         || Number.isNaN(duplicate_currency)
         || !Number.isInteger(duplicate_currency)) {
@@ -264,7 +264,7 @@ export const addCharacterToGacha = async (name, pull_rate, duplicate_currency) =
     const insertInfo = await gachaCollection.insertOne(newGachaCharacter); // insert new character into gacha system
     // if character wasn't created, throw
     if (!insertInfo.acknowledged || !insertInfo.insertedId)
-        throw `Could not add ${name} to the gacha system.`;
+        throw "Could not add " + name + " to the gacha system.";
 
     const newId = insertInfo.insertedId.toString(); // get new character's id 
     const gachaCharacter = await getGachaCharacterById(newId);     // get character object from gacha

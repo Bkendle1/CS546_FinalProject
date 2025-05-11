@@ -11,7 +11,7 @@ import {
  */
 export async function addItemToShop(name, cost, description, image) {
     name = validateString(name, "Item name");
-    name = name.toLowerCase();
+    name = name.toLowerCase(); 
     cost = validatePositiveInteger(cost, "Cost");
     description = validateString(description, "Description");
     image = validateString(image, "Image URL");
@@ -20,13 +20,12 @@ export async function addItemToShop(name, cost, description, image) {
     const shopCol = await shop();
     const item = await shopCol.findOne({ name });
     if (item) {
-        throw `${name} is already in the shop.`;
+        throw "Error: " + name + " is already in the shop.";
     }
 
     // insert new item into shop collection
-    const shopCollection = await shop();
     const newItem = { name, cost, description, image };
-    const result = await shopCollection.insertOne(newItem);
+    const result = await shopCol.insertOne(newItem);
     if (!result.acknowledged) {
         throw "Error: Could not add shop item.";
     }
@@ -39,7 +38,14 @@ export async function addItemToShop(name, cost, description, image) {
  */
 export async function getAllItems() {
     const shopCol = await shop();
-    return await shopCol.find({}).toArray();
+    const items = await shopCol.find({}).toArray();
+    return items.map((i) => ({
+        _id: i._id.toString(),
+        name: i.name,
+        cost: i.cost,
+        description: i.description,
+        image: i.image
+    }))
 }
 
 /**
@@ -52,9 +58,14 @@ export async function getOneItem(name) {
     const item = await shopCol.findOne({ name });
     if (!item) {
         throw "Error: No item with name " + name + " found.";
-    }
-    item._id = item._id.toString();
-    return item;
+    } 
+    return {
+        _id: item._id.toString(),
+        name: item.name,
+        cost: item.cost,
+        description: item.description,
+        image: item.image
+    };
 }
 
 /**
@@ -86,11 +97,11 @@ export async function purchaseItem(userId, itemName, quantity = 1) {
 
     // Update shop
     const updateShop = { $inc: { "metadata.currency": -totalCost } };
-    if (itemName === "golden ticket") {
+    if (itemName == "golden ticket") {
         updateShop.$inc["metadata.ticket_count.golden"] = quantity;
-    } else if (itemName === "ticket") {
+    } else if (itemName == "normal ticket") {
         updateShop.$inc["metadata.ticket_count.normal"] = quantity;
-    } else if (itemName === "food") {
+    } else if (itemName == "food") {
         updateShop.$inc["metadata.food_count"] = quantity;
     } else {
         throw "Error: " + itemName + " is an unhandled shop item."
