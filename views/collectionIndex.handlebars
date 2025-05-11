@@ -1,8 +1,12 @@
-<h1>Collection Index</h1>
+<div class="collectionIndex">    
+    <h1>Collection Index</h1>
 
-{{#if error}}
-    <p class="error">{{error}}</p>
-{{/if}}
+    {{#if error}}
+        <p class="error">{{error}}</p>
+    {{/if}}
 
-<canvas id="index-canvas" width="800" height="600"></canvas>
-<script src="/public/js/collectionIndex.js"></script>
+    <a href="/gacha">Back to Gacha</a>
+
+    <canvas id="index-canvas" width="800" height="600"></canvas>
+    <script type="module" src="/public/js/collectionIndex.js"></script>
+</div>

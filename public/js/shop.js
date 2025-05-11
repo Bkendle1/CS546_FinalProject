@@ -1,6 +1,15 @@
 import kaplay from "https://unpkg.com/kaplay@3001/dist/kaplay.mjs";
 
-// Get all availabile items from the shop
+// Initialize Kaplay
+const shopCanvas = document.querySelector("#shop-canvas");
+kaplay({
+    canvas: shopCanvas,
+    width: shopCanvas.width,
+    height: shopCanvas.height,
+    background: "#000000",
+    loadingScreen: true
+});
+
 async function fetchShopItems() {
     const res = await fetch("/shop/items");
     if (!res.ok) {
@@ -18,64 +27,27 @@ async function fetchBalance() {
     return data.balance;
 }
 
-// Lay out entities in a grid and hook up click → purchase
-function setupShop(items, canvas) {
-    const cols = Math.ceil(Math.sqrt(items.length));
-    const spacingX = canvas.width / cols;
-    const spacingY = canvas.height / cols;
+// preload sprites then start
+fetchShopItems()
+    .then(async items => {
+        // preload each sprite (with fallback)
+        for (const item of items) {
+        const url = item.image && item.image.startsWith("http")
+            ? item.image
+            : "https://via.placeholder.com/150";
+        loadSprite(item.name, url);
+        }
+        go("Shop");
+    })
+    .catch(console.error);
 
-    items.forEach((item, idx) => {
-        const row = Math.floor(idx / cols);
-        const col = idx % cols;
-        const x = spacingX * col + spacingX / 2;
-        const y = spacingY * row + spacingY / 2;
-
-        add([
-            sprite(item.name),
-            pos(x, y),
-            area(),
-            layer("sprite"),
-            onClick(() => {
-                document.getElementById("pf-itemName").value = item.name;
-                document.getElementById("purchase-form").submit();
-            }),
-        ]);
-
-        // name label
-        add([
-            drawText(item.name),
-            pos(x - spacingX/4, y + spacingY/4),
-            layer("ui")
-        ]);
-
-        // cost label
-        add([
-            drawText(cost.name),
-            pos(x - spacingX/4, y + spacingY/4),
-            layer("ui")
-        ]);
-
-        // description label
-        add([
-            drawText(item.description),
-            pos(x - spacingX/4, y + spacingY/4),
-            layer("ui")
-        ]);
-
-        /* // image label
-        add([
-            drawText(image.name),
-            pos(x - spacingX/4, y + spacingY/4),
-            layer("ui")
-        ]); */
-    });
-}
-
-window.addEventListener("DOMContentLoaded", main);
-async function main() {
+scene("Shop", async () => {
     let items, balance;
     try {
-        [items, balance] = await Promise.all([fetchShopItems(), fetchBalance()]);
+        [items, balance] = await Promise.all([
+            fetchShopItems(),
+            fetchBalance()
+        ]);
     } catch (e) {
         console.error(e);
         return;
@@ -86,18 +58,57 @@ async function main() {
         bal.textContent = "Balance: " + balance;
     }
 
-    // Initialize Kaplay
-    const canvas = document.getElementById("shop-canvas");
-    kaplay({
-        canvas,
-        width: canvas.width,
-        height: canvas.height
-    });
+    const cols = Math.ceil(Math.sqrt(items.length));
+    const spacingX = canvas.width / cols;
+    const spacingY = canvas.height / cols;
 
-    // Preload sprites
-    for (const item of items) {
-        loadSprite(item.name, item.image);
+    for (let idx = 0; idx < items.length; idx++) {
+        const item = items[idx];
+        const row = Math.floor(idx / cols);
+        const col = idx % cols;
+        const x = spacingX * col + spacingX / 2;
+        const y = spacingY * row + spacingY / 2;
+
+        add([
+            sprite(item.name, { src: item.image }),
+            pos(x, y),
+            area(),
+            layer("sprite"),
+            onClick(() => {
+                document.getElementById("pf-itemName").value = item.name;
+                document.getElementById("purchase-form").submit();
+            })
+        ]);
+
+        // name label
+        add([
+            drawText({ text: item.name }),
+            pos(x - spacingX / 4, y + spacingY / 4),
+            anchor("center"),
+            layer("ui")
+        ]);
+
+        // cost label
+        add([
+            drawText({ text: "Cost: " + item.cost }),
+            pos(x - spacingX / 4, y + spacingY / 4),
+            anchor("center"),
+            layer("ui")
+        ]);
+
+        // description label
+        add([
+            drawText({ text: item.description }),
+            pos(x - spacingX / 4, y + spacingY / 4),
+            anchor("center"),
+            layer("ui")
+        ]);
+
+        /* // image label
+        add([
+            drawText(image.name),
+            pos(x - spacingX/4, y + spacingY/4),
+            layer("ui")
+        ]); */
     }
-
-    setupShop(items, canvas);
-}
+});

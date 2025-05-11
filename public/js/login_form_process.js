@@ -47,13 +47,13 @@ function validateEmail(str) {
 function validatePassword(str) {
   // dont trim passwords !! 
   if (!str) {
-      throw new Error(`Password needed`);
+      throw new Error("Password needed");
   }
   if (typeof str !== "string") {
-      throw new Error(`Password must be a string`);
+      throw new Error("Password must be a string");
   }
   if (str.length === 0) {
-      throw new Error(`Password cannot be an empty string or with only spaces`);
+      throw new Error("Password cannot be an empty string or with only spaces");
   }
 
   // check if contains a space
@@ -79,14 +79,14 @@ function validatePassword(str) {
 }
 
 function displayErrors(errors) {
-    let errorElement = document.getElementById('error');
+    let errorElement = document.getElementById("error");
 
     // reset errorElement
     errorElement.innerHTML = "";
 
-    let ul = document.createElement('ul');
+    let ul = document.createElement("ul");
     for (let error of errors) {
-        let li = document.createElement('li');
+        let li = document.createElement("li");
         li.innerHTML = error;
         ul.appendChild(li);
     }
@@ -94,8 +94,8 @@ function displayErrors(errors) {
     errorElement.appendChild(ul);
 }
 
-let registerForm = document.getElementById(`signup-form`);
-let loginForm = document.getElementById('signin-form');
+let registerForm = document.getElementById("signup-form");
+let loginForm = document.getElementById("signin-form");
 
 if (loginForm) {
   loginForm.addEventListener("submit", function (event) {
@@ -148,10 +148,10 @@ if (registerForm) {
         let errors = [];
 
         // get inputs 
-        let username = document.getElementById('username').value.trim();
-        let email = document.getElementById('email').value.trim();
-        let password = document.getElementById('password').value;
-        let confirmPassword = document.getElementById('confirmPassword').value;
+        let username = document.getElementById("username").value.trim();
+        let email = document.getElementById("email").value.trim();
+        let password = document.getElementById("password").value;
+        let confirmPassword = document.getElementById("confirmPassword").value;
         
         // check for missing fields
         if (!username) {

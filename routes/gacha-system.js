@@ -1,21 +1,21 @@
-import { Router } from 'express';
+import { Router } from "express";
 const router = Router();
-import { gachaData } from '../data/index.js';
-import * as helpers from '../helpers.js';
-import { ObjectId } from 'mongodb';
+import { gachaData } from "../data/index.js";
+import * as helpers from "../helpers.js";
+import { ObjectId } from "mongodb";
 
 const BULK_PULL_COUNT = 5; // number of pulls for a bulk pull. IF YOU CHANGE THIS VALUE THEN MAKE SURE TO ALSO CHANGE THIS CONSTANT IN THE CORRESPONDING CLIENT-SIDE JS FILE
 
 router
-    .route('/')
+    .route("/")
     .get(async (req, res) => {
         // render the gacha template 
-        res.render('gacha', { title: "Gacha System" })
+        res.render("gacha", { title: "Gacha System" })
     });
 
 // this route is used so the game can get user's ticket information
 router
-    .route('/tickets')
+    .route("/tickets")
     .get(async (req, res) => {
         const userId = req.session.user.userId; // get user's id
 
@@ -25,13 +25,13 @@ router
             const goldenTicketCount = await gachaData.getTicketCount(userId, "golden");// get the current count of golden tickets from the user
             res.json({ normalTicketCount: normalTicketCount, goldenTicketCount: goldenTicketCount }); // return JSON with user's ticket counts
         } catch (e) {
-            res.status(500).render('error', { title: "Error: 500", error: e });
+            res.status(500).render("error", { title: "Error: 500", error: e });
         }
     });
 
 
 router
-    .route('/normal')
+    .route("/normal")
     .get(async (req, res) => {
         // makes a single, normal pull
         const userId = req.session.user.userId;
@@ -41,12 +41,12 @@ router
             res.json({ pulled: character.pulled[0], duplicates: character.duplicates[0] }); // gachaPull returns an array even if it was a single pull
         } catch (e) {
             // user doesn't have enough tickets (this shouldn't happen as the button that makes this request should've been disabled)
-            res.status(500).render('error', { title: "Error: 500", error: e });
+            res.status(500).render("error", { title: "Error: 500", error: e });
         }
     });
 
 router
-    .route('/normal/bulk')
+    .route("/normal/bulk")
     .get(async (req, res) => {
         // makes a bulk, normal pull
         const userId = req.session.user.userId;
@@ -56,27 +56,36 @@ router
             res.json({ pulled: characters.pulled, duplicates: characters.duplicates }); // gachaPull returns an array
         } catch (e) {
             // user doesn't have enough tickets (this shouldn't happen as the button that makes this request should've been disabled)
+<<<<<<< HEAD
+            res.status(500).render("error", { title: "Error: 500", error: e });
+=======
             console.log(e);
             res.status(500).render('error', { title: "Error: 500", error: e });
+>>>>>>> origin/main
         }
     });
 router
-    .route('/golden')
+    .route("/golden")
     .get(async (req, res) => {
         // makes a single, golden pull
         const userId = req.session.user.userId;
         // attempt to make a single, golden pull
         try {
+<<<<<<< HEAD
+            const character = await gachaData.gachaPull(userId, 1, "golden");
+            res.json({ pulled: character[0] });  // gachaPull returns an array even if it was a single pull
+=======
             const character = await gachaData.gachaPull(userId, 1, 'golden');
             res.json({ pulled: character.pulled[0], duplicates: character.duplicates[0] });  // gachaPull returns an array even if it was a single pull
+>>>>>>> origin/main
         } catch (e) {
             // user doesn't have enough tickets (this shouldn't happen as the button that makes this request should've been disabled)
-            res.status(500).render('error', { title: "Error: 500", error: e });
+            res.status(500).render("error", { title: "Error: 500", error: e });
         }
     });
 
 router
-    .route('/golden/bulk')
+    .route("/golden/bulk")
     .get(async (req, res) => {
         // makes a bulk, golden pull
         const userId = req.session.user.userId;
@@ -86,7 +95,7 @@ router
             res.json({ pulled: characters.pulled, duplicates: characters.duplicates }); // return the array of all the pulled characters and array of bools
         } catch (e) {
             // user doesn't have enough tickets (this shouldn't happen as the button that makes this request should've been disabled)
-            res.status(500).render('error', { title: "Error: 500", error: e });
+            res.status(500).render("error", { title: "Error: 500", error: e });
         }
     });
 export default router;
