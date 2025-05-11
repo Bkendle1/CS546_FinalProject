@@ -2,6 +2,7 @@ import * as helpers from "../helpers.js";
 import { users, collectionIndex, gacha } from "../config/mongoCollections.js";
 import { ObjectId } from "mongodb";
 import weighted from "weighted";
+import { markCollected } from "./collectionIndex.js";
 
 /**  Given the user's id, the size of the pull (should be either 1 or 5), and ticket type. Check if player has enough tickets to pull with. Ticket type is case-insensitive.
 */
@@ -202,7 +203,14 @@ export const gachaPull = async (userId, pullCount, pullType) => {
         }
 
         // TODO: using a collectionInventory.js data function, check if any pulls are duplicates and if so, increase user's currency with the corresponding duplicate currency
+        pulledCharacters.forEach(async (character) => {
+            // let collected = await markCollected(character)
+            // if (collected) {
 
+            // } else {
+
+            // }
+        });
         // TODO: using a collectionInventory.js data function, update the user's collection inventory to include the new character(s) assuming they're not duplicates
 
         // decrement user's corresponding ticket count 

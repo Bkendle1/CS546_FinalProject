@@ -41,7 +41,7 @@ export function validateObjectId(id, varName) {
 }
 
 export function validatePositiveInteger(num, varName) {
-    if (typeof num != "number" || !Number.isInteger(num) || num <= 0) {
+    if (typeof num != "number" || !Number.isInteger(num) || num <= 0 || Number.isNaN(num)) {
         throw "Error: " + varName + "must be a positive integer.";
     }
     return num;
@@ -82,16 +82,48 @@ export const updateTicketCount = async (userId, ticketType, amount) => {
     // otherwise, update the ticketType count by the given amount
     if (ticketType === 'normal') {
         const newCount = Math.max(0, user.metadata.ticket_count.normal += amount); // compute new ticket count 
-        await userCollection.updateOne({ _id: ObjectId.createFromHexString(userId) }, { $set: { "metadata.ticket_count.normal": newCount } });
+        const updateInfo = await userCollection.updateOne({ _id: ObjectId.createFromHexString(userId) }, { $set: { "metadata.ticket_count.normal": newCount } });
+        if (updateInfo.matchedCount === 0) {
+            throw `Could not update user's normal ticket count.`
+        }
+
         return `${user.username} now has ${newCount} normal tickets.`
     } else if (ticketType === 'golden') {
         const newCount = Math.max(0, user.metadata.ticket_count.golden += amount); // compute new ticket count
-        await userCollection.updateOne({ _id: ObjectId.createFromHexString(userId) }, { $set: { "metadata.ticket_count.golden": newCount } });
+        const updateInfo = await userCollection.updateOne({ _id: ObjectId.createFromHexString(userId) }, { $set: { "metadata.ticket_count.golden": newCount } });
+        if (updateInfo.matchedCount === 0) {
+            throw `Could not update user's golden ticket count.`
+        }
+
         return `${user.username} now has ${newCount} golden tickets.`
     } else {
         throw "Ticket type must be 'normal' or 'golden'.";
     }
 }
+
+/**
+ * Update user's currency count by a given amount. Note: You can pass negatives to decrement currency count.
+ */
+export const updateCurrencyCount = async (userId, amount) => {
+    // verify that userId is a valid string and ObjectId
+    userId = validateObjectId(userId);
+    // verify that userId is a valid positive integer
+    amount = validatePositiveInteger(amount, "Currency amount");
+
+    // check if a user with that id exists
+    const userCollection = await users();
+    const user = await userCollection.findOne({ _id: ObjectId.createFromHexString(userId) });
+    if (!user) throw `No user with the id of ${userId}`;
+
+    // update user's currency amount
+    const newCount = Math.max(0, user.metadata.currency += amount); // currency count can't be less than 0
+    const updateInfo = await userCollection.updateOne({ _id: ObjectId.createFromHexString(userId) }, { $set: { "metdata.currency": newCount } });
+    if (updateInfo.matchedCount === 0) {
+        throw "Could not update user's currency count.";
+    }
+    return `${user.username} now has ${newCount} in in-game currency.`;
+}
+
 /**
  * Given a username, verify that it is valid 
  */
