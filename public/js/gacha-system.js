@@ -260,13 +260,13 @@ scene("GachaDisplaySingle", async ({ pulled, duplicate }) => {
     // TODO: display character's information from index using AJAX request to collectionIndex route
     // display the character's name, image, description, rarity
     tween(
-        0,
-        1,
-        1,
+        0, // starting value
+        1, // target value
+        0.25, // duration
         (v) => {
             character.scale = vec2(v);
         },
-        easings.linear
+        easings.easeOutQuad // with this easing
     );
 
     // THIS IS JUST FOR DEBUGGING
