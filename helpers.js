@@ -35,7 +35,7 @@ export const getCharacterIdByName = async (name) => {
 export function validateObjectId(id, varName) {
     id = validateString(id, varName);
     if (!ObjectId.isValid(id)) {
-        throw "Error: " + varName + "is not a valid ObjectId.";
+        throw "Error: " + varName + " is not a valid ObjectId.";
     }
     return id;
 }

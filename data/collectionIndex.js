@@ -44,11 +44,8 @@ export async function addIndexEntry(name, rarity, image, description) {
 
     return result.insertedId.toString();
 }
-try {
-    console.log(await addIndexEntry("KOROMON", "RARE", "https://static.wikia.nocookie.net/digimon/images/3/33/Koromon_b.jpg/revision/latest/thumbnail/width/360/height/360?cb=20090128045819", "Koromon has shed its fur and grown one size bigger. It can move a bit faster, but fighting is still too much for it. It threatens enemies with bubbles from its mouth."))
-} catch (e) {
-    console.log(e);
-}
+
+
 /**
  * Get every character entry in the collection‑index.
  */
@@ -85,18 +82,27 @@ export async function getEntryById(id) {
     };
 }
 
+
 /**
- * Mark a character’s 'collected' flag to true.
+ * Mark a character’s 'collected' flag to true. If the character has already been collected before, return false. Otherwise, return true.
  */
 export async function markCollected(id) {
     id = validateObjectId(id, "Character Index Id");
     const indexCol = await collectionIndex();
+    // check if character exists with the id
+    const character = await indexCol.findOne({ _id: ObjectId.createFromHexString(id) });
+    if (!character) throw `No character in the index has the id of: ${id}.`;
+    // check if character is already marked as collected
+    if (character.collected) {
+        return false; // character is already marked as collected so we return false
+    }
+
     const result = await indexCol.updateOne(
-        { _id: new ObjectId(id) },
+        { _id: ObjectId.createFromHexString(id) },
         { $set: { collected: true } }
     );
     if (result.modifiedCount == 0) {
         throw "Error: Could not mark character " + id + " as collected.";
     }
-    return true;
+    return true; // character has been successfully marked as collected
 }
