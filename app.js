@@ -17,7 +17,17 @@ app.use(session({
 
 app.get('/', redirectToGachaIfLoggedIn);
 app.get('/register', redirectToGachaIfLoggedIn);
+
 // ensureLogin should apply to every other route besides / and /register but we dont have them yet
+app.get('/shop', ensureLogin);
+app.get('/shop/items', ensureLogin);
+app.get('/shop/purchase', ensureLogin);
+app.get('/shop/balance', ensureLogin);
+
+app.get('/collectionIndex', ensureLogin);
+app.get('/collectionIndex/entries', ensureLogin);
+app.get('/collectionIndex/entries/:id', ensureLogin);
+
 app.get('/signout', ensureLogin);
 
 
@@ -31,5 +41,5 @@ configRouteFunction(app);
 
 app.listen(3000, () => {
     console.log("We've now got a server!");
-    console.log('Your routes will be running on http://localhost:3000');
+    console.log("Your Gacha game routes will be running on http://localhost:3000");
 });

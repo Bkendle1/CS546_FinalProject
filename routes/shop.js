@@ -1,10 +1,11 @@
-// routes/shop.js
 import { Router } from "express";
 const router = Router();
 import {
     getAllItems,
     purchaseItem
 } from "../data/shop.js";
+import { users } from "../config/mongoCollections.js";
+import { ObjectId } from "mongodb";
 
 /**
  * GET /shop
@@ -53,6 +54,19 @@ router.post("/purchase", async (req, res) => {
             user: req.session.user,
             error: e
         });
+    }
+});
+
+/**
+ * GET /balance
+ */
+router.get("/shop/balance", async (req, res) => {
+    try {
+        const userCol = await users();
+        const user = await userCol.findOne({ _id: new ObjectId(req.session.user._id) });
+        res.json({ balance: user.metadata.currency });
+    } catch (e) {
+        res.status(500).json({ error: e.toString() });
     }
 });
 
