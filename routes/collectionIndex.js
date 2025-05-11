@@ -1,6 +1,6 @@
 import { Router } from "express";
 const router = Router();
-import { 
+import {
     getAllIndexEntries,
     getEntryById
 } from "../data/collectionIndex.js";
@@ -15,7 +15,7 @@ router.get("/", async (req, res) => {
             user: req.session.user,
         });
     } catch (e) {
-        res.status(500).render("error", { 
+        res.status(500).render("error", {
             error: e
         });
     }

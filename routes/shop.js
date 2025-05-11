@@ -63,7 +63,7 @@ router.post("/purchase", async (req, res) => {
 router.get("/balance", async (req, res) => {
     try {
         const userCol = await users();
-        const user = await userCol.findOne({ _id: new ObjectId(req.session.user._id) });
+        const user = await userCol.findOne({ _id: ObjectId.createFromHexString(req.session.user.userId) });
         res.json({ balance: user.metadata.currency });
     } catch (e) {
         res.status(500).json({ error: e.toString() });
