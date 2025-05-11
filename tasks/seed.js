@@ -42,7 +42,7 @@ async function main() {
             name: "Tokomon",
             rarity: "uncommon",
             image: "https://via.placeholder.com",
-            description: "A small Digimon with strange appendages growing under its body. In-training Digimon with legs are quite rare, and this one's cute as a button to boot. Don't let its looks fool you, though; carelessly reach out to it and expect a big set of chompers to clamp down on your hand. That being said, it doesn't have an ounce of ill will in its body.", 
+            description: "A small Digimon with strange appendages growing under its body. In-training Digimon with legs are quite rare, and this one's cute as a button to boot. Don't let its looks fool you, though; carelessly reach out to it and expect a big set of chompers to clamp down on your hand. That being said, it doesn't have an ounce of ill will in its body.",
         },
         // character 4
         {
@@ -50,7 +50,7 @@ async function main() {
             name: "Tanemon",
             rarity: "common",
             image: "https://via.placeholder.com",
-            description: "A bulb Digimon with sprout-like objects budding from its head. When an enemy draws close, this big old coward digs a hole with its four legs and buries its body in the ground. When it moves underground, the objects on its head mimic vegetation, protecting it from opponents.", 
+            description: "A bulb Digimon with sprout-like objects budding from its head. When an enemy draws close, this big old coward digs a hole with its four legs and buries its body in the ground. When it moves underground, the objects on its head mimic vegetation, protecting it from opponents.",
         },
         // character 5
         {
@@ -66,7 +66,7 @@ async function main() {
             name: "Motimon",
             rarity: "common",
             image: "https://via.placeholder.com",
-            description: "A soft-bodied Digimon possessing an elastic outer skin, toddling along on the bumps under its torso. When it gets worked up, its body swells up like a mochi rice cake, earning it the name Motimon. Its appearance belies an above-average intelligence, which leads to the assumption that it was born from a computer's dictionary function. It understands human speech, and can sometimes be seen transforming its body to communicate.", 
+            description: "A soft-bodied Digimon possessing an elastic outer skin, toddling along on the bumps under its torso. When it gets worked up, its body swells up like a mochi rice cake, earning it the name Motimon. Its appearance belies an above-average intelligence, which leads to the assumption that it was born from a computer's dictionary function. It understands human speech, and can sometimes be seen transforming its body to communicate.",
         },
         // character 7
         {
@@ -74,7 +74,7 @@ async function main() {
             name: "Bukamon",
             rarity: "common",
             image: "https://via.placeholder.com",
-            description: "This zany Digimon looks like a baby aquatic dinosaur, and moves like a sprightly seahorse. It tends to run away when others get close. Its exodermis can't withstand deep-sea water pressure or low temperatures, so it can't dive in the ocean depths for long.", 
+            description: "This zany Digimon looks like a baby aquatic dinosaur, and moves like a sprightly seahorse. It tends to run away when others get close. Its exodermis can't withstand deep-sea water pressure or low temperatures, so it can't dive in the ocean depths for long.",
         },
         // character 8
         {
@@ -154,7 +154,7 @@ async function main() {
     console.log("Starting to seed collectionIndex...");
     try {
         for (const c of characters) {
-            await indexData.addIndexEntry (
+            await indexData.addIndexEntry(
                 c.name,
                 c.rarity,
                 c.image,
@@ -164,26 +164,9 @@ async function main() {
     } catch (e) {
         console.error("error seeding collectionIndex: ", e);
     }
-    console.log("Done seeding collectionIndex!");
+    console.log("Done seeding collectionIndex & gacha!");
 
-    // 3) seed gacha
-    console.log("Starting to seed gacha collection...");
-    try {
-        for (const c of characters) {
-            const pullRate = rarityToPullRate(c.rarity);
-            const dupCur = rarityToDupCurrency(c.rarity);
-            await gachaData.addCharacterToGacha (
-                c.name,
-                pullRate,
-                dupCur
-            );
-        }
-    } catch (e) {
-        console.error("error seeding gatcha: ", e);
-    }
-    console.log("Done seeding gacha!");
-
-    // 4) create shop items
+    // 3) create shop items
     const shopItems = [
         {
             name: "normal ticket",
