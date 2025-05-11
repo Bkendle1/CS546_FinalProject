@@ -1,6 +1,15 @@
 import kaplay from "https://unpkg.com/kaplay@3001/dist/kaplay.mjs";
 
-// Get all availabile items from the shop
+// Initialize Kaplay
+const shopCanvas = document.querySelector("#shop-canvas");
+kaplay({
+    canvas: shopCanvas,
+    width: shopCanvas.width,
+    height: shopCanvas.height,
+    background: "#000000",
+    loadingScreen: true
+});
+
 async function fetchShopItems() {
     const res = await fetch("/shop/items");
     if (!res.ok) {
@@ -18,15 +27,19 @@ async function fetchBalance() {
     return data.balance;
 }
 
-// Initialize Kaplay
-const shopCanvas = document.querySelector("#shop-canvas");
-kaplay({
-    canvas: shopCanvas,
-    width: shopCanvas.width,
-    height: shopCanvas.height,
-    background: "#222222",
-    loadingScreen: true
-});
+// preload sprites then start
+fetchShopItems()
+    .then(async items => {
+        // preload each sprite (with fallback)
+        for (const item of items) {
+        const url = item.image && item.image.startsWith("http")
+            ? item.image
+            : "https://via.placeholder.com/150";
+        loadSprite(item.name, url);
+        }
+        go("Shop");
+    })
+    .catch(console.error);
 
 scene("Shop", async () => {
     let items, balance;
@@ -57,17 +70,14 @@ scene("Shop", async () => {
         const y = spacingY * row + spacingY / 2;
 
         add([
-            sprite(item.name),
+            sprite(item.name, { src: item.image }),
             pos(x, y),
             area(),
             layer("sprite"),
-            (() => {
-                const x = () => {
-                    document.getElementById("pf-itemName").value = item.name;
-                    document.getElementById("purchase-form").submit();
-                };
-                return { onClick: x };
-            })()
+            onClick(() => {
+                document.getElementById("pf-itemName").value = item.name;
+                document.getElementById("purchase-form").submit();
+            })
         ]);
 
         // name label
@@ -102,11 +112,3 @@ scene("Shop", async () => {
         ]); */
     }
 });
-
-
-
-// preload sprites then start
-fetchShopItems().then(items => {
-    items.forEach(item => loadSprite(item.name, item.image));
-    go("Shop");
-}).catch(console.error);

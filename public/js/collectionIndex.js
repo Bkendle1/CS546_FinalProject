@@ -1,5 +1,15 @@
 import kaplay from "https://unpkg.com/kaplay@3001/dist/kaplay.mjs";
 
+// Initialize Kaplay
+const indexCanvas = document.querySelector("#index-canvas");
+kaplay({ 
+    canvas: indexCanvas,
+    width: indexCanvas.width, 
+    height: indexCanvas.height,
+    background: "#000000",
+    loadingScreen: true
+});
+
 async function fetchEntries() {
     const res = await fetch("/collectionIndex/entries");
     if (!res.ok) {
@@ -7,6 +17,19 @@ async function fetchEntries() {
     }
     return res.json();
 }
+
+// preload sprites then start
+fetchEntries()
+    .then(async entries => {
+        for (const e of entries) {
+        const url = e.image && e.image.startsWith("http")
+            ? e.image
+            : "https://via.placeholder.com/150";
+        loadSprite(e._id, url);
+        }
+        go("Index");
+    })
+    .catch(console.error);
 
 scene("Index", async () => {
     let entries;
@@ -52,13 +75,13 @@ scene("Index", async () => {
             layer("ui")
         ]);
 
-        /* // image
+        // image
         add([
             drawText(entry.image),
             pos(x - spacingX/4, y + spacingY/4),
             anchor("center"),
             layer("ui")
-        ]); */
+        ]); 
 
         // description
         add([
@@ -76,22 +99,13 @@ scene("Index", async () => {
                 anchor("center"),
                 layer("ui")
             ]);
+        } else {
+            add([
+                drawText({ text: "" }),
+                pos(x + spacingX/4, y - spacingY/4),
+                anchor("center"),
+                layer("ui")
+            ]);
         }
     }
 });
-
-// Initialize Kaplay
-const indexCanvas = document.querySelector("index-canvas");
-kaplay({ 
-    canvas: indexCanvas,
-    width: indexCanvas.width, 
-    height: indexCanvas.height,
-    background: "#111",
-    loadingScreen: true
-});
-
-// preload sprites then start
-fetchEntries().then(entries => {
-    entries.forEach(entry => loadSprite(entry._id, entry.image));
-    go("Index");
-}).catch(console.error);
