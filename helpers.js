@@ -265,3 +265,54 @@ export const rarityToDupCurrency = (rarity) => {
         throw "Invalid rarity. It must be: 'common', 'uncommon', 'rare', or 'legendary'."
     }
 }
+
+
+/**
+ * Returns the current date and time in the format of MM/DD/YY HH:MM:SSAM/PM and pads the month/day with a 0 if its 1 digit.
+ */
+export const getCurrentDateAndTime = () => {
+    let currDate = new Date();
+    // get month
+    let month = currDate.getMonth() + 1; // getMonth() returns month as a 0 index
+    if (month.toString().length < 2) {
+        month = '0' + month
+    }
+
+    // get day
+    let day = currDate.getDate();
+    if (day.toString().length < 2) {
+        day = '0' + day;
+    }
+    // get year
+    let year = currDate.getFullYear().toString().substring(2);
+
+    // get hours
+    let hours = currDate.getHours() % 12;
+    // edge case: if its 12pm then currDate.getHours() % 12 = 0 which isn't correct so we do the following
+    if (currDate.getHours() === 12) {
+        hours = 12;
+    }
+
+    if (hours.toString().length < 2) {
+        hours = '0' + hours;
+    }
+    // get minutes
+    let minutes = currDate.getMinutes();
+    if (minutes.toString().length < 2) {
+        minutes = '0' + minutes;
+    }
+    // get seconds
+    let seconds = currDate.getSeconds();
+    if (seconds.toString().length < 2) {
+        seconds = '0' + seconds;
+    }
+
+    // get meridiem (AM/PM)
+    let meridiem = "AM";
+    if (currDate.getHours() >= 12) {
+        meridiem = "PM";
+    }
+
+    // combine to get current date
+    return `${month}/${day}/${year} ${hours}:${minutes}:${seconds}${meridiem}`;
+}

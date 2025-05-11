@@ -82,9 +82,9 @@ function requestPull(pullType, pullCount) {
         success: (response) => {
             // check if it was a single or bulk pull 
             if (pullCount === 1) {
-                go("GachaDisplaySingle", response.pulled); // after the player does a pull, render this new scene that displays their new character
+                go("GachaDisplaySingle", { pulled: response.pulled, duplicates: response.duplicates }); // after the player does a pull, render this new scene that displays their new character
             } else {
-                go("GachaDisplayBulk", response.pulled); // after the player does a pull, render this new scene that displays their new characters
+                go("GachaDisplayBulk", { pulled: response.pulled, duplicates: response.duplicates }); // after the player does a pull, render this new scene that displays their new characters
             }
         }
     };
@@ -230,7 +230,8 @@ scene("Gacha", () => {
 
 });
 
-scene("GachaDisplaySingle", (character) => {
+// scene takes two arguments, one for the pulled character, and a bool that states whether or not they're a duplicate
+scene("GachaDisplaySingle", ({ pulled, duplicate }) => {
     // render scene's background
     add([
         sprite("blackBG"),
@@ -241,7 +242,7 @@ scene("GachaDisplaySingle", (character) => {
 
     // TODO: display character's information from index using AJAX request to collectionIndex route
     add([
-        text(`DEBUG: You got: ${character}`, { font: "digiFont" }),
+        text(`DEBUG: You got: ${pulled}`, { font: "digiFont" }),
         pos(center()),
         anchor("center")
     ]);
@@ -251,8 +252,8 @@ scene("GachaDisplaySingle", (character) => {
     })
 });
 
-
-scene("GachaDisplayBulk", (characters) => {
+// scene takes two arrays, one for the pulled characters, and another that's the same size which stores a bool to determine whether or not they're a duplicate
+scene("GachaDisplayBulk", ({ pulled, duplicates }) => {
     // render scene's background
     add([
         sprite("blackBG"),
@@ -263,7 +264,7 @@ scene("GachaDisplayBulk", (characters) => {
 
     // TODO: display character's information from index using AJAX request to collectionIndex route
     add([
-        text(`DEBUG: You got: ${characters}`, { font: "digiFont" }),
+        text(`DEBUG: You got: ${pulled}`, { font: "digiFont" }),
         pos(center()),
         anchor("center")
     ]);

@@ -2,6 +2,7 @@ import * as helpers from "../helpers.js";
 import { users, collectionIndex, gacha } from "../config/mongoCollections.js";
 import { ObjectId } from "mongodb";
 import weighted from "weighted";
+import { getEntryById } from "./collectionIndex.js";
 import { markCollected } from "./collectionIndex.js";
 
 /**  Given the user's id, the size of the pull (should be either 1 or 5), and ticket type. Check if player has enough tickets to pull with. Ticket type is case-insensitive.
@@ -94,6 +95,60 @@ const getAllGachaCharacters = async () => {
 }
 
 /**
+ * Updates the pull history of the user with the given id.
+ */
+const updatePullHistory = async (userId, characters) => {
+    // verify thatt userId is a valid string and ObjectId
+    userId = helpers.validateObjectId(userId, "User ID");
+    // verify that characters was passed in
+    if (!characters) throw "Missing array of pulled characters.";
+    // verify that characters is a valid array
+    if (!Array.isArray(characters) || characters.length === 0) throw "Pulled characters must be in an array of at least one character.";
+    // check if user exists with that id
+    const userCollection = await users();
+    const user = await userCollection.findOne({ _id: ObjectId.createFromHexString(userId) });
+
+    if (!user) throw `No user with id ${userId}.`;
+    // check pull type
+    let pull_type = "single"
+    if (characters.length > 1) {
+        pull_type = "bulk";
+    }
+
+    // compute the array for the 'pulled' field for the user's pull history
+    let pulled = [];
+    for (let i = 0; i < characters.length; i++) {
+        let charName = characters[i];
+        // get the character's id from the index
+        let charId = await helpers.getCharacterIdByName(charName);
+        let character = await getEntryById(charId);
+        // get the character's rarity from the index
+        let rarity = character.rarity;
+        // get the image from index 
+        let image = character.image;
+        // get the current time as MM/DD/YY HH:MM:SS to reflect the pull date
+        let currDate = helpers.getCurrentDateAndTime();
+        let pullChar = {
+            _id: ObjectId.createFromHexString(charId),
+            name: charName,
+            rarity: rarity,
+            timestamp: currDate,
+            image: image
+        };
+        pulled.push(pullChar);
+    }
+    // construct new pull object for pull history
+    const newPull = {
+        pull_type: pull_type,
+        pulled: pulled
+    }
+
+    // add new pull object to the current pull history
+
+    console.log(user.pull_history.unshift(newPull))
+}
+
+/**
  * Given a user's id, return the number of tickets they have of the given ticket type. Ticket type is case-insensitive
  */
 export const getTicketCount = async (userId, ticketType) => {
@@ -126,11 +181,15 @@ export const getTicketCount = async (userId, ticketType) => {
 
 
 /**
- * This function will check if the user can pull and if so, does a pull equal to the given pull count (should only either be 1 or 5) using the odds based on the pull type (normal or golden). It will also update the user's collection inventory to include the new character(s) assuming they're not duplicates; otherwise, it will update the user’s currency amount to include the duplicate currency. 
+ * This function will check if the user can pull and if so, does a pull equal to the given pull count (should only either be 1 or 5) using the odds based on the pull type (normal or golden). 
+ * 
+ * It will update the user's collection inventory to include the new character(s) assuming they're not duplicates; otherwise, it will update the user’s currency amount to include the duplicate currency. 
  * 
  * Pull type is case-insensitive.
  * 
- * Returns all pulled characters as an array even if pullCount was 1.
+ * It will update pull history with all pulled characters both new and duplicates.
+ * 
+ * Returns an object containing an array of all pulled characters and an array of booleans stating whether they're duplicates. Object always has an array even if pullCount was 1.
  */
 export const gachaPull = async (userId, pullCount, pullType) => {
     // check if userId is a valid string
@@ -159,7 +218,11 @@ export const gachaPull = async (userId, pullCount, pullType) => {
     }
 
     // check if user has enough tickets for this pull type (either golden or normal)
-    let pulledCharacters = []; // store pulled characters in an array
+    let pulledCharacters = { // object that stores the pulled characters and whether they were duplicates
+        pulled: [], // store pulled characters in an array
+        duplicates: [] // array of booleans stating whether or not the corresponding pulled character was a duplicate
+    };
+
     if (await canPull(userId, pullCount, pullType)) {
         // get array of all characters in gacha collection
         let gachaCharacters = await getAllGachaCharacters();
@@ -173,7 +236,7 @@ export const gachaPull = async (userId, pullCount, pullType) => {
 
             // do the given amount of pulls
             for (let i = 0; i < pullCount; i++) {
-                pulledCharacters.push(weighted.select(normalPull, { normal: false }));
+                pulledCharacters.pulled.push(weighted.select(normalPull, { normal: false }));
             }
 
         } else if (pullType === 'golden') {
@@ -191,38 +254,37 @@ export const gachaPull = async (userId, pullCount, pullType) => {
             });
             // do the given amount of pulls
             for (let i = 0; i < pullCount; i++) {
-                pulledCharacters.push(weighted.select(goldenPull, { normal: false })); // normal is an option for whether or not the weights for the characters are normalized, we set this to false so the function normalizes for us
+                pulledCharacters.pulled.push(weighted.select(goldenPull, { normal: false })); // normal is an option for whether or not the weights for the characters are normalized, we set this to false so the function normalizes for us
             }
         } else {
             throw "Pull type must either be 'normal' or 'golden'.";
         }
 
         // TODO: using a collectionInventory.js data function, check if any pulls are duplicates and if so, increase user's currency with the corresponding duplicate currency
-        pulledCharacters.forEach(async function (charName) {
-            console.log(charName);
-
+        for (let i = 0; i < pulledCharacters.pulled.length; i++) {
+            let charName = pulledCharacters.pulled[i];
             let characterId = await helpers.getCharacterIdByName(charName);
             let collected = await markCollected(characterId); // update 'collected' field in collection index to true for each of the new pulled characters
-            // // console.log(`${charName}: ${collected}`);
             let character = await getGachaCharacterById(characterId); // get gacha document of character with corresponding character id 
-            // console.log(character);
             if (collected) {
-                // TODO: Update pull history with pulled character assuming its not a duplicate. Include the character's name, rarity, timestamp of pull, and image
-                // using a collectionInventory.js data function, update the user's collection inventory to include the new character(s) assuming they're not duplicates
+                // TODO using a collectionInventory.js data function, update the user's collection inventory to include the new character(s) assuming they're not duplicates
+                pulledCharacters.duplicates.push(false);
             } else {
-                // TODO: give user the corresponding duplicate currency
-                console.log(`You already had: ${charName}`);
-                console.log(character.duplicate_currency);
+                // Give user the corresponding duplicate currency
+                pulledCharacters.duplicates.push(true);
+                console.log(`You already had: ${charName} worth: ${character.duplicate_currency}`);
                 console.log(await helpers.updateCurrencyCount(userId, character.duplicate_currency));
             }
-        });
+        }
+
+        // TODO: Update pull history with pulled character. Include the character's name, rarity, timestamp of pull, and image
+        await updatePullHistory(userId, pulledCharacters.pulled);
 
         // decrement user's corresponding ticket count 
-        helpers.updateTicketCount(userId, pullType, -pullCount);
+        await helpers.updateTicketCount(userId, pullType, -pullCount);
     }
 
-
-    console.log(`DEBUG-DATA: ${pulledCharacters}`);
+    console.log(`DEBUG-DATA: ${pulledCharacters.pulled}:\n${pulledCharacters.duplicates}`);
     return pulledCharacters;
 }
 

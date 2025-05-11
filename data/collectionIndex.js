@@ -101,7 +101,8 @@ export async function markCollected(id) {
         { _id: ObjectId.createFromHexString(id) },
         { $set: { collected: true } }
     );
-    if (result.modifiedCount == 0) {
+    console.log(result);
+    if (result.modifiedCount === 0) {
         throw "Error: Could not mark character " + id + " as collected.";
     }
     return true; // character has been successfully marked as collected
