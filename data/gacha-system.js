@@ -266,7 +266,7 @@ export const gachaPull = async (userId, pullCount, pullType) => {
             throw "Pull type must either be 'normal' or 'golden'.";
         }
 
-        // TODO: using a collectionInventory.js data function, check if any pulls are duplicates and if so, increase user's currency with the corresponding duplicate currency
+        // Check if any pulls are duplicates and if so, increase user's currency with the corresponding duplicate currency
         for (let i = 0; i < pulledCharacters.pulled.length; i++) {
             let charName = pulledCharacters.pulled[i];
             let characterId = await helpers.getCharacterIdByName(charName);
@@ -283,7 +283,7 @@ export const gachaPull = async (userId, pullCount, pullType) => {
             }
         }
 
-        // TODO: Update pull history with pulled character(s). Include the character's name, rarity, timestamp of pull, and image
+        // Update pull history with pulled character(s). Include the character's name, rarity, timestamp of pull, and image
         await updatePullHistory(userId, pulledCharacters.pulled);
 
         // decrement user's corresponding ticket count 
