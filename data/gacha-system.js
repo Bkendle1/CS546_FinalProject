@@ -118,10 +118,12 @@ const updatePullHistory = async (userId, characters) => {
     // compute the array for the 'pulled' field for the user's pull history
     let pulled = [];
     for (let i = 0; i < characters.length; i++) {
-        let charName = characters[i];
         // get the character's id from the index
-        let charId = await helpers.getCharacterIdByName(charName);
+        // let charId = await helpers.getCharacterIdByName(charName);
+        let charId = characters[i];
         let character = await getEntryById(charId);
+        // let charName = characters[i];
+        let charName = character.name;
         // get the character's rarity from the index
         let rarity = character.rarity;
         // get the image from index 
@@ -234,10 +236,10 @@ export const gachaPull = async (userId, pullCount, pullType) => {
         let gachaCharacters = await getAllGachaCharacters();
 
         if (pullType === 'normal') {
-            // setup an object of character-pull_rate pairs considering normal pull_rates
+            // setup an object of (characterId, pull_rate) pairs considering normal pull_rates
             let normalPull = {};
             gachaCharacters.map((character) => {
-                normalPull[character.name] = character.pull_rate;
+                normalPull[character._id] = character.pull_rate;
             });
 
             // do the given amount of pulls
@@ -253,11 +255,12 @@ export const gachaPull = async (userId, pullCount, pullType) => {
             gachaCharacters.map((character) => {
                 // checks if character is rare enough based on RARE_THRESHOLD
                 if (character.pull_rate <= RARE_THRESHOLD) {
-                    goldenPull[character.name] = character.pull_rate * GOLDEN_RATE; // increase chance of being pulled with weight multiplier
+                    goldenPull[character._id] = character.pull_rate * GOLDEN_RATE; // increase chance of being pulled with weight multiplier
                 } else {
-                    goldenPull[character.name] = character.pull_rate;
+                    goldenPull[character._id] = character.pull_rate;
                 }
             });
+
             // do the given amount of pulls
             for (let i = 0; i < pullCount; i++) {
                 pulledCharacters.pulled.push(weighted.select(goldenPull, { normal: false })); // normal is an option for whether or not the weights for the characters are normalized, we set this to false so the function normalizes for us
@@ -268,17 +271,18 @@ export const gachaPull = async (userId, pullCount, pullType) => {
 
         // Check if any pulls are duplicates and if so, increase user's currency with the corresponding duplicate currency
         for (let i = 0; i < pulledCharacters.pulled.length; i++) {
-            let charName = pulledCharacters.pulled[i];
-            let characterId = await helpers.getCharacterIdByName(charName);
+            let characterId = pulledCharacters.pulled[i];
+            // let charName = pulledCharacters.pulled[i];
+            // let characterId = await helpers.getCharacterIdByName(charName);
             let collected = await markCollected(characterId); // update 'collected' field in collection index to true for each of the new pulled characters
             let character = await getGachaCharacterById(characterId); // get gacha document of character with corresponding character id 
             if (collected) {
                 // TODO using a collectionInventory.js data function, update the user's collection inventory to include the new character(s) assuming they're not duplicates
-                pulledCharacters.duplicates.push(false);
+
+                pulledCharacters.duplicates.push(false); // this character isn't a duplicate
             } else {
                 // Give user the corresponding duplicate currency
                 pulledCharacters.duplicates.push(true);
-                console.log(`You already had: ${charName} worth: ${character.duplicate_currency}`);
                 console.log(await helpers.updateCurrencyCount(userId, character.duplicate_currency));
             }
         }
@@ -330,6 +334,10 @@ export const addCharacterToGacha = async (name, pull_rate, duplicate_currency) =
     }
 
     const gachaCollection = await gacha(); // get reference to gacha collection
+    // check if character is already in the gacha
+    const character = await gachaCollection.findOne({ _id: ObjectId.createFromHexString(character_id) });
+    if (character) throw `${name} is already in the gacha with id: ${character_id}.`;
+
     const insertInfo = await gachaCollection.insertOne(newGachaCharacter); // insert new character into gacha system
     // if character wasn't created, throw
     if (!insertInfo.acknowledged || !insertInfo.insertedId)

@@ -68,7 +68,7 @@ export async function getAllIndexEntries() {
 export async function getEntryById(id) {
     id = validateObjectId(id, "Index Entry ID");
     const indexCol = await collectionIndex();
-    const entry = await indexCol.findOne({ _id: new ObjectId(id) });
+    const entry = await indexCol.findOne({ _id: ObjectId.createFromHexString(id) });
     if (!entry) {
         throw "Error: No index entry with id '" + id + "' found.";
     }

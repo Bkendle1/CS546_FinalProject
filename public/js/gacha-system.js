@@ -129,9 +129,18 @@ function requestPull(pullType, pullCount) {
     }
 };
 
-// TODO: get the data of a character using a route for the collectionIndex collection
-function requestCharacterData(characterId) {
 
+// Get the data of a character using a route for the collectionIndex collection
+async function requestCharacterData(characterId) {
+    // Make a GET request to /collectionIndex/entries/:id
+    try {
+        const url = `/collectionIndex/entries/${characterId}`;
+        const response = await fetch(url);
+        if (!response.ok) throw response.status;
+        return await response.json(); // return JSON of response, i.e. character index data
+    } catch (e) {
+        console.log(e);
+    }
 }
 
 loadSprite("banner", "/public/images/gachaBanner.png"); // load banner image as a sprite
@@ -231,7 +240,7 @@ scene("Gacha", () => {
 });
 
 // scene takes two arguments, one for the pulled character, and a bool that states whether or not they're a duplicate
-scene("GachaDisplaySingle", ({ pulled, duplicate }) => {
+scene("GachaDisplaySingle", async ({ pulled, duplicate }) => {
     // render scene's background
     add([
         sprite("blackBG"),
@@ -239,8 +248,25 @@ scene("GachaDisplaySingle", ({ pulled, duplicate }) => {
         pos(center()),
         anchor("center"),
     ]);
+    // get the pulled character's index information
+    const charInfo = await requestCharacterData(pulled);
+    loadSprite(charInfo.name, charInfo.image);
 
+    const character = add([
+        sprite(charInfo.name),
+        pos(center()),
+        anchor("center")
+    ])
     // TODO: display character's information from index using AJAX request to collectionIndex route
+    // display the character's name, image, description, rarity
+    tween(
+        0,
+        1,
+        2,
+        (v) => {
+
+        }
+    )
     add([
         text(`DEBUG: You got: ${pulled}`, { font: "digiFont" }),
         pos(center()),
@@ -261,6 +287,7 @@ scene("GachaDisplayBulk", ({ pulled, duplicates }) => {
         pos(center()),
         anchor("center"),
     ]);
+
 
     // TODO: display character's information from index using AJAX request to collectionIndex route
     add([
