@@ -1,16 +1,21 @@
 import userRoutes from "./user.js";
 import shopRoutes from "./shop.js";
 import indexRoutes from "./collectionIndex.js"
+import gachaRoutes from "./gacha-system.js";
 // import all the other routes ...
 
-const configRouteFunction = (app) => {
-    app.use("/", userRoutes);
+const constructorMethod = (app) => {
+    app.use("/gacha", gachaRoutes);
     app.use("/shop", shopRoutes);
+    app.use("/", userRoutes);
     app.use("/collectionIndex", indexRoutes);
 
     app.use(/(.*)/, (req, res) => {
-        res.status(404).json({ error: "Route Not found" });
+        return res.status(404).render("error", {
+        error: "Error: Route/Page Not Found!",
+        status: 404
+        });
     });
 };
 
-export default configRouteFunction;
+export default constructorMethod;
