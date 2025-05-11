@@ -42,7 +42,7 @@ export function validateObjectId(id, varName) {
 
 export function validatePositiveInteger(num, varName) {
     if (typeof num != "number" || !Number.isInteger(num) || num <= 0 || Number.isNaN(num)) {
-        throw "Error: " + varName + "must be a positive integer.";
+        throw "Error: " + varName + " must be a positive integer.";
     }
     return num;
 }
@@ -107,8 +107,13 @@ export const updateTicketCount = async (userId, ticketType, amount) => {
 export const updateCurrencyCount = async (userId, amount) => {
     // verify that userId is a valid string and ObjectId
     userId = validateObjectId(userId);
-    // verify that userId is a valid positive integer
-    amount = validatePositiveInteger(amount, "Currency amount");
+    // verify that amount is a valid integer
+    if (typeof (amount) !== 'number'
+        || !Number.isInteger(amount)
+        || Number.isNaN(amount)
+        || amount === 0) {
+        throw "Currency amount must be a valid integer that's not 0.";
+    }
 
     // check if a user with that id exists
     const userCollection = await users();
@@ -117,7 +122,7 @@ export const updateCurrencyCount = async (userId, amount) => {
 
     // update user's currency amount
     const newCount = Math.max(0, user.metadata.currency += amount); // currency count can't be less than 0
-    const updateInfo = await userCollection.updateOne({ _id: ObjectId.createFromHexString(userId) }, { $set: { "metdata.currency": newCount } });
+    const updateInfo = await userCollection.updateOne({ _id: ObjectId.createFromHexString(userId) }, { $set: { "metadata.currency": newCount } });
     if (updateInfo.matchedCount === 0) {
         throw "Could not update user's currency count.";
     }

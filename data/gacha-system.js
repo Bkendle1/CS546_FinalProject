@@ -59,7 +59,7 @@ const canPull = async (userId, pullCount, ticketType) => {
  */
 const getGachaCharacterById = async (characterId) => {
     // verify that characterId is a valid string
-    characterId = helpers.validateString(characterId, "Character IDd");
+    characterId = helpers.validateString(characterId, "Character ID");
     // verify that characterId is a valid ObjectID
     if (!ObjectId.isValid(characterId)) {
         throw "Invalid character ID.";
@@ -69,7 +69,7 @@ const getGachaCharacterById = async (characterId) => {
     const gachaCharacter = await gachaCollection.findOne({ _id: ObjectId.createFromHexString(characterId) });
 
     // if there's no character, throw
-    if (gachaCharacter === null) throw "No gacha character with that id.";
+    if (gachaCharacter === null) throw `No gacha character with id of ${characterId}.`;
     // return character object with its id as a string
     gachaCharacter._id = gachaCharacter._id.toString();
     return gachaCharacter;
@@ -124,11 +124,6 @@ export const getTicketCount = async (userId, ticketType) => {
 
 }
 
-// try {
-//     console.log(await getTicketCount("681e470761eacb4e94201ee6", "NORMAL"));
-// } catch (e) {
-//     console.log(e);
-// }
 
 /**
  * This function will check if the user can pull and if so, does a pull equal to the given pull count (should only either be 1 or 5) using the odds based on the pull type (normal or golden). It will also update the user's collection inventory to include the new character(s) assuming they're not duplicates; otherwise, it will update the user’s currency amount to include the duplicate currency. 
@@ -203,23 +198,29 @@ export const gachaPull = async (userId, pullCount, pullType) => {
         }
 
         // TODO: using a collectionInventory.js data function, check if any pulls are duplicates and if so, increase user's currency with the corresponding duplicate currency
-        pulledCharacters.forEach(async (character) => {
-            // let collected = await markCollected(character)
-            // if (collected) {
+        pulledCharacters.forEach(async function (charName) {
+            console.log(charName);
 
-            // } else {
-
-            // }
+            let characterId = await helpers.getCharacterIdByName(charName);
+            let collected = await markCollected(characterId); // update 'collected' field in collection index to true for each of the new pulled characters
+            // // console.log(`${charName}: ${collected}`);
+            let character = await getGachaCharacterById(characterId); // get gacha document of character with corresponding character id 
+            // console.log(character);
+            if (collected) {
+                // TODO: Update pull history with pulled character assuming its not a duplicate. Include the character's name, rarity, timestamp of pull, and image
+                // using a collectionInventory.js data function, update the user's collection inventory to include the new character(s) assuming they're not duplicates
+            } else {
+                // TODO: give user the corresponding duplicate currency
+                console.log(`You already had: ${charName}`);
+                console.log(character.duplicate_currency);
+                console.log(await helpers.updateCurrencyCount(userId, character.duplicate_currency));
+            }
         });
-        // TODO: using a collectionInventory.js data function, update the user's collection inventory to include the new character(s) assuming they're not duplicates
 
         // decrement user's corresponding ticket count 
         helpers.updateTicketCount(userId, pullType, -pullCount);
     }
 
-    // TODO: update 'collected' field in collection index to true (call function from collectionIndex.js data function) for each of the pulled characters
-
-    // TODO: Update pull history with pulled character assuming its not a duplicate. Include the character's name, rarity, timestamp of pull, and image
 
     console.log(`DEBUG-DATA: ${pulledCharacters}`);
     return pulledCharacters;
