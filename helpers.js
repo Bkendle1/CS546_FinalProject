@@ -316,3 +316,64 @@ export const getCurrentDateAndTime = () => {
     // combine to get current date
     return `${month}/${day}/${year} ${hours}:${minutes}:${seconds}${meridiem}`;
 }
+/**
+ * Given experience number, verify that it is valid
+ */
+export function validateExperience(exp) {
+    if (exp === undefined || exp === null) {
+        throw new Error("Experience missing!");
+    }
+    if (typeof exp !== "number" || isNaN(exp) || exp == Infinity || exp == -Infinity || !Number.isInteger(exp)) {
+        throw new Error("Experience must be a finite whole number!");
+    }
+    if (exp <= 0) {
+        throw new Error("Experience must be a positive non-zero number");
+    }
+
+    return exp;
+}
+
+/**
+ * Given nickname, verify that it is valid 
+ */
+export function validateNickName(str) {
+    str = validateString(str, "Nickname");
+    if (str.length > 20) {
+        throw new Error("Nicknames can be a max of 20 characters");
+    }
+
+    return str;
+}
+
+/**
+ * Given rarity and level, return the income rate 
+ */
+export function calculateIncome(rarity, level = 1) {
+    // default values for now, we can change it later
+    let baseIncome = 0;
+    rarity = rarity.toLowerCase().trim();
+
+    if (rarity === "common") {
+        baseIncome = 50;
+    }
+    else if (rarity === "uncommon") {
+        baseIncome = 100;
+    }
+    else if (rarity === "rare") {
+        baseIncome = 200;
+    }
+    else if (rarity === "legendary") {
+        baseIncome = 500;
+    }
+    else {
+        throw new Error("Invalid rarity given");
+    }
+
+    // increase by 10% after level 1
+    let income = Math.floor(baseIncome * Math.pow(1.1, level - 1));
+
+    return income;
+}
+
+
+
