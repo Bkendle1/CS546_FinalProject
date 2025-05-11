@@ -189,6 +189,17 @@ export function validateExperience(exp) {
     return exp;
 }
 
+/**
+ * Given nickname, verify that it is valid 
+ */
+export function validateNickName(str) {
+    str = validateString(str,"Nickname");
+    if (str.length > 20) {
+	throw new Error("Nicknames can be a max of 20 characters");
+    }
+   
+    return str;
+}
 
 /**
  * Given rarity and level, return the income rate 

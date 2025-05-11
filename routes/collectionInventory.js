@@ -7,7 +7,7 @@ import * as helpers from "../helpers.js";
 router.route('/').get(async (req, res) => {
     try {
         let inventory = await collectionInventoryData.getUserInventory(req.session.user.userId);
-        res.render('collectionInventory',{title:"My Inventory", inventory: inventory});
+        res.render('collectionInventory',{title:"My Inventory", inventory: JSON.stringify(inventory)});
     } catch (e) {
         res.status(500).render('error', {
           title: "Error: Inventory can not be viewed",
@@ -32,10 +32,8 @@ router.route('/:characterId').get(async (req, res) => {
 // POST: update character nickname
 router.route('/:characterId/nickname').post(async (req, res) => {
     try {
-        const nickname = req.body.nickname;
-        if (!nickname) {
-            return res.status(400).json({error: "Nickname is missing"});
-        }
+        let nickname = req.body.nickname;
+        nickname = helpers.validateNickName(nickname);
 
         let result = await collectionInventoryData.updateCharacterNickname(req.session.user.userId,req.params.characterId,nickname);
         res.status(200).json({success:true});

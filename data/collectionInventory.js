@@ -61,7 +61,7 @@ export const updateCharacterNickname = async (userId,characterId,nickname) => {
     // validation
     userId = helpers.validateObjectId(userId,"User ID");
     characterId = helpers.validateObjectId(characterId,"Character ID");
-    nickname = helpers.validateString(nickname,"Nickname");
+    nickname = helpers.validateNickName(nickname);
 
     // update nickname (default = character name)
     let inventoryCollection = await collectionInventory();
@@ -123,7 +123,7 @@ export const levelUpCharacter = async (userId,characterId,gainedExperience) => {
                  "obtained.$.experience.curr_exp": currentExpAmount,
                  "obtained.$.experience.exp_capacity": currentExpCapacity,
                  "obtained.$.experience.level": currentLevel,
-                 "obtained.$.experience.income": calculateIncome(character.rarity,currentLevel)
+                 "obtained.$.experience.income": helpers.calculateIncome(character.rarity,currentLevel)
                }
         }
     );
