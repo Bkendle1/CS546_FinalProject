@@ -7,7 +7,6 @@ import {validateUsername, validatePassword, validateEmail} from '../helpers.js';
 router.route('/').get(async (req, res) => {
     //code here for GET
     try {
-
       // if user is logged in, redirect to gacha.handlebars (home page)
       if (req.session.user) {
         return res.redirect('/gacha');

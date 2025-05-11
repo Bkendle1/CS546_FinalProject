@@ -58,7 +58,7 @@ const canPull = async (userId, pullCount, ticketType) => {
  */
 const getGachaCharacterById = async (characterId) => {
     // verify that characterId is a valid string
-    characterId = helpers.validateString(characterId, "Character IDd");
+    characterId = helpers.validateString(characterId, "Character ID");
     // verify that characterId is a valid ObjectID
     if (!ObjectId.isValid(characterId)) {
         throw "Invalid character ID.";
