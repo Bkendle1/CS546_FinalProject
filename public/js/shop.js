@@ -44,21 +44,21 @@ function setupShop(items, canvas) {
         // name label
         add([
             drawText(item.name),
-            pos(x - spacingX/4, y + spacingY/4),
+            pos(x - spacingX / 4, y + spacingY / 4),
             layer("ui")
         ]);
 
         // cost label
         add([
             drawText(cost.name),
-            pos(x - spacingX/4, y + spacingY/4),
+            pos(x - spacingX / 4, y + spacingY / 4),
             layer("ui")
         ]);
 
         // description label
         add([
             drawText(item.description),
-            pos(x - spacingX/4, y + spacingY/4),
+            pos(x - spacingX / 4, y + spacingY / 4),
             layer("ui")
         ]);
 
