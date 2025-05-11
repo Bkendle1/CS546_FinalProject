@@ -99,7 +99,7 @@ let loginForm = document.getElementById('signin-form');
 
 if (loginForm) {
   loginForm.addEventListener("submit", function (event) {
-    event.preventDefault(); // ✅ MUST be first
+    event.preventDefault(); 
 
     let errors = [];
     const email = document.getElementById("email").value.trim();
