@@ -18,6 +18,16 @@ async function fetchBalance() {
     return data.balance;
 }
 
+// Initialize Kaplay
+const shopCanvas = document.querySelector("#shop-canvas");
+kaplay({
+    canvas: shopCanvas,
+    width: shopCanvas.width,
+    height: shopCanvas.height,
+    background: "#222222",
+    loadingScreen: true
+});
+
 scene("Shop", async () => {
     let items, balance;
     try {
@@ -43,8 +53,8 @@ scene("Shop", async () => {
         const item = items[idx];
         const row = Math.floor(idx / cols);
         const col = idx % cols;
-        const x = spacingX * col + spacingX/2;
-        const y = spacingY * row + spacingY/2;
+        const x = spacingX * col + spacingX / 2;
+        const y = spacingY * row + spacingY / 2;
 
         add([
             sprite(item.name),
@@ -56,14 +66,14 @@ scene("Shop", async () => {
                     document.getElementById("pf-itemName").value = item.name;
                     document.getElementById("purchase-form").submit();
                 };
-            return { onClick: x };
+                return { onClick: x };
             })()
         ]);
 
         // name label
         add([
             drawText({ text: item.name }),
-            pos(x - spacingX/4, y + spacingY/4),
+            pos(x - spacingX / 4, y + spacingY / 4),
             anchor("center"),
             layer("ui")
         ]);
@@ -71,7 +81,7 @@ scene("Shop", async () => {
         // cost label
         add([
             drawText({ text: "Cost: " + item.cost }),
-            pos(x - spacingX/4, y + spacingY/4),
+            pos(x - spacingX / 4, y + spacingY / 4),
             anchor("center"),
             layer("ui")
         ]);
@@ -79,7 +89,7 @@ scene("Shop", async () => {
         // description label
         add([
             drawText({ text: item.description }),
-            pos(x - spacingX/4, y + spacingY/4),
+            pos(x - spacingX / 4, y + spacingY / 4),
             anchor("center"),
             layer("ui")
         ]);
@@ -93,15 +103,7 @@ scene("Shop", async () => {
     }
 });
 
-// Initialize Kaplay
-const shopCanvas = document.querySelector("shop-canvas");
-kaplay({
-    canvas: shopCanvas,
-    width: shopCanvas.width,
-    height: shopCanvas.height,
-    background: "#222",
-    loadingScreen: true
-});
+
 
 // preload sprites then start
 fetchShopItems().then(items => {
