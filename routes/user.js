@@ -1,26 +1,26 @@
-import { Router } from 'express';
+import { Router } from "express";
 const router = Router();
-import { register, login } from '../data/users.js';
-import xss from 'xss';
-import { validateUsername, validatePassword, validateEmail } from '../helpers.js';
+import { register, login } from "../data/users.js";
+import xss from "xss";
+import { validateUsername, validatePassword, validateEmail } from "../helpers.js";
 
-router.route('/').get(async (req, res) => {
+router.route("/").get(async (req, res) => {
   //code here for GET
   try {
 
     // if user is logged in, redirect to gacha.handlebars (home page)
     if (req.session.user) {
-      return res.redirect('/gacha');
+      return res.redirect("/gacha");
     }
 
     // else: render login.handlebars
-    res.render('login', {
+    res.render("login", {
       title: "Login Page",
       user: req.session.user,
     });
 
   } catch (e) {
-    res.status(500).render('error', { title: "Error: Login", error: e.toString() });
+    res.status(500).render("error", { title: "Error: Login", error: e.toString() });
   }
 })
   .post(async (req, res) => {
@@ -39,10 +39,10 @@ router.route('/').get(async (req, res) => {
     // re-render form explaining to user which fields are missing 
     if (errors.length > 0) {
       // check if ajax request (json)
-      if (req.is('json')) {
+      if (req.is("json")) {
         return res.status(400).json({ success: false, errors });
       }
-      return res.status(400).render('login', {
+      return res.status(400).render("login", {
         title: "Login Page",
         user: req.session.user,
         errors
@@ -72,18 +72,18 @@ router.route('/').get(async (req, res) => {
         pull_history: user.pull_history
       };
 
-      if (req.is('json')) {
+      if (req.is("json")) {
         return res.status(200).json({ success: true });
       }
 
       // redirect to gacha home page 
-      return res.redirect('/gacha');
+      return res.redirect("/gacha");
 
     } catch (e) {
-      if (req.is('json')) {
+      if (req.is("json")) {
         return res.status(400).json({ success: false, errors: ["Either the email or password is invalid"] });
       }
-      return res.status(400).render('login', {
+      return res.status(400).render("login", {
         title: "Login Page",
         user: req.session.user,
         errors: ["Either the email or password is invalid"]
@@ -91,19 +91,19 @@ router.route('/').get(async (req, res) => {
     }
   });
 
-router.route('/register')
+router.route("/register")
   .get(async (req, res) => {
     //code here for GET
     try {
       // if user is logged in, redirect to gacha.handlebars (home page)
       if (req.session.user) {
-        return res.redirect('/gacha');
+        return res.redirect("/gacha");
       }
 
       // else: then go to register.handlebar 
-      res.render('register', { title: "Register Page", user: req.session.user });
+      res.render("register", { title: "Register Page", user: req.session.user });
     } catch (e) {
-      res.status(400).render('error', {
+      res.status(400).render("error", {
         title: "Error: Registration Can Not Be Done",
         user: req.session.user,
         error: e.toString()
@@ -131,7 +131,7 @@ router.route('/register')
 
     // re-render form explaining to user which fields are missing 
     if (errors.length > 0) {
-      return res.status(400).render('register', {
+      return res.status(400).render("register", {
         title: "Register Page",
         user: req.session.user,
         errors
@@ -153,7 +153,7 @@ router.route('/register')
 
       // check if password and confirmPassword is the same value
       if (formInfo.password !== formInfo.confirmPassword) {
-        return res.status(400).render('register', {
+        return res.status(400).render("register", {
           title: "Register Page",
           user: req.session.user,
           errors: ["Password and Confirm Password need to match"]
@@ -165,10 +165,10 @@ router.route('/register')
 
       // if registered sucessfullt, redirect to login.handlebars
       if (result.registrationCompleted === true) {
-        return res.redirect('/');
+        return res.redirect("/");
       }
       else {
-        return res.status(500).render('register', {
+        return res.status(500).render("register", {
           title: "Register Page",
           user: req.session.user,
           errors: ["Internal Server Error"]
@@ -176,7 +176,7 @@ router.route('/register')
       }
     } catch (e) {
       // re-render form with 400 status code
-      return res.status(400).render('register', {
+      return res.status(400).render("register", {
         title: "Register Page",
         user: req.session.user,
         errors: [e.toString()]
@@ -185,14 +185,14 @@ router.route('/register')
 
   });
 
-router.route('/signout').get(async (req, res) => {
+router.route("/signout").get(async (req, res) => {
   //code here for GET
   try {
     req.session.destroy();
-    res.clearCookie('AuthenticationState');
-    res.render('signout', { title: "Logged Out" });
+    res.clearCookie("AuthenticationState");
+    res.render("signout", { title: "Logged Out" });
   } catch (e) {
-    res.status(400).render('error', {
+    res.status(400).render("error", {
       title: "Error: Logout Could Not Be Done",
       user: req.session.user,
       error: e.toString()
