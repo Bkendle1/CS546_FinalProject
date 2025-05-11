@@ -18,17 +18,33 @@ async function fetchBalance() {
     return data.balance;
 }
 
-// Lay out entities in a grid and hook up click → purchase
-function setupShop(items, canvas) {
+scene("Shop", async () => {
+    let items, balance;
+    try {
+        [items, balance] = await Promise.all([
+            fetchShopItems(),
+            fetchBalance()
+        ]);
+    } catch (e) {
+        console.error(e);
+        return;
+    }
+
+    const bal = document.getElementById("user-balance");
+    if (bal) {
+        bal.textContent = "Balance: " + balance;
+    }
+
     const cols = Math.ceil(Math.sqrt(items.length));
     const spacingX = canvas.width / cols;
     const spacingY = canvas.height / cols;
 
-    items.forEach((item, idx) => {
+    for (let idx = 0; idx < items.length; idx++) {
+        const item = items[idx];
         const row = Math.floor(idx / cols);
         const col = idx % cols;
-        const x = spacingX * col + spacingX / 2;
-        const y = spacingY * row + spacingY / 2;
+        const x = spacingX * col + spacingX/2;
+        const y = spacingY * row + spacingY/2;
 
         add([
             sprite(item.name),
@@ -74,35 +90,21 @@ function setupShop(items, canvas) {
             pos(x - spacingX/4, y + spacingY/4),
             layer("ui")
         ]); */
-    });
-}
-
-window.addEventListener("DOMContentLoaded", main);
-async function main() {
-    let items, balance;
-    try {
-        [items, balance] = await Promise.all([fetchShopItems(), fetchBalance()]);
-    } catch (e) {
-        console.error(e);
-        return;
     }
+});
 
-    const bal = document.getElementById("user-balance");
-    if (bal) {
-        bal.textContent = "Balance: " + balance;
-    }
+// Initialize Kaplay
+const shopCanvas = document.querySelector("shop-canvas");
+kaplay({
+    canvas: shopCanvas,
+    width: shopCanvas.width,
+    height: shopCanvas.height,
+    background: "#222",
+    loadingScreen: true
+});
 
-    // Initialize Kaplay
-    const canvas = document.getElementById("shop-canvas");
-    kaplay({
-        canvas,
-        width: canvas.width,
-        height: canvas.height
-    });
-
-    items.forEach(item =>
-        loadSprite(item.name, item.image)
-    );
-
-    setupShop(items, canvas);
-}
+// preload sprites then start
+fetchShopItems().then(items => {
+    items.forEach(item => loadSprite(item.name, item.image));
+    go("Shop");
+}).catch(console.error);

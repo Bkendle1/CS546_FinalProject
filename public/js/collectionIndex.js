@@ -8,66 +8,7 @@ async function fetchEntries() {
     return res.json();
 }
 
-function setupIndex(entries, canvas) {
-    const cols = Math.ceil(Math.sqrt(entries.length));
-    const spacingX = canvas.width  / cols;
-    const spacingY = canvas.height / cols;
-
-    entries.forEach((e, idx) => {
-        const row = Math.floor(idx / cols);
-        const col = idx % cols;
-        const x = spacingX * col + spacingX/2;
-        const y = spacingY * row + spacingY/2;
-
-        // character sprite
-        add([
-            sprite(e._id),
-            pos(x, y),
-            area(),
-            layer("sprite")
-        ]);
-
-        // name
-        add([
-            drawText({ text: e.name }),
-            pos(x - spacingX/4, y + spacingY/4),
-            layer("ui")
-        ]);
-
-        // rarity
-        add([
-            drawText({ text: e.rarity }),
-            pos(x - spacingX/4, y + spacingY/4 + 20),
-            layer("ui")
-        ]);
-
-        /* // image
-        add([
-            drawText(e.image),
-            pos(x - spacingX/4, y + spacingY/4),
-            layer("ui")
-        ]); */
-
-        // description
-        add([
-            drawText({ text: e.description }),
-            pos(x - spacingX/4, y + spacingY/4),
-            layer("ui")
-        ]);
-
-        // collected flag
-        if (e.collected) {
-            add([
-                drawText({ text: "✔️" }),
-                pos(x + spacingX/4, y - spacingY/4),
-                layer("ui")
-            ]);
-        }
-    });
-}
-
-window.addEventListener("DOMContentLoaded", main);
-async function main() {
+scene("Index", async () => {
     let entries;
     try {
         entries = await fetchEntries();
@@ -76,17 +17,81 @@ async function main() {
         return;
     }
 
-    // Initialize Kaplay
-    const canvas = document.getElementById("index-canvas");
-    kaplay({ 
-        canvas, 
-        width: canvas.width, 
-        height: canvas.height 
-    });
+    const cols = Math.ceil(Math.sqrt(entries.length));
+    const spacingX = canvas.width  / cols;
+    const spacingY = canvas.height / cols;
 
-    entries.forEach(entry => 
-        loadSprite(entry._id, entry.image
-    ));
+    for (let idx = 0; idx < entries.length; idx++) {
+        const entry = entries[idx];
+        const row = Math.floor(idx / cols);
+        const col = idx % cols;
+        const x = spacingX * col + spacingX/2;
+        const y = spacingY * row + spacingY/2;
 
-    setupIndex(entries, canvas);
-};
+        // character sprite
+        add([
+            sprite(entry._id),
+            pos(x, y),
+            area(),
+            layer("sprite")
+        ]);
+
+        // name
+        add([
+            drawText({ text: entry.name }),
+            pos(x - spacingX/4, y + spacingY/4),
+            anchor("center"),
+            layer("ui")
+        ]);
+
+        // rarity
+        add([
+            drawText({ text: entry.rarity }),
+            pos(x - spacingX/4, y + spacingY/4 + 20),
+            anchor("center"),
+            layer("ui")
+        ]);
+
+        /* // image
+        add([
+            drawText(entry.image),
+            pos(x - spacingX/4, y + spacingY/4),
+            anchor("center"),
+            layer("ui")
+        ]); */
+
+        // description
+        add([
+            drawText({ text: entry.description }),
+            pos(x - spacingX/4, y + spacingY/4),
+            anchor("center"),
+            layer("ui")
+        ]);
+
+        // collected flag
+        if (entry.collected) {
+            add([
+                drawText({ text: "✔️" }),
+                pos(x + spacingX/4, y - spacingY/4),
+                anchor("center"),
+                layer("ui")
+            ]);
+        }
+    }
+});
+
+// Initialize Kaplay
+const indexCanvas = document.querySelector("index-canvas");
+kaplay({ 
+    canvas: indexCanvas,
+    width: indexCanvas.width, 
+    height: indexCanvas.height,
+    background: "#111",
+    loadingScreen: true
+});
+
+// preload sprites then start
+fetchEntries().then(entries => {
+    entries.forEach(entry => loadSprite(entry._id, entry.image));
+    go("Index");
+}).catch(console.error);
