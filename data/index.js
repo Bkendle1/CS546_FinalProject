@@ -2,7 +2,9 @@
 import * as gachaDataFunctions from "./gacha-system.js";
 import * as userDataFunctions from "./users.js";
 import * as collectionInventoryFunctions from "./collectionInventory.js";
+import * as shopDataFunctions from "./shop.js"
 
 export const gachaData = gachaDataFunctions;
 export const userData = userDataFunctions;
+export const shopData = shopDataFunctions;
 export const collectionInventoryData = collectionInventoryFunctions;
