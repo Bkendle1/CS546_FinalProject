@@ -164,26 +164,9 @@ async function main() {
     } catch (e) {
         console.error("error seeding collectionIndex: ", e);
     }
-    console.log("Done seeding collectionIndex!");
+    console.log("Done seeding collectionIndex & gacha!");
 
-    // 3) seed gacha
-    console.log("Starting to seed gacha collection...");
-    try {
-        for (const c of characters) {
-            const pullRate = rarityToPullRate(c.rarity);
-            const dupCur = rarityToDupCurrency(c.rarity);
-            await gachaData.addCharacterToGacha(
-                c.name,
-                pullRate,
-                dupCur
-            );
-        }
-    } catch (e) {
-        console.error("error seeding gatcha: ", e);
-    }
-    console.log("Done seeding gacha!");
-
-    // 4) create shop items
+    // 3) create shop items
     const shopItems = [
         {
             name: "normal ticket",
