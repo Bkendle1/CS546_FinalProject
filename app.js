@@ -32,7 +32,18 @@ app.get('/signout', ensureLogin);
 
 app.use('/public', express.static('public'));
 app.use(express.urlencoded({ extended: true }));
-app.engine('handlebars', exphbs.engine({ defaultLayout: 'main' }));
+app.engine('handlebars', exphbs.engine({ 
+    defaultLayout: 'main',
+    helpers: {
+        range: (from, to) => {
+            let arr = [];
+            for (let i = from; i <= to; i++) {
+                arr.push(i);
+            }
+            return arr;
+        }
+    }
+}));
 app.set('view engine', 'handlebars');
 
 constructorMethod(app);
