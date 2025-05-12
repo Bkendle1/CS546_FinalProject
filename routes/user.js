@@ -4,6 +4,7 @@ import { register, login } from "../data/users.js";
 import xss from "xss";
 import { validateUsername, validatePassword, validateEmail } from "../helpers.js";
 import * as helpers from "../helpers.js";
+import { userData } from "../data/index.js";
 
 router.route("/").get(async (req, res) => {
   //code here for GET
@@ -212,12 +213,14 @@ router.route("/:id")
     }
 
     // TODO attempt to get user's profile page
-    // try {
-    //   // check that a user exists with that id
-    //   const user = await  
-    // } catch (e) {
+    try {
+      // check that a user exists with that id and get relevant data
+      const user = await userData.getUserById(req.params.id);
+      // render user handlebar with relevant data
+      res.render('user', { username: user.username, profilePic: user.profilePic, level: user.level, obtained: user.obtained });
+    } catch (e) {
 
-    // }
+    }
   });
 //export router
 export default router;
