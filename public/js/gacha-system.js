@@ -383,27 +383,29 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates }) => {
         pos(center()),
         "display"
     ]);
-    const displayImg = add([ // display character's image
-        // sprite()
+    const displayImg = display.add([ // display character's image
+        sprite(`${characters[0].name}`, { width: 400, height: 400 }), // initialize the sprite to some arbitrary image since this will get updated once displayInfo() is called
+        anchor("center"),
+        pos(vec2(width() - 1550, height() - 700)),
     ])
     // display character's name
-    const displayName = add([
+    const displayName = display.add([
         text("", { font: "digiFont", align: "center", size: 50 }),
         color("#FFFFFF"),
         anchor("center"),
-        pos(vec2(0, -300)),
+        pos(vec2(0, height() - 975)),
     ]);
     // display character's rarity
-    const displayRarity = add([
+    const displayRarity = display.add([
         text("", { font: "digiFont", align: "center" }),
         anchor("center"),
         pos(vec2(100, -150))
     ]);
     // display character's description
-    const displayDesc = add([
-        text("", { font: "digiFont", align: "left", width: 600, size: 25 }),
+    const displayDesc = display.add([
+        text("", { font: "digiFont", align: "left", width: 500, size: 25 }),
         anchor("center"),
-        pos(vec2(550, 50))
+        pos(vec2(width() - 1000, height() - 700)),
     ]);
 
     function displayInfo(character) {
