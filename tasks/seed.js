@@ -42,7 +42,7 @@ async function main() {
             name: "Tokomon",
             rarity: "uncommon",
             image: "https://via.placeholder.com",
-            description: "A small Digimon with strange appendages growing under its body. In-training Digimon with legs are quite rare, and this one's cute as a button to boot. Don't let its looks fool you, though; carelessly reach out to it and expect a big set of chompers to clamp down on your hand. That being said, it doesn't have an ounce of ill will in its body.",
+            description: "A small Digimon with strange appendages growing under its body. Don't let its looks fool you, though; carelessly reach out to it and expect a big set of chompers to clamp down on your hand. That being said, it doesn't have an ounce of ill will in its body.",
         },
         // character 4
         {
@@ -50,7 +50,7 @@ async function main() {
             name: "Tanemon",
             rarity: "common",
             image: "https://via.placeholder.com",
-            description: "A bulb Digimon with sprout-like objects budding from its head. When an enemy draws close, this big old coward digs a hole with its four legs and buries its body in the ground. When it moves underground, the objects on its head mimic vegetation, protecting it from opponents.",
+            description: "A bulb Digimon with sprout-like objects budding from its head. When an enemy draws close, this big old coward digs a hole with its four legs and buries its body in the ground.",
         },
         // character 5
         {
@@ -58,7 +58,7 @@ async function main() {
             name: "Pagumon",
             rarity: "uncommon",
             image: "https://via.placeholder.com",
-            description: "This small Digimon can fly at low altitudes with the ear-like protrusions growing out of its head. It can move these ears like a second pair of hands, using them to mock the enemy with all kinds of gestures. It has a malicious streak, often chasing after Digimon like Koromon or Tsunomon and teasing them. It also utilizes sprays of poison bubbles towards this end.",
+            description: "This small Digimon can fly at low altitudes with the ear-like protrusions growing out of its head. It can move these ears like a second pair of hands, using them to mock the enemy with all kinds of gestures. It has a malicious streak, often chasing after Digimon and teasing them.",
         },
         // character 6
         {
@@ -66,7 +66,7 @@ async function main() {
             name: "Motimon",
             rarity: "common",
             image: "https://via.placeholder.com",
-            description: "A soft-bodied Digimon possessing an elastic outer skin, toddling along on the bumps under its torso. When it gets worked up, its body swells up like a mochi rice cake, earning it the name Motimon. Its appearance belies an above-average intelligence, which leads to the assumption that it was born from a computer's dictionary function. It understands human speech, and can sometimes be seen transforming its body to communicate.",
+            description: "A soft-bodied Digimon possessing an elastic skin. When it gets worked up, its body swells up like a mochi rice cake. It understands human speech and transforms its body to communicate.",
         },
         // character 7
         {
@@ -90,7 +90,7 @@ async function main() {
             name: "Pyocomon",
             rarity: "common",
             image: "https://via.placeholder.com",
-            description: "A Bulb-type Lesser Digimon with a large flower blooming from its head. It is able to move by skillfully operating its root-like tentacles, and with its lightness, it can rise into the air, but only to a small height. As it is brimming with curiosity, it is restlessly stirring and its appearance seems very cute. It has a habit of living together in flocks, and it is said that due to grouping, the flocks will grow from a few to a few hundred.",
+            description: "A Bulb-type Digimon with a large flower blooming from its head. It moves skillfully by operating its root-like tentacles and it can rise into the air, but only to a small height. It has a habit of living together in flocks that can grow from a few to a few hundred.",
         },
         // character 10
         {
@@ -98,7 +98,7 @@ async function main() {
             name: "Kapurimon",
             rarity: "common",
             image: "https://via.placeholder.com",
-            description: "It is a tiny Digimon wearing a metallic helmet. Within the two horns attached to its helmet, it has antennae that are able to receive any radio wave or sound. Kapurimon is in possession of bat-like traits, as it has weak eyesight, and produces ultrasonic waves from its mouth, recognizing the objects ahead of it from the rebounding sound wave.",
+            description: "A tiny Digimon wearing a metallic helmet. Within the two horns, it has antennae that are able to receive any radio wave or sound. Kapurimon possess bat-like traits, as it has weak eyesight and produces ultrasonic waves from its mouth, recognizing objects ahead from the rebounding sound wave.",
         },
         // character 11
         {
@@ -114,7 +114,7 @@ async function main() {
             name: "DemiVeemon",
             rarity: "legendary",
             image: "https://via.placeholder.com",
-            description: "Unusually for an In-Training Digimon, it possesses a body, hands, and feet, and so is able to grip objects with both of its small hands, and move while hopping about with both feet. As it is very voracious, it especially likes sweet foods. Also, as it is very fond of sleeping, if you take your eyes off of it, it will instantly fall asleep.",
+            description: "Unusually for an In-Training Digimon, it possesses a body, hands, and feet. As it is very voracious, it especially likes sweet foods. Also, as it is very fond of sleeping, if you take your eyes off of it, it will instantly fall asleep.",
         },
         // character 13
         {
@@ -122,7 +122,7 @@ async function main() {
             name: "Poromon",
             rarity: "Common",
             image: "https://via.placeholder.com",
-            description: "A Small Bird Digimon that can fly at low altitudes. It has small feathers growing closely packed on its body, and unusually for a Baby Digimon, it has wings. Its most charming feature is the feather ornament attached to its head, so it maintains it intently. It has a fundamentally tidy personality, but because it cannot turn its neck(?) even if it wants to groom itself, it relies on its comrades.",
+            description: "A Small Bird Digimon that can fly at low altitudes. It has small feathers and wings. Its most charming feature is the feather ornament attached to its head, so it maintains it intently. It has a fundamentally tidy personality, but because it cannot turn its neck(?), it relies on its comrades.",
         },
         // character 14
         {
@@ -130,7 +130,7 @@ async function main() {
             name: "Upamon",
             rarity: "common",
             image: "https://via.placeholder.com",
-            description: "Upamon is an Amphibian Digimon. It has ear-like branchia growing from both sides of its head. Although it is able to live whether on land or underwater, it appears that it is rather suited for life on land. Because of its carefree personality, it is easily and frequently bullied by other Digimon. However, because of its personality, there are occasions when it mistakes it as being played with, rather than it being bullied.",
+            description: "Upamon is an Amphibian Digimon with ear-like branchia growing from both sides of its head. Although able to live on land or underwater, it is better suited for life on land. Because of its carefree personality, it is frequently bullied by other Digimon, but takes it as being played with.",
         },
         // character 15
         {
@@ -138,7 +138,7 @@ async function main() {
             name: "Minomon",
             rarity: "common",
             image: "https://via.placeholder.com",
-            description: "On days with good weather, or when it's in a good mood, it sticks its face out of its shell and vegetates. It hangs onto high places with the ivy (hair?) growing from its head, and moves by hanging onto large Digimon, but if it's over a short distance, it is also able to move by floating through the air. Due to its vegetative personality, it has a fault of not easily showing its emotions on its face. Also, as solitude is its 'specialty', it has the inner fortitude to not be discouraged even if it gets worried and anxious. Its Special Move is throwing a hard, pine cone-shaped substance.",
+            description: "On days with good weather or when in a good mood, it sticks its face out of its shell. It hangs onto high places and moves by hanging onto large Digimon. Due to its vegetative personality, it has trouble displaying emotion. Its Special Move is throwing a hard, pine cone-shaped substance.",
         },
         // character 16
         {
