@@ -3,6 +3,7 @@ const router = Router();
 import { register, login } from "../data/users.js";
 import xss from "xss";
 import { validateUsername, validatePassword, validateEmail } from "../helpers.js";
+import * as helpers from "../helpers.js";
 
 router.route("/").get(async (req, res) => {
   //code here for GET
@@ -200,5 +201,23 @@ router.route("/signout").get(async (req, res) => {
   }
 });
 
+router.route("/:id")
+  // Get user's profile
+  .get(async (req, res) => {
+    try {
+      // verify that url param is a valid object id
+      req.params.id = helpers.validateObjectId(req.params.id, "ID url param");
+    } catch (e) {
+      res.status(404).render('error', { title: "Error 404", error: e });
+    }
+
+    // TODO attempt to get user's profile page
+    // try {
+    //   // check that a user exists with that id
+    //   const user = await  
+    // } catch (e) {
+
+    // }
+  });
 //export router
 export default router;

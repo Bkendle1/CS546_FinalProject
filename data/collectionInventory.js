@@ -29,6 +29,11 @@ export const addCharacterToInventory = async (userId, characterId) => {
     return false;
   }
 
+  // check if user with that id exists
+  const userCollection = await users();
+  const user = await userCollection.findOne({ _id: ObjectId.createFromHexString(userId) });
+  if (!user) throw `No user with id: ${userId} found.`;
+
   let newCharacter = {
     _id: new ObjectId(String(characterId)),
     name: character.name,
@@ -42,7 +47,7 @@ export const addCharacterToInventory = async (userId, characterId) => {
       income: helpers.calculateIncome(character.rarity, 1)
     }
   };
-
+  // Add new character 
   let result = await inventoryCollection.updateOne(
     { user_id: new ObjectId(String(userId)) },
     { $push: { obtained: newCharacter } },
@@ -50,7 +55,15 @@ export const addCharacterToInventory = async (userId, characterId) => {
   );
 
   if (result.modifiedCount === 0) {
-    throw new Error("Character could not be added");
+    throw new Error("Character could not be added or couldn't update obtained count.");
+  }
+  // Update their obtained count by 1
+  const updateInfo = userCollection.updateOne(
+    { _id: ObjectId.createFromHexString(userId) },
+    { $inc: { "metadata.obtained_count": 1 } }
+  );
+  if (updateInfo.modifiedCount === 0) {
+    throw new Error(`Could not update the obtained count of the user with id: ${userId}.`);
   }
 
   return newCharacter;

@@ -145,3 +145,25 @@ export const removeAccount = async (userId) => {
 
   return { ...deleteInfo1, ...deleteInfo2, deleted: true } // remove account was succesful
 }
+
+/**
+ * Returns an object with the user's name, profile picture, level and collection count.
+ */
+export const getUserById = async (userId) => {
+  // verify that userId is a valid string and object id
+  userId = helpers.validateObjectId(userId, "User ID");
+
+  // verify that user exists with that id
+  const userCollection = await users();
+  const user = await userCollection.findOne({ _id: ObjectId.createFromHexString(userId) });
+  if (!user) throw `No user with id: ${userId}.`;
+
+  // get user's info, i.e. their username, profile picture, level and collection count
+  const userInfo = {
+    username: user.username,
+    profilePic: user.image,
+    level: user.metadata.experience.level,
+    obtained: user.metadata.obtained_count
+  }
+  return userInfo; // return user info
+}
