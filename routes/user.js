@@ -222,6 +222,7 @@ router.route("/user/:id")
       });
     }
   })
+
 router.route("/user/:id/profile")
   // Get user's profile
   .get(async (req, res) => {
@@ -244,8 +245,7 @@ router.route("/user/:id/profile")
         error: e.toString()
       });
     }
-  })
-  // delete the user account
+  })// delete the user account
   .delete(async (req, res) => {
     try {
       // verify that url param is a valid object id
@@ -256,10 +256,8 @@ router.route("/user/:id/profile")
     // attempt to delete user's account
     try {
       let deletedUser = await userData.removeAccount(req.params.id);
-      // delete AuthenticationState
-      req.session.destroy();
-      res.clearCookie("AuthenticationState");
-      res.render('signout', { title: "Signed Out" }); // redirect user to login page
+      // req.method = "GET";
+      // res.redirect('/signout'); // redirect user to /signout
     } catch (e) {
       console.log(e);
       res.status(404).render("error", {
@@ -268,5 +266,6 @@ router.route("/user/:id/profile")
       });
     }
   });
+
 //export router
 export default router;
