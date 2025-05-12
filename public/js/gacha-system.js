@@ -375,45 +375,49 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates }) => {
 
     // TODO: display character's information from index using AJAX request to collectionIndex route
     let infoDisplayed = false; // boolean that's set if a character's info is being displayed
-    function displayInfo(character) {
-        console.log(character);
-        const display = add([
-            rect(1100, 600),
-            color(DISPLAY_BG_COLOR),
-            outline(5),
-            anchor("center"),
-            pos(center()),
-            "display"
-        ]);
-        // display character's name
-        display.add([
-            text(`${character.name}`, { font: "digiFont", align: "center", size: 50 }),
-            color("#FFFFFF"),
-            anchor("center"),
-            pos(vec2(0, -300)),
-        ]);
-        // // display character's description
-        // character.add([
-        //     text(`${charInfo.description}`, { font: "digiFont", align: "left", width: 600, size: 25 }),
-        //     anchor("center"),
-        //     pos(vec2(550, 50))
-        // ]);
-        //}
-        // display character's rarity
-        display.add([
-            text(`${character.rarity}`, { font: "digiFont", align: "center" }),
-            anchor("center"),
-            pos(vec2(100, -150))
-        ]);
+    // const display = make([
+    //     rect(1100, 600),
+    //     color(DISPLAY_BG_COLOR),
+    //     outline(5),
+    //     anchor("center"),
+    //     pos(center()),
+    //     "display"
+    // ]);
+    // function displayInfo(character) {
+    //     console.log(character);
+    //     add(display);
+    //     // display character's name
+    //     display.add([
+    //         text(`${character.name}`, { font: "digiFont", align: "center", size: 50 }),
+    //         color("#FFFFFF"),
+    //         anchor("center"),
+    //         pos(vec2(0, -300)),
+    //     ]);
+    //     // // display character's description
+    //     // character.add([
+    //     //     text(`${charInfo.description}`, { font: "digiFont", align: "left", width: 600, size: 25 }),
+    //     //     anchor("center"),
+    //     //     pos(vec2(550, 50))
+    //     // ]);
+    //     //}
+    //     // display character's rarity
+    //     display.add([
+    //         text(`${character.rarity}`, { font: "digiFont", align: "center" }),
+    //         anchor("center"),
+    //         pos(vec2(100, -150))
+    //     ]);
+    //     zoomIn(display, 0.75) // have rectangle zoom in 
 
-        // display character's image
+    //     // display character's image
 
-        // display character's description
+    //     // display character's description
 
-        addBtn("Back", vec2(width() - 640, height() - 60), () => { infoDisplayed = false });
-        zoomIn(display, 0.75) // have rectangle zoom in 
-    }
-    // Tweens a gameObject's scale for a minimum duration of 0.25 seconds + delay
+    //     addBtn("Back", vec2(width() - 640, height() - 60), () => {
+    //         infoDisplayed = false;
+    //         zoomOut(display, 0);
+    //     });
+    // }
+    // Tweens a gameObject's scale to 1 for a minimum duration of 0.25 seconds + delay
     const zoomIn = (gameObject, delay) => {
         tween(0, // start value 
             1, // target value 
@@ -422,12 +426,13 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates }) => {
             easings.easeOutElastic // easing method
         );
     }
+    // Tweens a gameObject's scale to 0 for a minimum duration of 0.25 seconds + delay
     const zoomOut = (gameObject, delay) => {
         tween(1, // start value 
             0, // target value 
             0.25 + delay, // duration
             (v) => { gameObject.scale = vec2(v) }, // run this function for every interpolated value 'v'
-            easings.easeOutElastic // easing method
+            easings.easeOutSine    // easing method
         );
     }
     let characterGameObjects = grid.get("character") // get a list of all the game objects with the tag 'character'
@@ -463,9 +468,6 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates }) => {
             backBtn.area.scale = vec2(0) // make button clickable 
 
         } else {
-            // let display = get("display")[0];
-            // console.log(display);
-            // zoomOut(display, 3);
             characterGameObjects.forEach((character) => {
                 character.area.scale = vec2(1);// make each character clickable
             })
