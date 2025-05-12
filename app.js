@@ -14,7 +14,6 @@ app.use(session({
     saveUninitialized: false
 }));
 
-
 app.get('/', redirectToGachaIfLoggedIn);
 app.get('/register', redirectToGachaIfLoggedIn);
 

@@ -1,9 +1,9 @@
 //import mongo collections, bcrypt and implement the following data functions
 
-import { users } from '../config/mongoCollections.js';
-import bcrypt from 'bcrypt';
-import { validateUsername, validatePassword, validateEmail } from '../helpers.js';
-import { ExpressHandlebars } from 'express-handlebars';
+import { users } from "../config/mongoCollections.js";
+import bcrypt from "bcrypt";
+import { validateUsername, validatePassword, validateEmail } from "../helpers.js";
+import { ExpressHandlebars } from "express-handlebars";
 // import { ObjectId } from 'mongodb';
 
 export const register = async (

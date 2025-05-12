@@ -17,8 +17,8 @@ let goldenTicketCount = 0;
 // as soon as the webpage loads, send an AJAX request to get the user's ticket counts
 //Set up request config
 let requestConfig = {
-    method: 'GET', // send a GET request
-    url: '/gacha/tickets', // GET request goes to this route
+    method: "GET", // send a GET request
+    url: "/gacha/tickets", // GET request goes to this route
     // when the AJAX request is successful, update the ticket counts and run the Kaplay scene (we need this because AJAX isx asynchronous and the scene can't start if the request isn't done yet)
     success: (response) => {
         normalTicketCount = response.normalTicketCount; // extact normal ticket count
@@ -78,7 +78,7 @@ function addBtn(str, position, callback) {
 function requestPull(pullType, pullCount) {
     pullType = pullType.toLowerCase(); // make pull type case-insensitive
     let requestConfig = {
-        method: 'GET',
+        method: "GET",
         success: (response) => {
             // check if it was a single or bulk pull 
             if (pullCount === 1) {
@@ -89,17 +89,17 @@ function requestPull(pullType, pullCount) {
         }
     };
     // request a normal pull
-    if (pullType === 'normal') {
+    if (pullType === "normal") {
         // make request to corresponding route
         if (pullCount === 1) {
-            requestConfig["url"] = '/gacha/normal'; // request a single, normal pull
+            requestConfig["url"] = "/gacha/normal"; // request a single, normal pull
             $.ajax(requestConfig).then(function (response) {
                 console.log(`Character pulled ${response.pulled}`);
                 normalTicketCount -= 1; // decrement ticket count
             });
 
         } else {
-            requestConfig["url"] = '/gacha/normal/bulk'; // request a bulk, normal pull
+            requestConfig["url"] = "/gacha/normal/bulk"; // request a bulk, normal pull
             $.ajax(requestConfig).then(function (response) {
                 console.log(`Character pulled ${response.pulled}`);
                 normalTicketCount -= BULK_PULL_COUNT; // decrement ticket count
@@ -108,17 +108,17 @@ function requestPull(pullType, pullCount) {
 
 
     }
-    else if (pullType === 'golden') { // request a golden pull
+    else if (pullType === "golden") { // request a golden pull
         // make request to corresponding route
         if (pullCount === 1) {
-            requestConfig["url"] = '/gacha/golden'; // request a single, golden pull
+            requestConfig["url"] = "/gacha/golden"; // request a single, golden pull
             $.ajax(requestConfig).then(function (response) {
                 console.log(`Character pulled ${response.pulled}`);
                 goldenTicketCount -= 1; // decrement ticket count
             });
 
         } else {
-            requestConfig["url"] = '/gacha/golden/bulk'; // request a bulk, golden pull
+            requestConfig["url"] = "/gacha/golden/bulk"; // request a bulk, golden pull
             $.ajax(requestConfig).then(function (response) {
                 console.log(`Character pulled ${response.pulled}`);
                 goldenTicketCount -= BULK_PULL_COUNT; // decrement ticket count
@@ -175,20 +175,20 @@ scene("Gacha", () => {
 
     // add button for single normal pull
     const normalSingleBtn = addBtn("Normal x1", vec2(300, 200), () => {
-        requestPull('normal', 1)
+        requestPull("normal", 1)
     });
     // add button for bulk normal pull
     const normalBulkBtn = addBtn("Normal x5", vec2(300, 300), () => {
-        requestPull('normal', BULK_PULL_COUNT)
+        requestPull("normal", BULK_PULL_COUNT)
     });
 
     // add button for single golden pull
     const goldenSingleBtn = addBtn("Golden x1", vec2(950, 200), () => {
-        requestPull('golden', 1); // request a golden single pull
+        requestPull("golden", 1); // request a golden single pull
     });
     // add button for bulk golden pull
     const goldenBulkBtn = addBtn("Golden x5", vec2(950, 300), () => {
-        requestPull('golden', BULK_PULL_COUNT); // request a golden bulk pull
+        requestPull("golden", BULK_PULL_COUNT); // request a golden bulk pull
     });
 
     // TODO: Menu
