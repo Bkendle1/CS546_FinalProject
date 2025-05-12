@@ -242,7 +242,80 @@ scene("Gacha", () => {
 
 });
 
-// scene takes two arguments, one for the pulled character, and a bool that states whether or not they're a duplicate
+/**
+ * Given a rarity, return a color
+ */
+function getRarityColor(rarity) {
+    let hexCode = "#DB042F"; // default common color 
+    if (rarity === "common") {
+        hexCode = "#DB042F";
+    }
+    else if (rarity === "uncommon") {
+        hexCode = "#63AB5E";
+    }
+    else if (rarity === "rare") {
+        hexCode = "#3672E0";
+    }
+    else if (rarity === "legendary") {
+        hexCode = "#F3AF19";
+    } else {
+        console.error("Rarity can only be: 'common', 'uncommon', 'rare', or 'legendary'.")
+    }
+    return hexCode;
+}
+
+// Tweens a gameObject's scale to 1 for a minimum duration of 0.25 seconds + delay
+const zoomIn = (gameObject, delay) => {
+    tween(0, // start value 
+        1, // target value 
+        0.25 + delay, // duration
+        (v) => { gameObject.scale = vec2(v) }, // run this function for every interpolated value 'v'
+        easings.easeOutElastic // easing method
+    );
+}
+// Tweens a gameObject's scale to 0 for a minimum duration of 0.25 seconds + delay
+const zoomOut = (gameObject, delay) => {
+    tween(1, // start value 
+        0, // target value 
+        0.25 + delay, // duration
+        (v) => { gameObject.scale = vec2(v) }, // run this function for every interpolated value 'v'
+        easings.easeOutSine    // easing method
+    );
+}
+/**
+ * Creates a particle emitter with the given sprite. 
+ */
+// const particleEmitter = (sprite) => {
+//     let digitCode = loadSprite("digiCode", "/public/images/digicode.png", {
+//         sliceX: 2,
+//         sliceY: 13
+//     })
+//     let particle = getSprite(digitCode).data;
+//     let emitter = add([
+//         pos(0, 0),
+//         particles(
+//             {
+//                 max: 20,
+//                 speed: [50, 50],
+//                 lifeTime: [1, 1.5],
+//                 texture: particle.tex,
+//                 scales: [1, 2],
+//                 angle: [0, 360],
+//                 angularVelocity: [0, 100],
+//                 quads: particle.frames
+//             },
+//             {
+//                 lifetime: 1,
+//                 rate: 3,
+//                 direction: -90,
+//                 spread: 45,
+//             },
+//         )
+//     ]);
+//     return emitter;
+// }
+
+// This scene takes two arguments, one for the pulled character, and a bool that states whether or not they're a duplicate
 scene("GachaDisplaySingle", async ({ pulled, duplicate }) => {
     // render scene's background
     add([
@@ -267,22 +340,15 @@ scene("GachaDisplaySingle", async ({ pulled, duplicate }) => {
     ])
 
     // Display the character's name, image, description, rarity
-    tween(
-        0, // starting value
-        1, // target value
-        0.75, // duration
-        (v) => {
-            character.scale = vec2(v); // scale character
-            revealText.scale = vec2(v); // scale reveal text
-        },
-        easings.easeOutElastic // with this easing
-    );
+    zoomIn(character, 0.5);
+    zoomIn(revealText, 0.5);
 
     // display character's rarity
     character.add([
         text(`${charInfo.rarity}`, { font: "digiFont" }),
         anchor("center"),
-        pos(vec2(550, -200))
+        pos(vec2(550, -200)),
+        color(getRarityColor(charInfo.rarity)),
     ]);
 
     // display character's description
@@ -291,6 +357,11 @@ scene("GachaDisplaySingle", async ({ pulled, duplicate }) => {
         anchor("center"),
         pos(vec2(550, 10))
     ]);
+
+    // onUpdate(() => {
+    //     let emitter = particleEmitter(charInfo.name);
+    //     emitter.emit(1)
+    // })
 
     // add a back button so the player can do more pulls
     addBtn("Back", vec2(width() - 640, height() - 60), () => {
@@ -374,7 +445,6 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates }) => {
         }
     )
 
-    // TODO: display character's information from index using AJAX request to collectionIndex route
     let infoDisplayed = false; // boolean that's set if a character's info is being displayed
     const display = add([
         rect(1100, 600),
@@ -408,41 +478,29 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates }) => {
         anchor("center"),
         pos(vec2(width() - 1000, height() - 700)),
     ]);
-
+    // when player hovers over their pulls, display their name
+    const revealText = add([
+        text("", { font: "digiFont", align: "center" }),
+        anchor("center"),
+        pos(vec2(width() / 2, height() - 680))
+    ])
+    /**
+     * Populate info display with the given character's details
+     */
     function displayInfo(character) {
-        displayName.text = `${character.name}`;
-        displayRarity.text = `${character.rarity}`;
-        displayDesc.text = `${character.description}`;
-        displayImg.sprite = `${character.name}`;
-        zoomIn(display, 0.75) // have rectangle zoom in 
-
-        // display character's image
-
-        // display character's description
-
+        displayName.text = `${character.name}`;             // display character's name
+        displayRarity.text = `${character.rarity}`;         // display character' rarity
+        displayRarity.color = Color.fromHex(getRarityColor(character.rarity));
+        zoomIn(display, 0.75)                               // have rectangle zoom in 
+        displayImg.sprite = `${character.name}`;            // display character's image
+        displayDesc.text = `${character.description}`;      // display character's description
+        // button to go back to bulk pull results
         addBtn("Back", vec2(width() - 640, height() - 60), () => {
             infoDisplayed = false;
             zoomOut(display, 0.4); // TODO: this isn't visible as hidden is set to to true too soon
         });
     }
-    // Tweens a gameObject's scale to 1 for a minimum duration of 0.25 seconds + delay
-    const zoomIn = (gameObject, delay) => {
-        tween(0, // start value 
-            1, // target value 
-            0.25 + delay, // duration
-            (v) => { gameObject.scale = vec2(v) }, // run this function for every interpolated value 'v'
-            easings.easeOutElastic // easing method
-        );
-    }
-    // Tweens a gameObject's scale to 0 for a minimum duration of 0.25 seconds + delay
-    const zoomOut = (gameObject, delay) => {
-        tween(1, // start value 
-            0, // target value 
-            0.25 + delay, // duration
-            (v) => { gameObject.scale = vec2(v) }, // run this function for every interpolated value 'v'
-            easings.easeOutSine    // easing method
-        );
-    }
+
     let characterGameObjects = grid.get("character") // get a list of all the game objects with the tag 'character'
     // display each character with increasing more delay
     for (let i = 0; i < characterGameObjects.length; i++) {
@@ -451,11 +509,13 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates }) => {
         characterGameObjects[i].onHoverUpdate(() => {
             characterGameObjects[i].scale = vec2(1.2); // make button slightly larger
             setCursor("pointer"); // change cursor into pointer
+            revealText.text = `You got ${characters[i].name}!`;
         });
         // runs once the object stopped being hovered
         characterGameObjects[i].onHoverEnd(() => {
             characterGameObjects[i].scale = vec2(1); // reset scale of button
             setCursor("default"); // set cursor back to normal
+            revealText.text = "";
         });
 
         // run callback on click
@@ -468,22 +528,23 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates }) => {
 
     // runs every frame
     onUpdate(() => {
+        // check if info panel is currently being displayed
         if (infoDisplayed) {
+            // make each character unclickable
             characterGameObjects.forEach((character) => {
-                character.area.scale = vec2(0); // make each character unclickable
+                character.area.scale = vec2(0);
             })
             backBtn.hidden = true; // hide button that goes back to gacha
             backBtn.area.scale = vec2(0) // make button clickable 
-            display.hidden = false;
+            display.hidden = false; // show display panel
         } else {
-            display.hidden = true;
+            display.hidden = true; // hide display panel
+            // make each character clickable
             characterGameObjects.forEach((character) => {
-                character.area.scale = vec2(1);// make each character clickable
+                character.area.scale = vec2(1);
             })
             backBtn.hidden = false; // reveal button that goes back to gacha
             backBtn.area.scale = vec2(1) // make button clickable 
         }
     })
-
-
 });

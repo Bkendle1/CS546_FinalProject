@@ -275,7 +275,7 @@ export const gachaPull = async (userId, pullCount, pullType) => {
             let collected = await markCollected(characterId); // update 'collected' field in collection index to true for each of the new pulled characters
             let character = await getGachaCharacterById(characterId); // get gacha document of character with corresponding character id 
             if (collected) {
-                // TODO using a collectionInventory.js data function, update the user's collection inventory to include the new character(s) assuming they're not duplicates
+                // update the user's collection inventory to include the new character(s) assuming they're not duplicates
                 try {
                     await addCharacterToInventory(userId, characterId);
                 } catch (e) {
