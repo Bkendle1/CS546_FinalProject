@@ -188,6 +188,7 @@ async function main() {
         },
     ]
 
+
     // 5) seed shop
     console.log("Starting to seed shop collection...");
     try {
