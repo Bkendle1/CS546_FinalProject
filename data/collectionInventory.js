@@ -85,7 +85,7 @@ export const levelUpCharacter = async (userId, characterId, gainedExperience) =>
   // validation
   userId = helpers.validateObjectId(userId, "User ID");
   characterId = helpers.validateObjectId(characterId, "Character ID");
-  gainedExperience = helpers.validateExperience(gainedExperience);
+  gainedExperience = helpers.validateNumber(gainedExperience, "Experience");
 
   // check if character is in inventory 
   let inventoryCollection = await collectionInventory();
@@ -156,7 +156,7 @@ export const getUserInventory = async (userId) => {
   return inventory;
 }
 
-// Function:
+// Function: Given userId and characterId, return the character from user's inventory
 export const getCharacterFromInventory = async (userId, characterId) => {
   // validation 
   userId = helpers.validateObjectId(userId, "User ID");
@@ -179,5 +179,44 @@ export const getCharacterFromInventory = async (userId, characterId) => {
   }
 
   return character;
+}
+
+// Function: Given userId and characterId, call levelUpCharacter everytime a piece of food is consumed
+export const feedCharacter = async (userId, characterId) => {
+  // validation 
+  userId = helpers.validateObjectId(userId, "User ID");
+  characterId = helpers.validateObjectId(characterId, "Character ID");
+
+  // get the user
+  let userCollection = await users();
+  let user = await userCollection.findOne({ _id: new ObjectId(String(userId)) });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  // get the food count 
+  let currentFoodAmount = 0;
+  currentFoodAmount = user.metadata.food_count;
+  if (currentFoodAmount < 1) {
+    throw new Error("Minimum of amount of food to feed character is 1");
+  }
+
+  // update the food count by decrementing by 1
+  let updateUserFoodCount = await userCollection.updateOne(
+    { _id: new ObjectId(String(userId)) },
+    { $inc: { "metadata.food_count": -1 } }
+  );
+
+  if (updateUserFoodCount.modifiedCount === 0) {
+    throw new Error("Food count could not be updated after consumtion");
+  }
+
+  // fixed amount of exp per food
+  let gainedExperiencePerFood = 30;
+
+  // call levelUpCharacter
+  let result = await levelUpCharacter(userId, characterId, gainedExperiencePerFood);
+  return result;
 }
 

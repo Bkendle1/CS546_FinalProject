@@ -59,7 +59,7 @@ router
             res.json({ pulled: characters.pulled, duplicates: characters.duplicates }); // gachaPull returns an array
         } catch (e) {
             // user doesn't have enough tickets (this shouldn't happen as the button that makes this request should've been disabled)
-            res.status(500).render('error', { title: "Error: 500", error: e });
+            res.status(500).render("error", { title: "Error: 500", error: e });
         }
     });
 router
@@ -69,7 +69,7 @@ router
         const userId = req.session.user.userId;
         // attempt to make a single, golden pull
         try {
-            const character = await gachaData.gachaPull(userId, 1, 'golden');
+            const character = await gachaData.gachaPull(userId, 1, "golden");
             res.json({ pulled: character.pulled[0], duplicates: character.duplicates[0] });  // gachaPull returns an array even if it was a single pull
         } catch (e) {
             // user doesn't have enough tickets (this shouldn't happen as the button that makes this request should've been disabled)

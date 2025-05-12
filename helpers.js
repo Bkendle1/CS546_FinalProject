@@ -317,20 +317,20 @@ export const getCurrentDateAndTime = () => {
     return `${month}/${day}/${year} ${hours}:${minutes}:${seconds}${meridiem}`;
 }
 /**
- * Given experience number, verify that it is valid
+ * Given a number, verify that it is valid (positive whole number)
  */
-export function validateExperience(exp) {
-    if (exp === undefined || exp === null) {
-        throw new Error("Experience missing!");
+export function validateNumber(number,parameterName) {
+    if (number === undefined || number === null) {
+        throw new Error(`${parameterName} missing!`);
     }
-    if (typeof exp !== "number" || isNaN(exp) || exp == Infinity || exp == -Infinity || !Number.isInteger(exp)) {
-        throw new Error("Experience must be a finite whole number!");
+    if (typeof number !== "number" || isNaN(number) || number == Infinity || number == -Infinity || !Number.isInteger(number)) {
+        throw new Error(`${parameterName} must be a finite whole number!`);
     }
-    if (exp <= 0) {
-        throw new Error("Experience must be a positive non-zero number");
+    if (number <= 0) {
+        throw new Error(`${parameterName} must be a positive non-zero number!`);
     }
 
-    return exp;
+    return number;
 }
 
 /**

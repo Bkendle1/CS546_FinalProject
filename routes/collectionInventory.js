@@ -66,6 +66,19 @@ router.route('/:characterId/levelup').post(async (req, res) => {
     }
 });
 
+// POST: feed character 
+router.route('/:characterId/feed').post(async (req, res) => {
+    try {
+        let result = await collectionInventoryData.feedCharacter(req.session.user.userId,req.params.characterId);
+        res.status(200).json({success:true});
+    } catch (e) {   
+        res.status(500).render('error', {
+            title: "Error: Feeding can not be done",
+            error: e.toString()
+        });
+    }
+});
+
 
 //export router
 export default router;

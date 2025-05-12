@@ -18,6 +18,16 @@ async function main() {
     await db.dropDatabase();
     console.log("Dropped existing database.");
 
+    // create a user account 
+    try {
+        await userData.register("user1", "test@gmail.com", "ValidPass1!");
+        console.log("Test user created.");
+    } catch {
+        console.log("Test user already exists.");
+    }
+
+    const { userId } = await userData.login("test@gmail.com", "ValidPass1!");
+
     // 1) create characters
     const characters = [
         // character 1
