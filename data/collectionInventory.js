@@ -84,7 +84,7 @@ export const levelUpCharacter = async (userId,characterId,gainedExperience) => {
     // validation
     userId = helpers.validateObjectId(userId,"User ID");
     characterId = helpers.validateObjectId(characterId,"Character ID");
-    gainedExperience = helpers.validateExperience(gainedExperience);
+    gainedExperience = helpers.validateNumber(gainedExperience,"Experience");
 
     // check if character is in inventory 
     let inventoryCollection = await collectionInventory();
@@ -153,7 +153,7 @@ export const getUserInventory = async (userId) => {
   return inventory;
 }
 
-// Function:
+// Function: Given userId and characterId, return the character from user's inventory
 export const getCharacterFromInventory = async (userId,characterId) => {
   // validation 
   userId = helpers.validateObjectId(userId,"User ID");
