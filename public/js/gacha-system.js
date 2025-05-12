@@ -269,12 +269,12 @@ scene("GachaDisplaySingle", async ({ pulled, duplicate }) => {
     tween(
         0, // starting value
         1, // target value
-        0.25, // duration
+        0.75, // duration
         (v) => {
             character.scale = vec2(v); // scale character
             revealText.scale = vec2(v); // scale reveal text
         },
-        easings.easeOutSine // with this easing
+        easings.easeOutElastic // with this easing
     );
 
     // display character's rarity
@@ -299,6 +299,7 @@ scene("GachaDisplaySingle", async ({ pulled, duplicate }) => {
 
 // scene takes two arrays, one for the pulled characters, and another that's the same size which stores a bool to determine whether or not they're a duplicate
 scene("GachaDisplayBulk", async ({ pulled, duplicates }) => {
+    const DISPLAY_BG_COLOR = "#57467B"; // background color of the board displaying individual character info
     // render scene's background
     add([
         sprite("blackBG"),
@@ -306,7 +307,7 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates }) => {
         pos(center()),
         anchor("center"),
     ]);
-    let characters = []; // store all pulled characters
+    let characters = []; // store all the index entries of pulled characters
     // load all the characters' sprites
     for (let i = 0; i < pulled.length; i++) {
         const charInfo = await requestCharacterData(pulled[i]);
@@ -314,6 +315,11 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates }) => {
         characters.push(charInfo); // character info to array
     }
 
+    // add a back button so the player can do more pulls
+    const backBtn = addBtn("Back", vec2(width() - 640, height() - 60), () => {
+        go("Gacha");
+    })
+    // design grid layout
     const grid = addLevel([
         // define grid layout where the special symbols indicates a sprite's location in the grid
         "   !       @  ",
@@ -368,15 +374,66 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates }) => {
     )
 
     // TODO: display character's information from index using AJAX request to collectionIndex route
+    let infoDisplayed = false; // boolean that's set if a character's info is being displayed
+    function displayInfo(character) {
+        console.log(character);
+        const display = add([
+            rect(1100, 600),
+            color(DISPLAY_BG_COLOR),
+            outline(5),
+            anchor("center"),
+            pos(center()),
+            "display"
+        ]);
+        // display character's name
+        display.add([
+            text(`${character.name}`, { font: "digiFont", align: "center", size: 50 }),
+            color("#FFFFFF"),
+            anchor("center"),
+            pos(vec2(0, -300)),
+        ]);
+        // // display character's description
+        // character.add([
+        //     text(`${charInfo.description}`, { font: "digiFont", align: "left", width: 600, size: 25 }),
+        //     anchor("center"),
+        //     pos(vec2(550, 50))
+        // ]);
+        //}
+        // display character's rarity
+        display.add([
+            text(`${character.rarity}`, { font: "digiFont", align: "center" }),
+            anchor("center"),
+            pos(vec2(100, -150))
+        ]);
 
+        // display character's image
+
+        // display character's description
+
+        addBtn("Back", vec2(width() - 640, height() - 60), () => { infoDisplayed = false });
+        zoomIn(display, 0.75) // have rectangle zoom in 
+    }
     // Tweens a gameObject's scale for a minimum duration of 0.25 seconds + delay
     const zoomIn = (gameObject, delay) => {
-        tween(0, 1, 0.25 + delay, (v) => { gameObject.scale = vec2(v) }, easings.easeOutSine);
+        tween(0, // start value 
+            1, // target value 
+            0.25 + delay, // duration
+            (v) => { gameObject.scale = vec2(v) }, // run this function for every interpolated value 'v'
+            easings.easeOutElastic // easing method
+        );
+    }
+    const zoomOut = (gameObject, delay) => {
+        tween(1, // start value 
+            0, // target value 
+            0.25 + delay, // duration
+            (v) => { gameObject.scale = vec2(v) }, // run this function for every interpolated value 'v'
+            easings.easeOutElastic // easing method
+        );
     }
     let characterGameObjects = grid.get("character") // get a list of all the game objects with the tag 'character'
     // display each character with increasing more delay
     for (let i = 0; i < characterGameObjects.length; i++) {
-        zoomIn(characterGameObjects[i], i * 0.1);
+        zoomIn(characterGameObjects[i], i * 0.25);
         // runs every frame when the object is being hovered
         characterGameObjects[i].onHoverUpdate(() => {
             characterGameObjects[i].scale = vec2(1.2); // make button slightly larger
@@ -390,35 +447,32 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates }) => {
 
         // run callback on click
         characterGameObjects[i].onClick(() => {
-            console.log("clicked")
+            displayInfo(characters[i]);
+            infoDisplayed = true;
+            console.log("clicked");
         });
     }
 
+    // runs every frame
+    onUpdate(() => {
+        if (infoDisplayed) {
+            characterGameObjects.forEach((character) => {
+                character.area.scale = vec2(0); // make each character unclickable
+            })
+            backBtn.hidden = true; // hide button that goes back to gacha
+            backBtn.area.scale = vec2(0) // make button clickable 
 
-
-
-
-
-    // Display the character's name, image, description, rarity
-
-
-    // // display character's rarity
-    // character.add([
-    //     text(`${charInfo.rarity}`, { font: "digiFont" }),
-    //     anchor("center"),
-    //     pos(vec2(550, -150))
-    // ]);
-
-    // // display character's description
-    // character.add([
-    //     text(`${charInfo.description}`, { font: "digiFont", align: "left", width: 600, size: 25 }),
-    //     anchor("center"),
-    //     pos(vec2(550, 50))
-    // ]);
-    //}
-
-    // add a back button so the player can do more pulls
-    addBtn("Back", vec2(width() - 640, height() - 60), () => {
-        go("Gacha");
+        } else {
+            // let display = get("display")[0];
+            // console.log(display);
+            // zoomOut(display, 3);
+            characterGameObjects.forEach((character) => {
+                character.area.scale = vec2(1);// make each character clickable
+            })
+            backBtn.hidden = false; // reveal button that goes back to gacha
+            backBtn.area.scale = vec2(1) // make button clickable 
+        }
     })
+
+
 });
