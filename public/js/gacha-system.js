@@ -282,38 +282,7 @@ const zoomOut = (gameObject, delay) => {
         easings.easeOutSine    // easing method
     );
 }
-/**
- * Creates a particle emitter with the given sprite. 
- */
-// const particleEmitter = (sprite) => {
-//     let digitCode = loadSprite("digiCode", "/public/images/digicode.png", {
-//         sliceX: 2,
-//         sliceY: 13
-//     })
-//     let particle = getSprite(digitCode).data;
-//     let emitter = add([
-//         pos(0, 0),
-//         particles(
-//             {
-//                 max: 20,
-//                 speed: [50, 50],
-//                 lifeTime: [1, 1.5],
-//                 texture: particle.tex,
-//                 scales: [1, 2],
-//                 angle: [0, 360],
-//                 angularVelocity: [0, 100],
-//                 quads: particle.frames
-//             },
-//             {
-//                 lifetime: 1,
-//                 rate: 3,
-//                 direction: -90,
-//                 spread: 45,
-//             },
-//         )
-//     ]);
-//     return emitter;
-// }
+
 
 // This scene takes two arguments, one for the pulled character, and a bool that states whether or not they're a duplicate
 scene("GachaDisplaySingle", async ({ pulled, duplicate }) => {
@@ -357,11 +326,6 @@ scene("GachaDisplaySingle", async ({ pulled, duplicate }) => {
         anchor("center"),
         pos(vec2(550, 10))
     ]);
-
-    // onUpdate(() => {
-    //     let emitter = particleEmitter(charInfo.name);
-    //     emitter.emit(1)
-    // })
 
     // add a back button so the player can do more pulls
     addBtn("Back", vec2(width() - 640, height() - 60), () => {
@@ -478,22 +442,32 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates }) => {
         anchor("center"),
         pos(vec2(width() - 1000, height() - 700)),
     ]);
+    const displayDupCurrency = display.add([
+        text("", { font: "digiFont", align: "left", width: 500, size: 25 }),
+        anchor("center"),
+        pos(vec2(width() - 1000, height() - 500)),
+    ])
     // when player hovers over their pulls, display their name
     const revealText = add([
         text("", { font: "digiFont", align: "center" }),
         anchor("center"),
         pos(vec2(width() / 2, height() - 680))
-    ])
+    ]);
     /**
      * Populate info display with the given character's details
      */
-    function displayInfo(character) {
+    function displayInfo(character, dup_currency) {
         displayName.text = `${character.name}`;             // display character's name
         displayRarity.text = `${character.rarity}`;         // display character' rarity
         displayRarity.color = Color.fromHex(getRarityColor(character.rarity));
         zoomIn(display, 0.75)                               // have rectangle zoom in 
         displayImg.sprite = `${character.name}`;            // display character's image
         displayDesc.text = `${character.description}`;      // display character's description
+        if (dup_currency !== 0) {
+            displayDupCurrency.text = `Duplicate: +${dup_currency}`;
+        } else {
+            displayDupCurrency.text = "";
+        }
         // button to go back to bulk pull results
         addBtn("Back", vec2(width() - 640, height() - 60), () => {
             infoDisplayed = false;
@@ -520,9 +494,8 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates }) => {
 
         // run callback on click
         characterGameObjects[i].onClick(() => {
-            displayInfo(characters[i]);
+            displayInfo(characters[i], duplicates[i]);
             infoDisplayed = true;
-            console.log("clicked");
         });
     }
 

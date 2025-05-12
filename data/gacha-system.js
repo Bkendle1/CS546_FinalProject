@@ -228,7 +228,7 @@ export const gachaPull = async (userId, pullCount, pullType) => {
     // check if user has enough tickets for this pull type (either golden or normal)
     let pulledCharacters = { // object that stores the pulled characters and whether they were duplicates
         pulled: [], // store pulled characters in an array
-        duplicates: [] // array of booleans stating whether or not the corresponding pulled character was a duplicate
+        duplicates: [] // array of currency amounts corresponding to the pulled character's duplicate currency (if the character is new then its value is 0) 
     };
 
     if (await canPull(userId, pullCount, pullType)) {
@@ -281,10 +281,10 @@ export const gachaPull = async (userId, pullCount, pullType) => {
                 } catch (e) {
                     console.log(e)
                 }
-                pulledCharacters.duplicates.push(false); // this character isn't a duplicate
+                pulledCharacters.duplicates.push(0); // this character isn't a duplicate so push 0
             } else {
                 // Give user the corresponding duplicate currency
-                pulledCharacters.duplicates.push(true);
+                pulledCharacters.duplicates.push(character.duplicate_currency); // push character's duplicate currency amount
                 console.log(await helpers.updateCurrencyCount(userId, character.duplicate_currency));
             }
         }
