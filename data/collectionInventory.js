@@ -178,3 +178,40 @@ export const getCharacterFromInventory = async (userId,characterId) => {
   return character;
 }
 
+// Function: Given userId and characterId, call levelUpCharacter everytime a piece of food is consumed
+export const feedCharacter = async (userId,characterId) {
+  // validation 
+  userId = helpers.validateObjectId(userId,"User ID");
+  characterId = helpers.validateObjectId(characterId,"Character ID");
+  foodAmount = helpers.validateNumber(foodAmount,"Amount of food");
+
+  // get the user
+  let userCollection = await users();
+  let user = userCollection.findOne({user_id: new ObjectId(String(userId))});
+  
+  if (!user) {
+    throw new Error("User not found");
+  }
+  
+  // get the food count 
+  let currentFoodAmount = 0;
+  currentFoodAmount = user.metadata.food_count;
+
+  // update the food count by decrementing by 1
+  let updateUserFoodCount = userCollection.updateOne(
+    {user_id: new ObjectId(String(userId))},
+    {$inc: {"metadata.food_count": -1}}
+  );
+
+  if (updateUserFoodCount.modifiedCount === 0) {
+        throw new Error("Food count could not be updated after consumtion");
+  }
+  
+  // fixed amount of exp per food
+  let gainedExperiencePerFood = 30; 
+
+  // call levelUpCharacter
+  let result = await levelUpCharacter(userId,characterId,gainedExperiencePerFood);
+  return result;
+}
+

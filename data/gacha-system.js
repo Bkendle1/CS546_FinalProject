@@ -235,13 +235,8 @@ export const gachaPull = async (userId, pullCount, pullType) => {
         // get array of all characters in gacha collection
         let gachaCharacters = await getAllGachaCharacters();
 
-<<<<<<< HEAD
-        if (pullType === "normal") {
-            // setup an object of character-pull_rate pairs considering normal pull_rates
-=======
         if (pullType === 'normal') {
             // setup an object of (characterId, pull_rate) pairs considering normal pull_rates
->>>>>>> origin/main
             let normalPull = {};
             gachaCharacters.map((character) => {
                 normalPull[character._id] = character.pull_rate;
@@ -303,17 +298,7 @@ export const gachaPull = async (userId, pullCount, pullType) => {
     return pulledCharacters;
 }
 
-<<<<<<< HEAD
 
-// try {
-//     console.log(await gachaPull("67fbccf7bedaaf5edc00dae7", 2, "GOLDEN"));
-// } catch (e) {
-//     console.log(e);
-// }
-
-
-=======
->>>>>>> origin/main
 /**
  * Given a name, pull_rate, and duplicate currency, add a new character to the gacha system.
  * IMPORTANT: Since characters will share the same _id across different collections, the new character must already exist in the collection index collection as that's where we copy the _id field from.
