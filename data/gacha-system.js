@@ -2,8 +2,8 @@ import * as helpers from "../helpers.js";
 import { users, collectionIndex, gacha } from "../config/mongoCollections.js";
 import { ObjectId } from "mongodb";
 import weighted from "weighted";
-import { getEntryById } from "./collectionIndex.js";
-import { markCollected } from "./collectionIndex.js";
+import { getEntryById, markCollected } from "./collectionIndex.js";
+import { addCharacterToInventory } from "./collectionInventory.js";
 
 /**  Given the user's id, the size of the pull (should be either 1 or 5), and ticket type. Check if player has enough tickets to pull with. Ticket type is case-insensitive.
 */
@@ -272,13 +272,15 @@ export const gachaPull = async (userId, pullCount, pullType) => {
         // Check if any pulls are duplicates and if so, increase user's currency with the corresponding duplicate currency
         for (let i = 0; i < pulledCharacters.pulled.length; i++) {
             let characterId = pulledCharacters.pulled[i];
-            // let charName = pulledCharacters.pulled[i];
-            // let characterId = await helpers.getCharacterIdByName(charName);
             let collected = await markCollected(characterId); // update 'collected' field in collection index to true for each of the new pulled characters
             let character = await getGachaCharacterById(characterId); // get gacha document of character with corresponding character id 
             if (collected) {
                 // TODO using a collectionInventory.js data function, update the user's collection inventory to include the new character(s) assuming they're not duplicates
-
+                try {
+                    await addCharacterToInventory(userId, characterId);
+                } catch (e) {
+                    console.log(e)
+                }
                 pulledCharacters.duplicates.push(false); // this character isn't a duplicate
             } else {
                 // Give user the corresponding duplicate currency
@@ -293,11 +295,8 @@ export const gachaPull = async (userId, pullCount, pullType) => {
         // decrement user's corresponding ticket count 
         await helpers.updateTicketCount(userId, pullType, -pullCount);
     }
-
-    console.log(`DEBUG-DATA: ${pulledCharacters.pulled}:\n${pulledCharacters.duplicates}`);
     return pulledCharacters;
 }
-
 
 /**
  * Given a name, pull_rate, and duplicate currency, add a new character to the gacha system.
