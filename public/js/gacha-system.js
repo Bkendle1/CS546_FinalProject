@@ -33,7 +33,7 @@ const BUTTON_HOVER_COLOR = "#93E1D8" // hexcolor for buttons on hover
 const BUTTON_TEXT_COLOR = "#28262C" // hexcolor for text of buttons
 const BULK_PULL_COUNT = 5; // number of pulls for a bulk pull. IF YOU CHANGE THIS VALUE THEN MAKE SURE TO ALSO CHANGE THIS CONSTANT IN THE CORRESPONDING ROUTER JS FILE
 const DISABLED_BUTTON_COLOR = "#36454F" // hexcolor for a disabled button
-const TEXT_COLOR = "#A4B0F5" // hexcolor for general text
+const TEXT_COLOR = "#00FFE7" // hexcolor for general text
 // Create a button with the given text, at the give position, that executes the given callback function when clicked on
 function addBtn(str, position, callback) {
     // create button
@@ -175,23 +175,22 @@ scene("Gacha", () => {
     ]);
 
     // add button for single normal pull
-    const normalSingleBtn = addBtn("Normal x1", vec2(300, 200), () => {
+    const normalSingleBtn = addBtn("Normal x1", vec2(width() - 1000, height() - 500), () => {
         requestPull("normal", 1)
     });
     // add button for bulk normal pull
-    const normalBulkBtn = addBtn("Normal x5", vec2(300, 300), () => {
+    const normalBulkBtn = addBtn("Normal x5", vec2(width() - 1000, height() - 250), () => {
         requestPull("normal", BULK_PULL_COUNT)
     });
 
     // add button for single golden pull
-    const goldenSingleBtn = addBtn("Golden x1", vec2(950, 200), () => {
+    const goldenSingleBtn = addBtn("Golden x1", vec2(width() - 300, height() - 500), () => {
         requestPull("golden", 1); // request a golden single pull
     });
     // add button for bulk golden pull
-    const goldenBulkBtn = addBtn("Golden x5", vec2(950, 300), () => {
+    const goldenBulkBtn = addBtn("Golden x5", vec2(width() - 300, height() - 250), () => {
         requestPull("golden", BULK_PULL_COUNT); // request a golden bulk pull
     });
-
     // TODO: Menu
 
 
