@@ -332,7 +332,8 @@ scene("GachaDisplaySingle", async ({ pulled, duplicate }) => {
         go("Gacha");
     });
 });
-
+const BADGE_BG_COLOR = "#0D3B66" // background color for the new badge
+const BADGE_TXT_COLOR = "#F8F991" // hex code for text in the new badge
 // scene takes two arrays, one for the pulled characters, and another that's the same size which stores a bool to determine whether or not they're a duplicate
 scene("GachaDisplayBulk", async ({ pulled, duplicates }) => {
     const DISPLAY_BG_COLOR = "#57467B"; // background color of the board displaying individual character info
@@ -442,11 +443,13 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates }) => {
         anchor("center"),
         pos(vec2(width() - 1000, height() - 700)),
     ]);
+    // display duplicate currency amount
     const displayDupCurrency = display.add([
         text("", { font: "digiFont", align: "left", width: 500, size: 25 }),
         anchor("center"),
-        pos(vec2(width() - 1000, height() - 500)),
-    ])
+        pos(vec2(width() - 1000, height() - 530)),
+    ]);
+
     // when player hovers over their pulls, display their name
     const revealText = add([
         text("", { font: "digiFont", align: "center" }),
@@ -463,10 +466,12 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates }) => {
         zoomIn(display, 0.75)                               // have rectangle zoom in 
         displayImg.sprite = `${character.name}`;            // display character's image
         displayDesc.text = `${character.description}`;      // display character's description
+        // displayNewBadge.hidden = true;
         if (dup_currency !== 0) {
             displayDupCurrency.text = `Duplicate: +${dup_currency}`;
         } else {
             displayDupCurrency.text = "";
+            // displayNewBadge.hidden = false;
         }
         // button to go back to bulk pull results
         addBtn("Back", vec2(width() - 640, height() - 60), () => {
@@ -485,6 +490,23 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates }) => {
             setCursor("pointer"); // change cursor into pointer
             revealText.text = `You got ${characters[i].name}!`;
         });
+        // If character isn't a duplicate, display a badge that says they're new
+        if (duplicates[i] === 0) {
+            const newBadge = characterGameObjects[i].add([
+                rect(200, 75, { radius: 5 }),
+                outline(2),
+                rotate(-45),
+                anchor("center"),
+                pos(vec2(-100, -100)),
+                color(BADGE_BG_COLOR)
+            ]);
+            newBadge.add([
+                text("New!", { font: "digiFont" }),
+                anchor("center"),
+                pos(vec2(0, -5)), // center it with newBadge
+                color(BADGE_TXT_COLOR)
+            ])
+        }
         // runs once the object stopped being hovered
         characterGameObjects[i].onHoverEnd(() => {
             characterGameObjects[i].scale = vec2(1); // reset scale of button
