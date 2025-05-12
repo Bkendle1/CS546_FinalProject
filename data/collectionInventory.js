@@ -183,11 +183,10 @@ export const feedCharacter = async (userId,characterId) => {
   // validation 
   userId = helpers.validateObjectId(userId,"User ID");
   characterId = helpers.validateObjectId(characterId,"Character ID");
-  foodAmount = helpers.validateNumber(foodAmount,"Amount of food");
 
   // get the user
   let userCollection = await users();
-  let user = userCollection.findOne({user_id: new ObjectId(String(userId))});
+  let user = await userCollection.findOne({_id: new ObjectId(String(userId))});
   
   if (!user) {
     throw new Error("User not found");
@@ -196,10 +195,13 @@ export const feedCharacter = async (userId,characterId) => {
   // get the food count 
   let currentFoodAmount = 0;
   currentFoodAmount = user.metadata.food_count;
+  if (currentFoodAmount < 1) {
+    throw new Error("Minimum of amount of food to feed character is 1");
+  }
 
   // update the food count by decrementing by 1
-  let updateUserFoodCount = userCollection.updateOne(
-    {user_id: new ObjectId(String(userId))},
+  let updateUserFoodCount = await userCollection.updateOne(
+    {_id: new ObjectId(String(userId))},
     {$inc: {"metadata.food_count": -1}}
   );
 
