@@ -130,6 +130,14 @@ function requestPull(pullType, pullCount) {
     }
 };
 
+async function fetchBalance() {
+    const res = await fetch("/shop/balance");
+    if (!res.ok) {
+        throw "Error: Balance fetch failed- " + res.status;
+    }
+    const data = await res.json();
+    return data.balance;
+}
 
 /**
  * Get the data of a single character using a route for the collectionIndex collection. 
@@ -149,8 +157,8 @@ async function requestCharacterData(characterId) {
 loadSprite("banner", "/public/images/gachaBanner.png"); // load banner image as a sprite
 loadSprite("blackBG", "/public/images/abstractBlackBG.png");
 loadFont("digiFont", "/public/fonts/PixelDigivolve.otf", 8, 8);
-scene("Gacha", () => {
-    // render gacha's banner
+scene("Gacha", async () => {
+    // add gacha's banner
     add([
         sprite("banner"),
         scale(1.1),
@@ -173,6 +181,14 @@ scene("Gacha", () => {
         pos(vec2(width() - 200, 90)),
         anchor("center"),
     ]);
+    let currency = await fetchBalance();
+    // add user's currency count
+    const currencyCounter = add([
+        text(`Currency: ${currency}`, { font: "digiFont" }),
+        color(TEXT_COLOR),
+        pos(vec2(width() / 2, 90)),
+        anchor("center"),
+    ])
 
     // add button for single normal pull
     const normalSingleBtn = addBtn("Normal x1", vec2(width() - 1000, height() - 500), () => {

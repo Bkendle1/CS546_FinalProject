@@ -41,6 +41,7 @@ router
             res.json({ pulled: character.pulled[0], duplicates: character.duplicates[0] }); // gachaPull returns an array even if it was a single pull
         } catch (e) {
             // user doesn't have enough tickets (this shouldn't happen as the button that makes this request should've been disabled)
+            console.log(e);
             res.status(500).render('error', {
                 title: "Error: 500",
                 error: e.toString()

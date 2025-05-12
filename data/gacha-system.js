@@ -231,6 +231,7 @@ export const gachaPull = async (userId, pullCount, pullType) => {
         duplicates: [] // array of currency amounts corresponding to the pulled character's duplicate currency (if the character is new then its value is 0) 
     };
 
+    // check if user exists and if so, can they do this specific gacha pull
     if (await canPull(userId, pullCount, pullType)) {
         // get array of all characters in gacha collection
         let gachaCharacters = await getAllGachaCharacters();
@@ -289,6 +290,13 @@ export const gachaPull = async (userId, pullCount, pullType) => {
             }
         }
 
+        // TODO: Give user experience for pulling character(s)
+        const EXP_GAIN = 50; // amount of experience points earned per pull
+        // const userCollection = await users();
+        // const updateInfo = await userCollection.updateOne({ _id: ObjectId.createFromHexString(userId) }, { $inc: { "metadata.experience.curr_exp": EXP_GAIN * pullCount } })
+        // if (updateInfo.modifiedCount === 0) {
+        //     throw `Could not update the current experience of user with id: ${userId}.`;
+        // }
         // Update pull history with pulled character(s). Include the character's name, rarity, timestamp of pull, and image
         await updatePullHistory(userId, pulledCharacters.pulled);
 
