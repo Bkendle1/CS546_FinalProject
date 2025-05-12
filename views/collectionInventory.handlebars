@@ -5,10 +5,12 @@
         <a href="/shop" class="navigationLink">Shop</a>
     </div>
     {{!-- input for nickname, but keep it hidden initially --}}
-    <label for="nickname">
-        Nickname:
-    </label>
-    <input type="text" id="nickname-input" style="display: none"> 
+    <div class="nicknameContainer">
+        <label for="nickname" id="nickname-label" class="labelA" style="display: none">
+            Nickname:
+        </label>
+        <input type="text" id="nickname-input" class="inputA" style="display: none"> 
+    </div>
     <canvas id="inventory-canvas"></canvas> 
     <script>
         window.inventoryData = {{{inventory}}}; // pass inventoryData to the game

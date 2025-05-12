@@ -33,7 +33,7 @@ const BUTTON_HOVER_COLOR = "#93E1D8" // hexcolor for buttons on hover
 const BUTTON_TEXT_COLOR = "#28262C" // hexcolor for text of buttons
 const BULK_PULL_COUNT = 5; // number of pulls for a bulk pull. IF YOU CHANGE THIS VALUE THEN MAKE SURE TO ALSO CHANGE THIS CONSTANT IN THE CORRESPONDING ROUTER JS FILE
 const DISABLED_BUTTON_COLOR = "#36454F" // hexcolor for a disabled button
-const TEXT_COLOR = "#A4B0F5" // hexcolor for general text
+const TEXT_COLOR = "#00FFE7" // hexcolor for general text
 // Create a button with the given text, at the give position, that executes the given callback function when clicked on
 function addBtn(str, position, callback) {
     // create button
@@ -49,8 +49,9 @@ function addBtn(str, position, callback) {
 
     // add a child object that displays the text
     btn.add([
-        text(str),
+        text(`${str}`, { font: "digiFont", }),
         anchor("center"),
+        pos(vec2(0, -8)),
         color(BUTTON_TEXT_COLOR), // color of text
     ]);
 
@@ -130,16 +131,18 @@ function requestPull(pullType, pullCount) {
 };
 
 
-// Get the data of a character using a route for the collectionIndex collection
+/**
+ * Get the data of a single character using a route for the collectionIndex collection. 
+ */
 async function requestCharacterData(characterId) {
     // Make a GET request to /collectionIndex/entries/:id
     try {
         const url = `/collectionIndex/entries/${characterId}`;
         const response = await fetch(url);
-        if (!response.ok) throw response.status;
+        if (!response.ok) throw response.status.message;
         return await response.json(); // return JSON of response, i.e. character index data
     } catch (e) {
-        console.log(e);
+        console.error(e);
     }
 }
 
@@ -172,23 +175,22 @@ scene("Gacha", () => {
     ]);
 
     // add button for single normal pull
-    const normalSingleBtn = addBtn("Normal x1", vec2(300, 200), () => {
+    const normalSingleBtn = addBtn("Normal x1", vec2(width() - 1000, height() - 500), () => {
         requestPull("normal", 1)
     });
     // add button for bulk normal pull
-    const normalBulkBtn = addBtn("Normal x5", vec2(300, 300), () => {
+    const normalBulkBtn = addBtn("Normal x5", vec2(width() - 1000, height() - 250), () => {
         requestPull("normal", BULK_PULL_COUNT)
     });
 
     // add button for single golden pull
-    const goldenSingleBtn = addBtn("Golden x1", vec2(950, 200), () => {
+    const goldenSingleBtn = addBtn("Golden x1", vec2(width() - 300, height() - 500), () => {
         requestPull("golden", 1); // request a golden single pull
     });
     // add button for bulk golden pull
-    const goldenBulkBtn = addBtn("Golden x5", vec2(950, 300), () => {
+    const goldenBulkBtn = addBtn("Golden x5", vec2(width() - 300, height() - 250), () => {
         requestPull("golden", BULK_PULL_COUNT); // request a golden bulk pull
     });
-
     // TODO: Menu
 
 
@@ -239,8 +241,51 @@ scene("Gacha", () => {
 
 });
 
-// scene takes two arguments, one for the pulled character, and a bool that states whether or not they're a duplicate
-scene("GachaDisplaySingle", async ({ pulled, duplicate }) => {
+/**
+ * Given a rarity, return a color
+ */
+function getRarityColor(rarity) {
+    let hexCode = "#DB042F"; // default common color 
+    if (rarity === "common") {
+        hexCode = "#DB042F";
+    }
+    else if (rarity === "uncommon") {
+        hexCode = "#63AB5E";
+    }
+    else if (rarity === "rare") {
+        hexCode = "#3672E0";
+    }
+    else if (rarity === "legendary") {
+        hexCode = "#F3AF19";
+    } else {
+        console.error("Rarity can only be: 'common', 'uncommon', 'rare', or 'legendary'.")
+    }
+    return hexCode;
+}
+
+// Tweens a gameObject's scale to 1 for a minimum duration of 0.25 seconds + delay
+const zoomIn = (gameObject, delay) => {
+    tween(0, // start value 
+        1, // target value 
+        0.25 + delay, // duration
+        (v) => { gameObject.scale = vec2(v) }, // run this function for every interpolated value 'v'
+        easings.easeOutElastic // easing method
+    );
+}
+// Tweens a gameObject's scale to 0 for a minimum duration of 0.25 seconds + delay
+const zoomOut = (gameObject, delay) => {
+    tween(1, // start value 
+        0, // target value 
+        0.25 + delay, // duration
+        (v) => { gameObject.scale = vec2(v) }, // run this function for every interpolated value 'v'
+        easings.easeOutSine    // easing method
+    );
+}
+const BADGE_BG_COLOR = "#0D3B66" // background color for the new badge
+const BADGE_TXT_COLOR = "#F8F991" // hex code for text in the new badge
+
+// This scene takes two arguments, one for the pulled character, and a bool that states whether or not they're a duplicate
+scene("GachaDisplaySingle", async ({ pulled, duplicates }) => {
     // render scene's background
     add([
         sprite("blackBG"),
@@ -250,36 +295,68 @@ scene("GachaDisplaySingle", async ({ pulled, duplicate }) => {
     ]);
     // get the pulled character's index information
     const charInfo = await requestCharacterData(pulled);
-    loadSprite(charInfo.name, charInfo.image);
-
-    const character = add([
-        sprite(charInfo.name),
-        pos(center()),
-        anchor("center")
-    ])
-    // TODO: display character's information from index using AJAX request to collectionIndex route
-    // display the character's name, image, description, rarity
-    tween(
-        0,
-        1,
-        2,
-        (v) => {
-
-        }
-    )
-    add([
-        text(`DEBUG: You got: ${pulled}`, { font: "digiFont" }),
-        pos(center()),
+    loadSprite(charInfo.name, charInfo.image); // load the sprite for the corresponding character
+    const revealText = add([
+        text(`Congrats! You got ${charInfo.name}!`, { font: "digiFont" }),
+        pos(vec2(width() / 2, height() - 650)),
         anchor("center")
     ]);
+
+    const character = add([
+        sprite(charInfo.name, { width: 350, height: 350 }),
+        pos(vec2(width() - 1000, height() - 360)),
+        anchor("center")
+    ])
+
+    // Display the character's name, image, description, rarity
+    zoomIn(character, 0.5);
+    zoomIn(revealText, 0.5);
+
+    // display character's rarity
+    character.add([
+        text(`${charInfo.rarity}`, { font: "digiFont" }),
+        anchor("center"),
+        pos(vec2(550, -200)),
+        color(getRarityColor(charInfo.rarity)),
+    ]);
+
+    // display character's description
+    character.add([
+        text(`${charInfo.description}`, { font: "digiFont", align: "center", width: 600, size: 25 }),
+        anchor("center"),
+        pos(vec2(550, 10))
+    ]);
+    // If character isn't a duplicate, display a badge that says they're new
+    console.log(duplicates)
+    if (duplicates === 0) {
+        const newBadge = character.add([
+            rect(200, 75, { radius: 5 }),
+            outline(2),
+            rotate(-45),
+            anchor("center"),
+            pos(vec2(-150, -150)),
+            color(BADGE_BG_COLOR)
+        ]);
+        newBadge.add([
+            text("New!", { font: "digiFont" }),
+            anchor("center"),
+            pos(vec2(0, -5)), // center it with newBadge
+            color(BADGE_TXT_COLOR)
+        ])
+    }
+    // player can go back to gacha via pressing the escape key
+    onKeyPress("escape", () => {
+        go("Gacha");
+    })
     // add a back button so the player can do more pulls
     addBtn("Back", vec2(width() - 640, height() - 60), () => {
         go("Gacha");
-    })
+    });
 });
 
 // scene takes two arrays, one for the pulled characters, and another that's the same size which stores a bool to determine whether or not they're a duplicate
-scene("GachaDisplayBulk", ({ pulled, duplicates }) => {
+scene("GachaDisplayBulk", async ({ pulled, duplicates }) => {
+    const DISPLAY_BG_COLOR = "#57467B"; // background color of the board displaying individual character info
     // render scene's background
     add([
         sprite("blackBG"),
@@ -287,17 +364,210 @@ scene("GachaDisplayBulk", ({ pulled, duplicates }) => {
         pos(center()),
         anchor("center"),
     ]);
-
-
-    // TODO: display character's information from index using AJAX request to collectionIndex route
-    add([
-        text(`DEBUG: You got: ${pulled}`, { font: "digiFont" }),
-        pos(center()),
-        anchor("center")
-    ]);
+    let characters = []; // store all the index entries of pulled characters
+    // load all the characters' sprites
+    for (let i = 0; i < pulled.length; i++) {
+        const charInfo = await requestCharacterData(pulled[i]);
+        loadSprite(charInfo.name, charInfo.image); // load sprite for character
+        characters.push(charInfo); // character info to array
+    }
 
     // add a back button so the player can do more pulls
-    addBtn("Back", vec2(width() - 640, height() - 60), () => {
+    const backBtn = addBtn("Back", vec2(width() - 640, height() - 60), () => {
         go("Gacha");
+    })
+    // design grid layout
+    const grid = addLevel([
+        // define grid layout where the special symbols indicates a sprite's location in the grid
+        "   !       @  ",
+        "              ",
+        "              ",
+        "              ",
+        "#      $      %",
+    ],
+        {
+            tileWidth: 64, // width of a grid tile
+            tileHeight: 64, // height of a grid tile
+            pos: vec2(width() - 1100, height() - 500), // position of the first block
+            // define what each symbol means
+            tiles: {
+                // ! is for the first character
+                "!": () => [
+                    sprite(`${characters[0].name}`, { width: 240, height: 240 }),
+                    area(), // give them collision bodies so they can be clicked on
+                    anchor("center"),
+                    "character",
+                ],
+                // @ is for the second character
+                "@": () => [
+                    sprite(`${characters[1].name}`, { width: 240, height: 240 }),
+                    area(), // give them collision bodies so they can be clicked on
+                    anchor("center"),
+                    "character",
+                ],
+                // # is for the third character
+                "#": () => [
+                    sprite(`${characters[2].name}`, { width: 240, height: 240 }),
+                    area(), // give them collision bodies so they can be clicked on
+                    anchor("center"),
+                    "character"
+                ],
+                // $ is for the fourth character
+                "$": () => [
+                    sprite(`${characters[3].name}`, { width: 240, height: 240 }),
+                    area(), // give them collision bodies so they can be clicked on
+                    anchor("center"),
+                    "character"
+                ],
+                // % is for the fifth character
+                "%": () => [
+                    sprite(`${characters[4].name}`, { width: 240, height: 240 }),
+                    area(), // give them collision bodies so they can be clicked on
+                    anchor("center"),
+                    "character"
+                ],
+            }
+        }
+    )
+
+    let infoDisplayed = false; // boolean that's set if a character's info is being displayed
+    const display = add([
+        rect(1100, 600),
+        color(DISPLAY_BG_COLOR),
+        outline(5),
+        anchor("center"),
+        pos(center()),
+        "display"
+    ]);
+    const displayImg = display.add([ // display character's image
+        sprite(`${characters[0].name}`, { width: 400, height: 400 }), // initialize the sprite to some arbitrary image since this will get updated once displayInfo() is called
+        anchor("center"),
+        pos(vec2(width() - 1550, height() - 700)),
+    ])
+    // display character's name
+    const displayName = display.add([
+        text("", { font: "digiFont", align: "center", size: 50 }),
+        color("#FFFFFF"),
+        anchor("center"),
+        pos(vec2(0, height() - 975)),
+    ]);
+    // display character's rarity
+    const displayRarity = display.add([
+        text("", { font: "digiFont", align: "center" }),
+        anchor("center"),
+        pos(vec2(100, -150))
+    ]);
+    // display character's description
+    const displayDesc = display.add([
+        text("", { font: "digiFont", align: "left", width: 500, size: 25 }),
+        anchor("center"),
+        pos(vec2(width() - 1000, height() - 700)),
+    ]);
+    // display duplicate currency amount
+    const displayDupCurrency = display.add([
+        text("", { font: "digiFont", align: "left", width: 500, size: 25 }),
+        anchor("center"),
+        pos(vec2(width() - 1000, height() - 530)),
+    ]);
+
+    // when player hovers over their pulls, display their name
+    const revealText = add([
+        text("", { font: "digiFont", align: "center" }),
+        anchor("center"),
+        pos(vec2(width() / 2, height() - 680))
+    ]);
+    /**
+     * Populate info display with the given character's details
+     */
+    function displayInfo(character, dup_currency) {
+        displayName.text = `${character.name}`;             // display character's name
+        displayRarity.text = `${character.rarity}`;         // display character' rarity
+        displayRarity.color = Color.fromHex(getRarityColor(character.rarity));
+        zoomIn(display, 0.75)                               // have rectangle zoom in 
+        displayImg.sprite = `${character.name}`;            // display character's image
+        displayDesc.text = `${character.description}`;      // display character's description
+        // displayNewBadge.hidden = true;
+        if (dup_currency !== 0) {
+            displayDupCurrency.text = `Duplicate: +${dup_currency}`;
+        } else {
+            displayDupCurrency.text = "";
+            // displayNewBadge.hidden = false;
+        }
+        // button to go back to bulk pull results
+        addBtn("Back", vec2(width() - 640, height() - 60), () => {
+            infoDisplayed = false;
+            zoomOut(display, 0.4); // TODO: this isn't visible as hidden is set to to true too soon
+        });
+    }
+    // player can go back to gacha or bulk display via pressing the escape key
+    onKeyPress("escape", () => {
+        if (infoDisplayed) {
+            infoDisplayed = false;
+            zoomOut(display, 0.4); // TODO: this isn't visible as hidden is set to to true too soon
+        } else {
+            go("Gacha");
+        }
+    })
+    let characterGameObjects = grid.get("character") // get a list of all the game objects with the tag 'character'
+    // display each character with increasing more delay
+    for (let i = 0; i < characterGameObjects.length; i++) {
+        zoomIn(characterGameObjects[i], i * 0.25);
+        // runs every frame when the object is being hovered
+        characterGameObjects[i].onHoverUpdate(() => {
+            characterGameObjects[i].scale = vec2(1.2); // make button slightly larger
+            setCursor("pointer"); // change cursor into pointer
+            revealText.text = `You got ${characters[i].name}!`;
+        });
+        // If character isn't a duplicate, display a badge that says they're new
+        if (duplicates[i] === 0) {
+            const newBadge = characterGameObjects[i].add([
+                rect(200, 75, { radius: 5 }),
+                outline(2),
+                rotate(-45),
+                anchor("center"),
+                pos(vec2(-100, -100)),
+                color(BADGE_BG_COLOR)
+            ]);
+            newBadge.add([
+                text("New!", { font: "digiFont" }),
+                anchor("center"),
+                pos(vec2(0, -5)), // center it with newBadge
+                color(BADGE_TXT_COLOR)
+            ])
+        }
+        // runs once the object stopped being hovered
+        characterGameObjects[i].onHoverEnd(() => {
+            characterGameObjects[i].scale = vec2(1); // reset scale of button
+            setCursor("default"); // set cursor back to normal
+            revealText.text = "";
+        });
+
+        // run callback on click
+        characterGameObjects[i].onClick(() => {
+            displayInfo(characters[i], duplicates[i]);
+            infoDisplayed = true;
+        });
+    }
+
+    // runs every frame
+    onUpdate(() => {
+        // check if info panel is currently being displayed
+        if (infoDisplayed) {
+            // make each character unclickable
+            characterGameObjects.forEach((character) => {
+                character.area.scale = vec2(0);
+            })
+            backBtn.hidden = true; // hide button that goes back to gacha
+            backBtn.area.scale = vec2(0) // make button clickable 
+            display.hidden = false; // show display panel
+        } else {
+            display.hidden = true; // hide display panel
+            // make each character clickable
+            characterGameObjects.forEach((character) => {
+                character.area.scale = vec2(1);
+            })
+            backBtn.hidden = false; // reveal button that goes back to gacha
+            backBtn.area.scale = vec2(1) // make button clickable 
+        }
     })
 });

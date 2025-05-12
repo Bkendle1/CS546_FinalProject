@@ -2,8 +2,8 @@ import kaplay from "https://unpkg.com/kaplay@3001/dist/kaplay.mjs";
 
 // initialize game 
 kaplay({
-    width: 1280, // width of canvas 
-    height: 720, // height of canvas
+    width: 1380,  // width of canvas 
+    height: 1380, // height of canvas
     font: "sans-serif", // in-game font
     crisp: false, // makes pixels sharp
     canvas: document.querySelector("#inventory-canvas"),
@@ -131,7 +131,7 @@ function createCharacterProfile(character,position) {
     // loadSprite(character._id, character.image);
     let charImage = profile.add([
         sprite(character._id.toString()),
-        scale(0.5),
+        scale(0.3),
         pos(0,-20), 
         anchor("center"),
         z(3) // image will be in front of profile element
@@ -195,7 +195,7 @@ scene("Inventory",() => {
     add([
         sprite("inventoryBG"),
         pos(width()/2, height()/2),
-        scale(1),
+        scale(vec2(width()/1280,height()/720)),
         anchor("center"),
         z(0)
     ]);
@@ -205,9 +205,9 @@ scene("Inventory",() => {
     }
 
     let characters = inventoryData.obtained;
-    let profPerRow = 4;
-    let spaceRows = CHARACTER_PROFILE_WIDTH + 50;
-    let spaceColumns = CHARACTER_PROFILE_WIDTH + 50;
+    let profPerRow = 5;
+    let spaceRows = CHARACTER_PROFILE_WIDTH + 65;
+    let spaceColumns = CHARACTER_PROFILE_WIDTH + 150;
 
     characters.forEach((charac,index) => {
         let posX = 150 + (index % profPerRow) * spaceRows;
@@ -222,21 +222,21 @@ scene("CharacterInteraction",(character) => {
     add([
         sprite("inventoryBG"),
         pos(width()/2, height()/2),
-        scale(1),
+        scale(vec2(width()/1280,height()/720)),
         anchor("center"),
         z(0)
     ]);
 
     // add a back button to go back to main inventory
-    addBtn("Back",vec2(width()-640,height()-60), () => {
-        go("Inventory"),18});
+    addBtn("Back",vec2(width()/2,height()-60), () => {
+        go("Inventory")},25);
 
     // add the name
     add([
-        text(character.nickname || character.name, {size: 30}),
+        text(character.nickname || character.name,{size: 60}),
         pos(vec2(width()/2,100)),
         anchor("center"),
-        color(TEXT_COLOR)
+        color(getRarityColor(character.rarity))
     ]);
 
     // update nickname
@@ -244,10 +244,12 @@ scene("CharacterInteraction",(character) => {
     addBtn("Edit Nickname",vec2(width()-200,200), () => {
         if (!nicknameInputShown) {
             let nicknameInput = document.getElementById('nickname-input');
+            let nicknameLabel = document.getElementById('nickname-label');
             nicknameInput.value = character.nickname || character.name;
 
             // make input box visible
             nicknameInput.style.display = "block"; 
+            nicknameLabel.style.display = "block";
             nicknameInputShown = true;
         
 
@@ -262,6 +264,7 @@ scene("CharacterInteraction",(character) => {
             }
             
             nicknameInput.style.display = "none"; // hide after saving
+            nicknameLabel.style.display = "none";
 
             if (!newNickname) {
                 return;
@@ -284,6 +287,10 @@ scene("CharacterInteraction",(character) => {
                 let charIndex = inventoryData.obtained.findIndex((charac) => charac._id === updatedCharacter._id);
                 inventoryData.obtained[charIndex].nickname = updatedCharacter.nickname;
                 go("CharacterInteraction",updatedCharacter);
+            })
+            .fail (function (e) {
+                let msg = e.responseJSON.error || "Updating Nickname has failed";
+                alert(msg);
             });
         },20);
       }
@@ -292,46 +299,70 @@ scene("CharacterInteraction",(character) => {
     // load for the specific character 
     add([
         sprite(character._id.toString()),
-        scale(0.5),
-        pos(vec2(width()/2,200)),
+        scale(1),
+        pos(vec2(width()/2,500)),
         anchor("center"),
         z(4)
     ]);
 
-    addBtn("Level Up",vec2(width()/2,500), () => {
+    // addBtn("Level Up",vec2(width()/2,1100), () => {
+    //     $.ajax({
+    //         method: 'POST',
+    //         url: `/collectionInventory/${character._id}/levelup`,
+    //         data: {gainedExperience: 100} // default 100 for feeding 
+    //     })
+    //     .then(function () { // refresh the data after leveling up 
+    //         return $.ajax({
+    //             method: 'GET',
+    //             url: `/collectionInventory/${character._id}`
+    //         });
+    //     })
+    //     .then(function (updatedCharacter) {
+    //         // refresh when we go back to inventory page 
+    //         let charIndex = inventoryData.obtained.findIndex((charac) => charac._id === updatedCharacter._id);
+    //         inventoryData.obtained[charIndex] = updatedCharacter;
+    //         go("CharacterInteraction",updatedCharacter);
+    //     });
+    // },20);
+
+    add([
+        text(`Level: ${character.experience.level}`,{size: 25}),
+        pos(vec2(width()/2,800)),
+        anchor("center"),
+        color(TEXT_COLOR)
+    ]);
+
+    add([
+        text(`Income: ${character.experience.income}`,{size: 25}),
+        pos(vec2(width()/2,900)),
+        anchor("center"),
+        color(TEXT_COLOR),
+    ]);
+
+    addBtn("Feed to Level Up",vec2(width()/2,1200), () => {
         $.ajax({
             method: 'POST',
-            url: `/collectionInventory/${character._id}/levelup`,
-            data: {gainedExperience: 100} // default 100 for feeding 
+            url: `/collectionInventory/${character._id}/feed`,
         })
-        .then(function () { // refresh the data after leveling up 
+        .then(function (response) {
+            if (response.playerLeveledUp === true) {
+                alert("Player has leveled up! You have earned a ticket!");
+            }
             return $.ajax({
                 method: 'GET',
                 url: `/collectionInventory/${character._id}`
             });
         })
         .then(function (updatedCharacter) {
-            // refresh when we go back to inventory page 
             let charIndex = inventoryData.obtained.findIndex((charac) => charac._id === updatedCharacter._id);
             inventoryData.obtained[charIndex] = updatedCharacter;
             go("CharacterInteraction",updatedCharacter);
+        })
+        .fail (function (e) {
+                let msg = e.responseJSON.error || "Feeding has failed";
+                alert(msg);
         });
-    },20);
-
-    add([
-        text(`Level: ${character.experience.level}`,{size: 20}),
-        pos(vec2(width()/2,200)),
-        anchor("center"),
-        color(TEXT_COLOR)
-    ]);
-
-    add([
-        text(`Income: ${character.experience.income}`,{size: 20}),
-        pos(vec2(width()/2,250)),
-        anchor("center"),
-        color(TEXT_COLOR),
-    ]);
-
+    },16);
 });
 
 go("Inventory");
