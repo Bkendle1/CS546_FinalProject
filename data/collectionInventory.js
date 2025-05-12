@@ -179,7 +179,7 @@ export const getCharacterFromInventory = async (userId,characterId) => {
 }
 
 // Function: Given userId and characterId, call levelUpCharacter everytime a piece of food is consumed
-export const feedCharacter = async (userId,characterId) {
+export const feedCharacter = async (userId,characterId) => {
   // validation 
   userId = helpers.validateObjectId(userId,"User ID");
   characterId = helpers.validateObjectId(characterId,"Character ID");
