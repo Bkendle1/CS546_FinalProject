@@ -90,10 +90,6 @@ scene("Shop", async () => {
             anchor("center"),
             scale(0.5),
             layer("sprite"),
-            /* onClick(() => {
-                document.getElementById("pf-itemName").value = item.name;
-                document.getElementById("purchase-form").submit();
-            }), */
             z(3)
         ]);
 
