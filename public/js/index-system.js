@@ -25,7 +25,7 @@ fetchEntries()
         for (const e of entries) {
         const url = e.image && e.image.startsWith("http")
             ? e.image
-            : "https://via.placeholder.com/150";
+            : "https://via.placeholder.com";
         loadSprite(e._id, url);
         }
         await Promise.all(spritePromises);
