@@ -282,10 +282,11 @@ const zoomOut = (gameObject, delay) => {
         easings.easeOutSine    // easing method
     );
 }
-
+const BADGE_BG_COLOR = "#0D3B66" // background color for the new badge
+const BADGE_TXT_COLOR = "#F8F991" // hex code for text in the new badge
 
 // This scene takes two arguments, one for the pulled character, and a bool that states whether or not they're a duplicate
-scene("GachaDisplaySingle", async ({ pulled, duplicate }) => {
+scene("GachaDisplaySingle", async ({ pulled, duplicates }) => {
     // render scene's background
     add([
         sprite("blackBG"),
@@ -326,14 +327,34 @@ scene("GachaDisplaySingle", async ({ pulled, duplicate }) => {
         anchor("center"),
         pos(vec2(550, 10))
     ]);
-
+    // If character isn't a duplicate, display a badge that says they're new
+    console.log(duplicates)
+    if (duplicates === 0) {
+        const newBadge = character.add([
+            rect(200, 75, { radius: 5 }),
+            outline(2),
+            rotate(-45),
+            anchor("center"),
+            pos(vec2(-150, -150)),
+            color(BADGE_BG_COLOR)
+        ]);
+        newBadge.add([
+            text("New!", { font: "digiFont" }),
+            anchor("center"),
+            pos(vec2(0, -5)), // center it with newBadge
+            color(BADGE_TXT_COLOR)
+        ])
+    }
+    // player can go back to gacha via pressing the escape key
+    onKeyPress("escape", () => {
+        go("Gacha");
+    })
     // add a back button so the player can do more pulls
     addBtn("Back", vec2(width() - 640, height() - 60), () => {
         go("Gacha");
     });
 });
-const BADGE_BG_COLOR = "#0D3B66" // background color for the new badge
-const BADGE_TXT_COLOR = "#F8F991" // hex code for text in the new badge
+
 // scene takes two arrays, one for the pulled characters, and another that's the same size which stores a bool to determine whether or not they're a duplicate
 scene("GachaDisplayBulk", async ({ pulled, duplicates }) => {
     const DISPLAY_BG_COLOR = "#57467B"; // background color of the board displaying individual character info
@@ -479,7 +500,15 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates }) => {
             zoomOut(display, 0.4); // TODO: this isn't visible as hidden is set to to true too soon
         });
     }
-
+    // player can go back to gacha or bulk display via pressing the escape key
+    onKeyPress("escape", () => {
+        if (infoDisplayed) {
+            infoDisplayed = false;
+            zoomOut(display, 0.4); // TODO: this isn't visible as hidden is set to to true too soon
+        } else {
+            go("Gacha");
+        }
+    })
     let characterGameObjects = grid.get("character") // get a list of all the game objects with the tag 'character'
     // display each character with increasing more delay
     for (let i = 0; i < characterGameObjects.length; i++) {
