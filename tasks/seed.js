@@ -2,13 +2,14 @@ import { dbConnection, closeConnection } from "../config/mongoConnection.js";
 import {
     gachaData,
     shopData,
-    indexData,
+    collectionIndexData,
     userData,
     collectionInventoryData
 } from "../data/index.js";
 import {
     rarityToPullRate,
-    rarityToDupCurrency
+    rarityToDupCurrency,
+    updateCurrencyCount
 } from "../helpers.js";
 
 async function main() {
@@ -21,12 +22,20 @@ async function main() {
     // create a user account 
     try {
         await userData.register("user1", "test@gmail.com", "ValidPass1!");
-        console.log("Test user created.");
+        console.log("Test user1 created.");
     } catch {
-        console.log("Test user already exists.");
+        console.log("Test user1 already exists.");
     }
 
     const { userId } = await userData.login("test@gmail.com", "ValidPass1!");
+    // Seed currency for test user
+    try {
+        // using helper to add currency
+        await updateCurrencyCount(userId, 1000);
+        console.log("Seeded user1 with 1000 in-game currency.");
+    } catch (e) {
+        console.error("Failed to seed currency for user1: ", e);
+    }
 
     // 1) create characters
     const characters = [
@@ -161,10 +170,10 @@ async function main() {
     ]
 
     // 2) seed collection index
-    console.log("Starting to seed collectionIndex...");
+    console.log("Starting to seed collectionIndex & gacha...");
     try {
         for (const c of characters) {
-            await indexData.addIndexEntry(
+            await collectionIndexData.addIndexEntry(
                 c.name,
                 c.rarity,
                 c.image,
@@ -172,7 +181,7 @@ async function main() {
             );
         }
     } catch (e) {
-        console.error("error seeding collectionIndex: ", e);
+        console.error("error seeding collectionIndex & gacha: ", e);
     }
     console.log("Done seeding collectionIndex & gacha!");
 
@@ -182,22 +191,21 @@ async function main() {
             name: "normal ticket",
             cost: 10,
             description: "A basic ticket good for one Gacha pull.",
-            image: "https://via.placeholder.com",
+            image: "https://media-hosting.imagekit.io/0b48c956c62047ce/screenshot_1747005089338.png?Expires=1841613089&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=YkqCS~-iONJIBM4yzsZ1QiNgByCLrLkeDYvBcoIe6YCF29VdDBRRXCnFm8Wk-WMcZqmq-iqplxixTHmsQcLlsWyoqA-mXfW8U6BQz8OUaM1TvkWNuCI4QzT2xgRVxh~4KoP7TRiIOSW0QG5xO5YJZJxB4zVvwlKSgp9dkvf4FFBCSn5DCu84dlxqk-d9hUlob6~As9aGjv-J0-xBp5IqbkELYhnwq1SRwHXyjBiOAIklnN7iXS8c7~iTmm5xLbxgVt3WQWq6SaSN8vFXYQq7ACjxji21dHk3bFKIaZ55Y79zRYydP1Lwx9bIb0xQbpx8sPXKVRmyPTafYYTTrhSLOw__",
         },
         {
             name: "golden ticket",
             cost: 100,
             description: "A golden ticket with higher odds for rare characters.",
-            image: "https://via.placeholder.com",
+            image: "https://media-hosting.imagekit.io/0b48c956c62047ce/screenshot_1747005089338.png?Expires=1841613089&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=YkqCS~-iONJIBM4yzsZ1QiNgByCLrLkeDYvBcoIe6YCF29VdDBRRXCnFm8Wk-WMcZqmq-iqplxixTHmsQcLlsWyoqA-mXfW8U6BQz8OUaM1TvkWNuCI4QzT2xgRVxh~4KoP7TRiIOSW0QG5xO5YJZJxB4zVvwlKSgp9dkvf4FFBCSn5DCu84dlxqk-d9hUlob6~As9aGjv-J0-xBp5IqbkELYhnwq1SRwHXyjBiOAIklnN7iXS8c7~iTmm5xLbxgVt3WQWq6SaSN8vFXYQq7ACjxji21dHk3bFKIaZ55Y79zRYydP1Lwx9bIb0xQbpx8sPXKVRmyPTafYYTTrhSLOw__",
         },
         {
             name: "food",
             cost: 50,
             description: "Food to feed your characters and boost their experience.",
-            image: "https://via.placeholder.com",
+            image: "https://media-hosting.imagekit.io/0b48c956c62047ce/screenshot_1747005089338.png?Expires=1841613089&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=YkqCS~-iONJIBM4yzsZ1QiNgByCLrLkeDYvBcoIe6YCF29VdDBRRXCnFm8Wk-WMcZqmq-iqplxixTHmsQcLlsWyoqA-mXfW8U6BQz8OUaM1TvkWNuCI4QzT2xgRVxh~4KoP7TRiIOSW0QG5xO5YJZJxB4zVvwlKSgp9dkvf4FFBCSn5DCu84dlxqk-d9hUlob6~As9aGjv-J0-xBp5IqbkELYhnwq1SRwHXyjBiOAIklnN7iXS8c7~iTmm5xLbxgVt3WQWq6SaSN8vFXYQq7ACjxji21dHk3bFKIaZ55Y79zRYydP1Lwx9bIb0xQbpx8sPXKVRmyPTafYYTTrhSLOw__",
         },
     ]
-
 
     // 5) seed shop
     console.log("Starting to seed shop collection...");
