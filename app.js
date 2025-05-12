@@ -16,7 +16,7 @@ app.use(session({
 
 app.get('/', redirectToGachaIfLoggedIn);
 app.get('/register', redirectToGachaIfLoggedIn);
-
+app.get('/gacha', ensureLogin);
 // ensureLogin should apply to every other route besides / and /register but we dont have them yet
 app.get('/shop', ensureLogin);
 app.get('/shop/items', ensureLogin);
@@ -27,8 +27,9 @@ app.get('/collectionIndex', ensureLogin);
 app.get('/collectionIndex/entries', ensureLogin);
 app.get('/collectionIndex/entries/:id', ensureLogin);
 
+app.get('/user/:id', ensureLogin);
+app.get('/user/:id/profile', ensureLogin);
 app.get('/signout', ensureLogin);
-
 
 app.use('/public', express.static('public'));
 app.use(express.urlencoded({ extended: true }));

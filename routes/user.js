@@ -202,24 +202,70 @@ router.route("/signout").get(async (req, res) => {
   }
 });
 
-router.route("/:id")
+router.route("/user/:id")
+  // render webpage that lets the user choose to view their account or delete it  
+  .get(async (req, res) => {
+    try {
+      // verify that url param is a valid object id
+      req.params.id = helpers.validateObjectId(req.params.id, "ID url param");
+    } catch (e) {
+      res.status(400).render('error', { title: "Error 404", error: e });
+    }
+
+    // attempt to render user settings page
+    try {
+      res.render('settings', { title: "User Settings", userId: req.params.id });
+    } catch (e) {
+      res.status(404).render("error", {
+        title: "Error: 404",
+        error: e.toString()
+      });
+    }
+  })
+router.route("/user/:id/profile")
   // Get user's profile
   .get(async (req, res) => {
     try {
       // verify that url param is a valid object id
       req.params.id = helpers.validateObjectId(req.params.id, "ID url param");
     } catch (e) {
-      res.status(404).render('error', { title: "Error 404", error: e });
+      res.status(400).render('error', { title: "Error 404", error: e });
     }
 
-    // TODO attempt to get user's profile page
+    // attempt to get user's profile page
     try {
       // check that a user exists with that id and get relevant data
       const user = await userData.getUserById(req.params.id);
       // render user handlebar with relevant data
-      res.render('user', { username: user.username, profilePic: user.profilePic, level: user.level, obtained: user.obtained });
+      res.render('user', { title: `${user.username}'s Page`, username: user.username, profilePic: user.profilePic, level: user.level, obtained: user.obtained });
     } catch (e) {
-
+      res.status(404).render("error", {
+        title: "Error: 404",
+        error: e.toString()
+      });
+    }
+  })
+  // delete the user account
+  .delete(async (req, res) => {
+    try {
+      // verify that url param is a valid object id
+      req.params.id = helpers.validateObjectId(req.params.id, "ID url param");
+    } catch (e) {
+      res.status(400).render('error', { title: "Error 400", error: e });
+    }
+    // attempt to delete user's account
+    try {
+      let deletedUser = await userData.removeAccount(req.params.id);
+      // delete AuthenticationState
+      req.session.destroy();
+      res.clearCookie("AuthenticationState");
+      res.render('signout', { title: "Signed Out" }); // redirect user to login page
+    } catch (e) {
+      console.log(e);
+      res.status(404).render("error", {
+        title: "Error: 404",
+        error: e.toString()
+      });
     }
   });
 //export router
