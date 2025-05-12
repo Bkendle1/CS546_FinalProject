@@ -287,6 +287,10 @@ scene("CharacterInteraction",(character) => {
                 let charIndex = inventoryData.obtained.findIndex((charac) => charac._id === updatedCharacter._id);
                 inventoryData.obtained[charIndex].nickname = updatedCharacter.nickname;
                 go("CharacterInteraction",updatedCharacter);
+            })
+            .fail (function (e) {
+                let msg = e.responseJSON.error || "Updating Nickname has failed";
+                alert(msg);
             });
         },20);
       }
@@ -301,25 +305,25 @@ scene("CharacterInteraction",(character) => {
         z(4)
     ]);
 
-    addBtn("Level Up",vec2(width()/2,1100), () => {
-        $.ajax({
-            method: 'POST',
-            url: `/collectionInventory/${character._id}/levelup`,
-            data: {gainedExperience: 100} // default 100 for feeding 
-        })
-        .then(function () { // refresh the data after leveling up 
-            return $.ajax({
-                method: 'GET',
-                url: `/collectionInventory/${character._id}`
-            });
-        })
-        .then(function (updatedCharacter) {
-            // refresh when we go back to inventory page 
-            let charIndex = inventoryData.obtained.findIndex((charac) => charac._id === updatedCharacter._id);
-            inventoryData.obtained[charIndex] = updatedCharacter;
-            go("CharacterInteraction",updatedCharacter);
-        });
-    },20);
+    // addBtn("Level Up",vec2(width()/2,1100), () => {
+    //     $.ajax({
+    //         method: 'POST',
+    //         url: `/collectionInventory/${character._id}/levelup`,
+    //         data: {gainedExperience: 100} // default 100 for feeding 
+    //     })
+    //     .then(function () { // refresh the data after leveling up 
+    //         return $.ajax({
+    //             method: 'GET',
+    //             url: `/collectionInventory/${character._id}`
+    //         });
+    //     })
+    //     .then(function (updatedCharacter) {
+    //         // refresh when we go back to inventory page 
+    //         let charIndex = inventoryData.obtained.findIndex((charac) => charac._id === updatedCharacter._id);
+    //         inventoryData.obtained[charIndex] = updatedCharacter;
+    //         go("CharacterInteraction",updatedCharacter);
+    //     });
+    // },20);
 
     add([
         text(`Level: ${character.experience.level}`,{size: 25}),
@@ -335,6 +339,30 @@ scene("CharacterInteraction",(character) => {
         color(TEXT_COLOR),
     ]);
 
+    addBtn("Feed to Level Up",vec2(width()/2,1200), () => {
+        $.ajax({
+            method: 'POST',
+            url: `/collectionInventory/${character._id}/feed`,
+        })
+        .then(function (response) {
+            if (response.playerLeveledUp === true) {
+                alert("Player has leveled up! You have earned a ticket!");
+            }
+            return $.ajax({
+                method: 'GET',
+                url: `/collectionInventory/${character._id}`
+            });
+        })
+        .then(function (updatedCharacter) {
+            let charIndex = inventoryData.obtained.findIndex((charac) => charac._id === updatedCharacter._id);
+            inventoryData.obtained[charIndex] = updatedCharacter;
+            go("CharacterInteraction",updatedCharacter);
+        })
+        .fail (function (e) {
+                let msg = e.responseJSON.error || "Feeding has failed";
+                alert(msg);
+        });
+    },16);
 });
 
 go("Inventory");
