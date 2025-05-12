@@ -315,7 +315,7 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates }) => {
     }
 
     const grid = addLevel([
-        // define grid layout where the special symbol indicates a sprite's location in the grid
+        // define grid layout where the special symbols indicates a sprite's location in the grid
         "   !       @  ",
         "              ",
         "              ",
@@ -331,50 +331,73 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates }) => {
                 // ! is for the first character
                 "!": () => [
                     sprite(`${characters[0].name}`, { width: 240, height: 240 }),
-                    area(),
+                    area(), // give them collision bodies so they can be clicked on
                     anchor("center"),
-                    "first"
+                    "character",
                 ],
                 // @ is for the second character
                 "@": () => [
                     sprite(`${characters[1].name}`, { width: 240, height: 240 }),
-                    area(),
+                    area(), // give them collision bodies so they can be clicked on
                     anchor("center"),
+                    "character",
                 ],
                 // # is for the third character
                 "#": () => [
                     sprite(`${characters[2].name}`, { width: 240, height: 240 }),
-                    area(),
+                    area(), // give them collision bodies so they can be clicked on
                     anchor("center"),
+                    "character"
                 ],
                 // $ is for the fourth character
                 "$": () => [
                     sprite(`${characters[3].name}`, { width: 240, height: 240 }),
-                    area(),
+                    area(), // give them collision bodies so they can be clicked on
                     anchor("center"),
+                    "character"
                 ],
                 // % is for the fifth character
                 "%": () => [
                     sprite(`${characters[4].name}`, { width: 240, height: 240 }),
-                    area(),
+                    area(), // give them collision bodies so they can be clicked on
                     anchor("center"),
+                    "character"
                 ],
             }
         }
     )
 
     // TODO: display character's information from index using AJAX request to collectionIndex route
-    tween(
-        0, // starting value
-        1, // target value
-        0.25, // duration
-        (v) => {
-            first
-            // grid.scale = vec2(v); // scale character
-            // revealText.scale = vec2(v); // scale reveal text
-        },
-        easings.easeOutSine // with this easing
-    );
+
+    // Tweens a gameObject's scale for a minimum duration of 0.25 seconds + delay
+    const zoomIn = (gameObject, delay) => {
+        tween(0, 1, 0.25 + delay, (v) => { gameObject.scale = vec2(v) }, easings.easeOutSine);
+    }
+    let characterGameObjects = grid.get("character") // get a list of all the game objects with the tag 'character'
+    // display each character with increasing more delay
+    for (let i = 0; i < characterGameObjects.length; i++) {
+        zoomIn(characterGameObjects[i], i * 0.1);
+        // runs every frame when the object is being hovered
+        characterGameObjects[i].onHoverUpdate(() => {
+            characterGameObjects[i].scale = vec2(1.2); // make button slightly larger
+            setCursor("pointer"); // change cursor into pointer
+        });
+        // runs once the object stopped being hovered
+        characterGameObjects[i].onHoverEnd(() => {
+            characterGameObjects[i].scale = vec2(1); // reset scale of button
+            setCursor("default"); // set cursor back to normal
+        });
+
+        // run callback on click
+        characterGameObjects[i].onClick(() => {
+            console.log("clicked")
+        });
+    }
+
+
+
+
+
 
     // Display the character's name, image, description, rarity
 
@@ -393,11 +416,6 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates }) => {
     //     pos(vec2(550, 50))
     // ]);
     //}
-    // add([
-    //     text(`DEBUG: You got: ${pulled}`, { font: "digiFont" }),
-    //     pos(center()),
-    //     anchor("center")
-    // ]);
 
     // add a back button so the player can do more pulls
     addBtn("Back", vec2(width() - 640, height() - 60), () => {
