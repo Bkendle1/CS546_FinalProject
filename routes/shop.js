@@ -42,7 +42,7 @@ router.get("/items", async (req, res) => {
  */
 router.post("/purchase", async (req, res) => {
     try {
-        const userId = req.session.user._id;
+        const userId = req.session.user.userId;
         const { itemName, quantity } = req.body;
         await purchaseItem(userId, itemName, parseInt(quantity, 10));
         res.redirect("/shop");

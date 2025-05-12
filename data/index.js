@@ -8,5 +8,5 @@ import * as collectionIndexFunctions from "./collectionIndex.js"
 export const gachaData = gachaDataFunctions;
 export const userData = userDataFunctions;
 export const shopData = shopDataFunctions;
-export const indexData = collectionIndexFunctions;
+export const collectionIndexData = collectionIndexFunctions;
 export const collectionInventoryData = collectionInventoryFunctions;
