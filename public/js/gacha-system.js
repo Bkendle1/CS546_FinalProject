@@ -130,13 +130,15 @@ function requestPull(pullType, pullCount) {
 };
 
 
-// Get the data of a character using a route for the collectionIndex collection
+/**
+ * Get the data of a single character using a route for the collectionIndex collection. 
+ */
 async function requestCharacterData(characterId) {
     // Make a GET request to /collectionIndex/entries/:id
     try {
         const url = `/collectionIndex/entries/${characterId}`;
         const response = await fetch(url);
-        if (!response.ok) throw response.status;
+        if (!response.ok) throw response.status.message;
         return await response.json(); // return JSON of response, i.e. character index data
     } catch (e) {
         console.error(e);
@@ -250,39 +252,53 @@ scene("GachaDisplaySingle", async ({ pulled, duplicate }) => {
     ]);
     // get the pulled character's index information
     const charInfo = await requestCharacterData(pulled);
-    loadSprite(charInfo.name, charInfo.image);
+    loadSprite(charInfo.name, charInfo.image); // load the sprite for the corresponding character
+    const revealText = add([
+        text(`Congrats! You got ${charInfo.name}!`, { font: "digiFont" }),
+        pos(vec2(width() / 2, height() - 650)),
+        anchor("center")
+    ]);
 
     const character = add([
-        sprite(charInfo.name),
-        pos(center()),
+        sprite(charInfo.name, { width: 350, height: 350 }),
+        pos(vec2(width() - 1000, height() - 360)),
         anchor("center")
     ])
-    // TODO: display character's information from index using AJAX request to collectionIndex route
-    // display the character's name, image, description, rarity
+
+    // Display the character's name, image, description, rarity
     tween(
         0, // starting value
         1, // target value
         0.25, // duration
         (v) => {
-            character.scale = vec2(v);
+            character.scale = vec2(v); // scale character
+            revealText.scale = vec2(v); // scale reveal text
         },
-        easings.easeOutQuad // with this easing
+        easings.easeOutSine // with this easing
     );
 
-    // THIS IS JUST FOR DEBUGGING
-    // add([
-    //     text(`DEBUG: You got: ${pulled}`, { font: "digiFont" }),
-    //     pos(center()),
-    //     anchor("center")
-    // ]);
+    // display character's rarity
+    character.add([
+        text(`${charInfo.rarity}`, { font: "digiFont" }),
+        anchor("center"),
+        pos(vec2(550, -200))
+    ]);
+
+    // display character's description
+    character.add([
+        text(`${charInfo.description}`, { font: "digiFont", align: "center", width: 600, size: 25 }),
+        anchor("center"),
+        pos(vec2(550, 10))
+    ]);
+
     // add a back button so the player can do more pulls
     addBtn("Back", vec2(width() - 640, height() - 60), () => {
         go("Gacha");
-    })
+    });
 });
 
 // scene takes two arrays, one for the pulled characters, and another that's the same size which stores a bool to determine whether or not they're a duplicate
-scene("GachaDisplayBulk", ({ pulled, duplicates }) => {
+scene("GachaDisplayBulk", async ({ pulled, duplicates }) => {
     // render scene's background
     add([
         sprite("blackBG"),
@@ -290,14 +306,98 @@ scene("GachaDisplayBulk", ({ pulled, duplicates }) => {
         pos(center()),
         anchor("center"),
     ]);
+    let characters = []; // store all pulled characters
+    // load all the characters' sprites
+    for (let i = 0; i < pulled.length; i++) {
+        const charInfo = await requestCharacterData(pulled[i]);
+        loadSprite(charInfo.name, charInfo.image); // load sprite for character
+        characters.push(charInfo); // character info to array
+    }
 
+    const grid = addLevel([
+        // define grid layout where the special symbol indicates a sprite's location in the grid
+        "   !       @  ",
+        "              ",
+        "              ",
+        "              ",
+        "#      $      %",
+    ],
+        {
+            tileWidth: 64, // width of a grid tile
+            tileHeight: 64, // height of a grid tile
+            pos: vec2(width() - 1100, height() - 500), // position of the first block
+            // define what each symbol means
+            tiles: {
+                // ! is for the first character
+                "!": () => [
+                    sprite(`${characters[0].name}`, { width: 240, height: 240 }),
+                    area(),
+                    anchor("center"),
+                    "first"
+                ],
+                // @ is for the second character
+                "@": () => [
+                    sprite(`${characters[1].name}`, { width: 240, height: 240 }),
+                    area(),
+                    anchor("center"),
+                ],
+                // # is for the third character
+                "#": () => [
+                    sprite(`${characters[2].name}`, { width: 240, height: 240 }),
+                    area(),
+                    anchor("center"),
+                ],
+                // $ is for the fourth character
+                "$": () => [
+                    sprite(`${characters[3].name}`, { width: 240, height: 240 }),
+                    area(),
+                    anchor("center"),
+                ],
+                // % is for the fifth character
+                "%": () => [
+                    sprite(`${characters[4].name}`, { width: 240, height: 240 }),
+                    area(),
+                    anchor("center"),
+                ],
+            }
+        }
+    )
 
     // TODO: display character's information from index using AJAX request to collectionIndex route
-    add([
-        text(`DEBUG: You got: ${pulled}`, { font: "digiFont" }),
-        pos(center()),
-        anchor("center")
-    ]);
+    tween(
+        0, // starting value
+        1, // target value
+        0.25, // duration
+        (v) => {
+            first
+            // grid.scale = vec2(v); // scale character
+            // revealText.scale = vec2(v); // scale reveal text
+        },
+        easings.easeOutSine // with this easing
+    );
+
+    // Display the character's name, image, description, rarity
+
+
+    // // display character's rarity
+    // character.add([
+    //     text(`${charInfo.rarity}`, { font: "digiFont" }),
+    //     anchor("center"),
+    //     pos(vec2(550, -150))
+    // ]);
+
+    // // display character's description
+    // character.add([
+    //     text(`${charInfo.description}`, { font: "digiFont", align: "left", width: 600, size: 25 }),
+    //     anchor("center"),
+    //     pos(vec2(550, 50))
+    // ]);
+    //}
+    // add([
+    //     text(`DEBUG: You got: ${pulled}`, { font: "digiFont" }),
+    //     pos(center()),
+    //     anchor("center")
+    // ]);
 
     // add a back button so the player can do more pulls
     addBtn("Back", vec2(width() - 640, height() - 60), () => {
