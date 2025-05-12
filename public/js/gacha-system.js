@@ -49,8 +49,9 @@ function addBtn(str, position, callback) {
 
     // add a child object that displays the text
     btn.add([
-        text(str),
+        text(`${str}`, { font: "digiFont", }),
         anchor("center"),
+        pos(vec2(0, -8)),
         color(BUTTON_TEXT_COLOR), // color of text
     ]);
 
