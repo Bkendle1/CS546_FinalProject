@@ -43,10 +43,20 @@ footer {
 .nicknameContainer {
     position: absolute;
     top: 50px;
-    left: 30%;
+    left: 35%;
     z-index: 1000; 
     padding: 10px;
     border-radius: 8px;
+    color: rgb(97, 216, 253);
+}
+
+.nickname-label {
+    margin-top: 10px;
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+    font-weight: bold;
+    font-size: 20pt;
 }
 
 .labelA,
@@ -81,11 +91,10 @@ footer {
     font-size: 18px;
 }
 
-
 a {
     color: #FF4D00;
     display: block;
-    font-size: 13pt;
+    font-size: 20pt;
 }
 
 a:visited {

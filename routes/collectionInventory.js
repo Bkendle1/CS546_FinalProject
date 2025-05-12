@@ -7,7 +7,7 @@ import * as helpers from "../helpers.js";
 router.route('/').get(async (req, res) => {
     try {
         let inventory = await collectionInventoryData.getUserInventory(req.session.user.userId);
-        res.render('collectionInventory',{title:"My Inventory", inventory: JSON.stringify(inventory)});
+        res.render('collectionInventory',{title:"My Inventory", inventory: JSON.stringify(inventory), user: JSON.stringify(req.session.user)});
     } catch (e) {
         res.status(500).render('error', {
           title: "Error: Inventory can not be viewed",

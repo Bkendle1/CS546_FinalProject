@@ -3,7 +3,7 @@ import kaplay from "https://unpkg.com/kaplay@3001/dist/kaplay.mjs";
 // initialize game 
 kaplay({
     width: 1380,  // width of canvas 
-    height: 1380, // height of canvas
+    height: 1580, // height of canvas
     font: "sans-serif", // in-game font
     crisp: false, // makes pixels sharp
     canvas: document.querySelector("#inventory-canvas"),
@@ -22,6 +22,7 @@ const CHARACTER_PROFILE_HEIGHT = 300;
 
 // initialize 
 let inventoryData = window.inventoryData;
+let userData = window.userData;
 
 // load background image and character images
 loadSprite("inventoryBG", "/public/images/digimonInventory.jpg");
@@ -211,9 +212,22 @@ scene("Inventory",() => {
 
     characters.forEach((charac,index) => {
         let posX = 150 + (index % profPerRow) * spaceRows;
-        let posY = 150 + Math.floor(index/profPerRow) * spaceColumns;
+        let posY = 300 + Math.floor(index/profPerRow) * spaceColumns;
         createCharacterProfile(charac,vec2(posX,posY));
     });
+
+    if (!userData) {
+        return;
+    }
+
+    let foodCount = userData.metadata.food_count;
+    add([
+        text(`Food Counter: ${foodCount}`,{size: 25}),
+        pos(1200,100),
+        anchor("center"),
+        color("#FF8A1C")
+    ])
+    
 });
 
 // for user interaction -- nickname and leveling up 
@@ -229,7 +243,20 @@ scene("CharacterInteraction",(character) => {
 
     // add a back button to go back to main inventory
     addBtn("Back",vec2(width()/2,height()-60), () => {
-        go("Inventory")},25);
+        $.ajax({
+                method: 'GET',
+                url: `/metadata`
+        })
+        .then(function (updatedMetaData) {
+            userData.metadata = updatedMetaData;
+            go("Inventory");
+        })
+        .fail (function (e) {
+            let msg = e.responseJSON.error || "Refreshing user metadata has failed";
+            alert(msg);
+            go("Inventory");
+        });
+    },25);
 
     // add the name
     add([
