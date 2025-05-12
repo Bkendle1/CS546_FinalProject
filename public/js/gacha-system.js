@@ -375,48 +375,53 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates }) => {
 
     // TODO: display character's information from index using AJAX request to collectionIndex route
     let infoDisplayed = false; // boolean that's set if a character's info is being displayed
-    // const display = make([
-    //     rect(1100, 600),
-    //     color(DISPLAY_BG_COLOR),
-    //     outline(5),
-    //     anchor("center"),
-    //     pos(center()),
-    //     "display"
-    // ]);
-    // function displayInfo(character) {
-    //     console.log(character);
-    //     add(display);
-    //     // display character's name
-    //     display.add([
-    //         text(`${character.name}`, { font: "digiFont", align: "center", size: 50 }),
-    //         color("#FFFFFF"),
-    //         anchor("center"),
-    //         pos(vec2(0, -300)),
-    //     ]);
-    //     // // display character's description
-    //     // character.add([
-    //     //     text(`${charInfo.description}`, { font: "digiFont", align: "left", width: 600, size: 25 }),
-    //     //     anchor("center"),
-    //     //     pos(vec2(550, 50))
-    //     // ]);
-    //     //}
-    //     // display character's rarity
-    //     display.add([
-    //         text(`${character.rarity}`, { font: "digiFont", align: "center" }),
-    //         anchor("center"),
-    //         pos(vec2(100, -150))
-    //     ]);
-    //     zoomIn(display, 0.75) // have rectangle zoom in 
+    const display = add([
+        rect(1100, 600),
+        color(DISPLAY_BG_COLOR),
+        outline(5),
+        anchor("center"),
+        pos(center()),
+        "display"
+    ]);
+    const displayImg = add([ // display character's image
+        // sprite()
+    ])
+    // display character's name
+    const displayName = add([
+        text("", { font: "digiFont", align: "center", size: 50 }),
+        color("#FFFFFF"),
+        anchor("center"),
+        pos(vec2(0, -300)),
+    ]);
+    // display character's rarity
+    const displayRarity = add([
+        text("", { font: "digiFont", align: "center" }),
+        anchor("center"),
+        pos(vec2(100, -150))
+    ]);
+    // display character's description
+    const displayDesc = add([
+        text("", { font: "digiFont", align: "left", width: 600, size: 25 }),
+        anchor("center"),
+        pos(vec2(550, 50))
+    ]);
 
-    //     // display character's image
+    function displayInfo(character) {
+        displayName.text = `${character.name}`;
+        displayRarity.text = `${character.rarity}`;
+        displayDesc.text = `${character.description}`;
+        displayImg.sprite = `${character.name}`;
+        zoomIn(display, 0.75) // have rectangle zoom in 
 
-    //     // display character's description
+        // display character's image
 
-    //     addBtn("Back", vec2(width() - 640, height() - 60), () => {
-    //         infoDisplayed = false;
-    //         zoomOut(display, 0);
-    //     });
-    // }
+        // display character's description
+
+        addBtn("Back", vec2(width() - 640, height() - 60), () => {
+            infoDisplayed = false;
+            zoomOut(display, 0.4); // TODO: this isn't visible as hidden is set to to true too soon
+        });
+    }
     // Tweens a gameObject's scale to 1 for a minimum duration of 0.25 seconds + delay
     const zoomIn = (gameObject, delay) => {
         tween(0, // start value 
@@ -466,8 +471,9 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates }) => {
             })
             backBtn.hidden = true; // hide button that goes back to gacha
             backBtn.area.scale = vec2(0) // make button clickable 
-
+            display.hidden = false;
         } else {
+            display.hidden = true;
             characterGameObjects.forEach((character) => {
                 character.area.scale = vec2(1);// make each character clickable
             })
