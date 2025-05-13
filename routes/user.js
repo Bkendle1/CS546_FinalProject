@@ -2,9 +2,7 @@ import { Router } from "express";
 const router = Router();
 import { register, login } from "../data/users.js";
 import xss from "xss";
-import { validateUsername, validatePassword, validateEmail } from "../helpers.js";
-import * as helpers from "../helpers.js";
-import { userData } from "../data/index.js";
+import { validateUsername, validatePassword, validateEmail, getUserMetadata } from "../helpers.js";
 
 router.route("/").get(async (req, res) => {
   //code here for GET
@@ -267,6 +265,16 @@ router.route("/user/:id/profile")
       });
     }
   });
+
+router.route("/metadata").get(async (req, res) => {
+  //code here for GET
+  try {
+    let metadata = await getUserMetadata(req.session.user.userId);
+    return res.status(200).json(metadata);
+  } catch (e) {
+    res.status(500).json({error: e.toString()});
+  }
+});
 
 //export router
 export default router;

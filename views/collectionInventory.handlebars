@@ -6,7 +6,7 @@
     </div>
     {{!-- input for nickname, but keep it hidden initially --}}
     <div class="nicknameContainer">
-        <label for="nickname" id="nickname-label" class="labelA" style="display: none">
+        <label for="nickname" id="nickname-label" class="nickname-label" style="display: none">
             Nickname:
         </label>
         <input type="text" id="nickname-input" class="inputA" style="display: none"> 
@@ -14,6 +14,9 @@
     <canvas id="inventory-canvas"></canvas> 
     <script>
         window.inventoryData = {{{inventory}}}; // pass inventoryData to the game
+    </script>
+    <script>
+        window.userData = {{{user}}}; // pass user to the game
     </script>
     <script type="module" src="../public/js/inventory-system.js"></script>
 </div>
