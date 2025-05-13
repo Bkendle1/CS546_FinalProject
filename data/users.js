@@ -66,10 +66,11 @@ export const register = async (
   }
 
   // update the user's ticket cooldown timer
-  const cooldown = await setTicketCooldownTime(insertNewUser.insertedId);
+  const userId = insertNewUser.insertedId.toString();
+  const cooldown = await setTicketCooldownTime(userId, 24); // set cooldown time to be 24 hours from current time
   const updateInfo = usersCollection.updateOne({ _id: ObjectId.createFromHexString(userId) }, { $set: { "metadata.ticket_count.cooldown": cooldown } });
   if (updateInfo.modifiedCount === 0) {
-    throw `Could not update the cooldown time for user with id: ${userId}.`
+    throw `Could not update the cooldown time for user with id: ${insertNewUser.insertedId}.`
   }
 
   // create the user's inventory document
