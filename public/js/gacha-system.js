@@ -313,12 +313,16 @@ scene("GachaDisplaySingle", async ({ pulled, duplicates, tickets }) => {
     if (tickets.normal !== 0) {
         alertMsg = `You leveled up and got ${tickets.normal} ${tickets.normal > 1 ? `normal tickets!` : `normal ticket!`}.`
         normalTicketCount += tickets.normal // increment normal ticket count
-        alert(alertMsg);
+        // alert(alertMsg);
+        new Notification(alertMsg);
+
     }
     if (tickets.golden !== 0) {
         alertMsg = `You leveled up and got ${tickets.golden} ${tickets.golden > 1 ? `golden tickets!` : `golden ticket!`}.`
         goldenTicketCount += tickets.golden // increment golden ticket count
-        alert(alertMsg);
+        // alert(alertMsg);
+        new Notification(alertMsg);
+
     }
 
 
@@ -473,12 +477,14 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates, tickets }) => {
     if (tickets.normal !== 0) {
         alertMsg = `You leveled up and got ${tickets.normal} ${tickets.normal > 1 ? `normal tickets!` : `normal ticket!`}.`
         normalTicketCount += tickets.normal // increment normal ticket count
-        alert(alertMsg);
+        // alert(alertMsg);
+        new Notification(alertMsg);
     }
     if (tickets.golden !== 0) {
         alertMsg = `You leveled up and got ${tickets.golden} ${tickets.golden > 1 ? `golden tickets!` : `golden ticket!`}.`
         goldenTicketCount += tickets.golden // increment golden ticket count
-        alert(alertMsg);
+        // alert(alertMsg);
+        new Notification(alertMsg);
     }
 
 
@@ -538,12 +544,10 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates, tickets }) => {
         zoomIn(display, 0.75)                               // have rectangle zoom in 
         displayImg.sprite = `${character.name}`;            // display character's image
         displayDesc.text = `${character.description}`;      // display character's description
-        // displayNewBadge.hidden = true;
         if (dup_currency !== 0) {
             displayDupCurrency.text = `Duplicate: +${dup_currency}`;
         } else {
             displayDupCurrency.text = "";
-            // displayNewBadge.hidden = false;
         }
         // button to go back to bulk pull results
         addBtn("Back", vec2(width() - 640, height() - 60), () => {
@@ -641,3 +645,12 @@ async function checkFreeTicket() {
     $.ajax(requestConfig);
 }
 checkFreeTicket(); // when the script loads, check if the user got their free ticket 
+
+// Ask the player if they want notifications
+window.addEventListener("DOMContentLoaded", async () => {
+    if ("Notification" in window && Notification.permission === "default") {
+        alert("Accept notifications to get notified when leveling up!");
+        let promise = await Notification.requestPermission();
+    }
+
+});
