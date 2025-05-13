@@ -1,7 +1,7 @@
 import { users, collectionIndex, gacha, collectionInventory } from "./config/mongoCollections.js";
 import { ObjectId } from "mongodb";
 import random from 'simple-random-number-generator';
-
+import moment from 'moment';
 /**
  * Verifies that the given string is not undefined, empty, not of type string, nor just whitespace, and also returns the string trimmed with trim().
  */
@@ -417,3 +417,67 @@ export const getPullHistory = async (userId) => {
     if (!user) throw `No user with id: ${userId}.`;
     return user.pull_history;
 }
+
+/**
+ * Sets the user's 'cooldown' field with a given number of hours. Supports decimals. Returns the cooldown time as an ISOString.
+ */
+export const setTicketCooldownTime = async (userId, hours) => {
+    // verify that user id is a valid Object ID and string
+    userId = validateObjectId(userId, "User ID");
+    // verify that hours is a valid number
+    if (!hours) throw "Must supply an amount of time in hours.";
+    if (typeof (hours) !== 'number'
+        || Number.isNaN(hours)
+        || hours <= 0) {
+        throw "Hours must be a positive number greater than 0.";
+    }
+
+    // check if user exists
+    const userCollection = await users();
+    const user = await userCollection.findOne({ _id: ObjectId.createFromHexString(userId) });
+    if (!user) throw `No user with id: ${userId}.`;
+
+    // update cooldown time with given hours
+    const newCooldownTime = moment().add(hours, 'hours').toISOString();
+    const updateInfo = await userCollection.updateOne({ _id: ObjectId.createFromHexString(userId) }, { $set: { "metadata.ticket_count.cooldown": newCooldownTime } });
+    if (updateInfo.modifiedCount === 0) {
+        throw `Could not update the cooldown time for user with id: ${userId}.`;
+    }
+
+    return newCooldownTime // returns the cooldown time
+
+}
+
+/**
+ * Check if the cooldown time for the user with the given id has been reached. 
+ * 
+ * If so, it updates the user's normal ticket count by 1 and updates the cooldown time to be 24 hours from the current time. 
+ * 
+ * It also updates the timestamp that stores the last time the user received a free ticket this way.
+ * 
+ * It returns the difference between the cooldown time and the last time the user received a free ticket. If the cooldown time is up, then the return value is how many milliseconds it has been since the cooldown time expired (which should be <= 0). Otherwise, the return result is how many milliseconds until the cooldown time expires.
+ */
+export const checkTicketCooldownTime = async (userId) => {
+    // verify that user id is a valid Object ID and string
+    userId = validateObjectId(userId, "User ID");
+    // check if user exists with that id
+    const userCollection = await users();
+    const user = await userCollection.findOne({ _id: ObjectId.createFromHexString(userId) });
+    if (!user) throw `No user with id: ${userId}.`;
+
+    // check if cooldown time has passed and, if so, give user their free ticket and update their cooldown time with a new time 
+    const cooldownTime = moment(user.metadata.ticket_count.cooldown); // get cooldown time as a moment instance
+    const currentTime = moment(); // get current time
+    const difference = cooldownTime.diff(currentTime); // compute difference between the two times
+    // check if 24 hours have passed since the cooldown time
+    if (difference <= 0) {
+        console.log(await updateTicketCount(userId, 'normal', 1)); // give user 1 normal ticket
+        await setTicketCooldownTime(userId, 24); // update cooldown time to be another 24 hours from now
+        const updateInfo = await userCollection.updateOne({ _id: ObjectId.createFromHexString(userId) }, { $set: { "metadata.ticket_count.timestamp": new Date().toISOString() } }) // update the timestamp for when the user received a last free ticket with the current time 
+        if (updateInfo.modifiedCount === 0) throw `Can't update the ticket timestamp for user with id: ${userId}.`;
+        return difference; // return the time since the cooldown expired
+    } else {
+        return difference; // return the time left before cooldown expires
+    }
+}
+

@@ -45,6 +45,7 @@ app.get('/gacha/normal/bulk',ensureLogin);
 app.get('/gacha/golden',ensureLogin);
 app.get('/gacha/golden/bulk',ensureLogin);
 app.get('/gacha/:id/pull_history', ensureLogin);
+app.get('/gacha/free_ticket', ensureLogin);
 
 app.get('/user/:id', ensureLogin);
 app.get('/user/:id/profile', ensureLogin);

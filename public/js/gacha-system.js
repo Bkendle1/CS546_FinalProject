@@ -312,10 +312,12 @@ scene("GachaDisplaySingle", async ({ pulled, duplicates, tickets }) => {
     let alertMsg = "";
     if (tickets.normal !== 0) {
         alertMsg = `You leveled up and got ${tickets.normal} ${tickets.normal > 1 ? `normal tickets!` : `normal ticket!`}.`
+        normalTicketCount += tickets.normal // increment normal ticket count
         alert(alertMsg);
     }
     if (tickets.golden !== 0) {
         alertMsg = `You leveled up and got ${tickets.golden} ${tickets.golden > 1 ? `golden tickets!` : `golden ticket!`}.`
+        goldenTicketCount += tickets.golden // increment golden ticket count
         alert(alertMsg);
     }
 
@@ -470,10 +472,12 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates, tickets }) => {
     let alertMsg = "";
     if (tickets.normal !== 0) {
         alertMsg = `You leveled up and got ${tickets.normal} ${tickets.normal > 1 ? `normal tickets!` : `normal ticket!`}.`
+        normalTicketCount += tickets.normal // increment normal ticket count
         alert(alertMsg);
     }
     if (tickets.golden !== 0) {
         alertMsg = `You leveled up and got ${tickets.golden} ${tickets.golden > 1 ? `golden tickets!` : `golden ticket!`}.`
+        goldenTicketCount += tickets.golden // increment golden ticket count
         alert(alertMsg);
     }
 
@@ -619,3 +623,21 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates, tickets }) => {
         }
     })
 });
+
+// User gets a free ticket a 24 hours; therefore, when this script loads, it should check if enough time has elapsed
+async function checkFreeTicket() {
+    const requestConfig = {
+        url: '/gacha/free_ticket',
+        method: 'GET',
+        success: (response) => {
+            if (response.free_ticket) {
+                alert(`You got your daily free normal ticket!`);
+                normalTicketCount++; // update counter to reflect new ticket count
+            } else {
+                console.log(`There's still ${response.timeRemaining * 1000} seconds left before your free ticket.`);
+            }
+        }
+    }
+    $.ajax(requestConfig);
+}
+checkFreeTicket(); // when the script loads, check if the user got their free ticket 
