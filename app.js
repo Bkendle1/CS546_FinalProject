@@ -14,6 +14,12 @@ app.use(session({
     saveUninitialized: false
 }));
 
+app.use((req, res, next) => {
+    res.locals.user = req.session.user || null;
+    res.locals.userId = req.session.user ? req.session.user.userId : null;
+    next();
+});
+
 app.get('/', redirectToGachaIfLoggedIn);
 app.get('/register', redirectToGachaIfLoggedIn);
 
@@ -39,6 +45,9 @@ app.get('/gacha/normal/bulk',ensureLogin);
 app.get('/gacha/golden',ensureLogin);
 app.get('/gacha/golden/bulk',ensureLogin);
 
+app.get('/user/:id', ensureLogin);
+app.get('/user/:id/profile', ensureLogin);
+app.get('/user/:id/upload-pic', ensureLogin);
 app.get('/metadata',ensureLogin);
 app.get('/signout',ensureLogin);
 
