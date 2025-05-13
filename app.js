@@ -39,6 +39,7 @@ app.get('/gacha/normal/bulk',ensureLogin);
 app.get('/gacha/golden',ensureLogin);
 app.get('/gacha/golden/bulk',ensureLogin);
 
+app.get('/metadata',ensureLogin);
 app.get('/signout',ensureLogin);
 
 
