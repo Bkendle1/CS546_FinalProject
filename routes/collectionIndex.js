@@ -4,6 +4,7 @@ import {
     getAllIndexEntries,
     getEntryById
 } from "../data/collectionIndex.js";
+import { validateObjectId } from "../helpers.js";
 
 // GET /collectionIndex
 router.get("/", async (req, res) => {
@@ -33,6 +34,11 @@ router.get("/entries", async (req, res) => {
 
 // GET /collectionIndex/entries/:id
 router.get("/entries/:id", async (req, res) => {
+    try {
+        req.params.id = validateObjectId(req.params.id, "Entry ID");
+    } catch (e) {
+        return res.status(400).json({ error: e.toString() });
+    }
     try {
         const entry = await getEntryById(req.params.id);
         res.status(200).json(entry);
