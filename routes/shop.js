@@ -6,7 +6,7 @@ import {
 } from "../data/shop.js";
 import { users } from "../config/mongoCollections.js";
 import { ObjectId } from "mongodb";
-
+import xss from "xss";
 /**
  * GET /shop
  */
@@ -43,8 +43,9 @@ router.get("/items", async (req, res) => {
 router.post("/purchase", async (req, res) => {
     try {
         const userId = req.session.user.userId;
-        const { itemName, quantity } = req.body;
-        await purchaseItem(userId, itemName, parseInt(quantity, 10));
+        const cleanItemName = xss(req.body.itemName);
+        const cleanQuantity = xss(req.body.quantity);
+        await purchaseItem(userId, cleanItemName, parseInt(cleanQuantity, 10));
         res.redirect("/shop");
     } catch (e) {
         const items = await getAllItems();
