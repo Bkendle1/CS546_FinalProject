@@ -97,6 +97,18 @@ router
     .route('/:id/pull_history')
     // TODO display the user's recent pull history  
     .get(async (req, res) => {
+        try {
+            const userId = validateObjectId(req.params.id, "ID URL param");
+        } catch (e) {
+            res.status(404).render('error', { title: "Error 404", error: e });
+        }
+
+        // attempt to render user pull history
+        try {
+            res.render('history',)
+        } catch (e) {
+
+        }
 
     })
 export default router;

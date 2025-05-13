@@ -319,7 +319,7 @@ export const getCurrentDateAndTime = () => {
 /**
  * Given a number, verify that it is valid (positive whole number)
  */
-export function validateNumber(number,parameterName) {
+export function validateNumber(number, parameterName) {
     if (number === undefined || number === null) {
         throw new Error(`${parameterName} missing!`);
     }
@@ -378,7 +378,9 @@ export function calculateIncome(rarity, level = 1) {
 /**
  * Given userId, return metadata of user 
  */
-export const getUserMetadata = async (userId) => { 
+export const getUserMetadata = async (userId) => {
+    // validate userID
+    userId = validateObjectId(userId, "User ID");
     // get reference to user
     let userCollection = await users();
     let user = await userCollection.findOne({ _id: ObjectId.createFromHexString(userId) });
@@ -390,5 +392,15 @@ export const getUserMetadata = async (userId) => {
     return user.metadata;
 }
 
-
-
+/**
+ * Returns an array storing the pull history of the user with the given ID. 
+ */
+export const getPullHistory = async (userId) => {
+    // verify user id is a valid Object ID
+    userId = validateObjectId(userId, "User ID");
+    // get reference to user
+    const userCollection = await users();
+    const user = await userCollection.findOne({ _id: ObjectId.createFromHexString(userId) });
+    if (!user) throw `No user with id: ${userId}.`;
+    return user.pull_history;
+}
