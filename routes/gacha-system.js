@@ -92,4 +92,24 @@ router
             res.status(500).render('error', { title: "Error: 500", error: e });
         }
     });
+
+router
+    .route('/:id/pull_history')
+    // TODO display the user's recent pull history  
+    .get(async (req, res) => {
+        try {
+            var userId = helpers.validateObjectId(req.params.id, "ID URL param");
+        } catch (e) {
+            res.status(404).render('error', { title: "Error 404", error: e });
+        }
+
+        // attempt to render user pull history
+        try {
+            const pull_history = await helpers.getPullHistory(userId);
+            res.render('history', { pullHistory: pull_history });
+        } catch (e) {
+            res.status(404).render('error', { title: "Error 404", error: e });
+        }
+
+    })
 export default router;

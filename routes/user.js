@@ -188,7 +188,6 @@ router.route("/register")
 router.route("/signout").get(async (req, res) => {
   //code here for GET
   try {
-    console.log("in /signout")
     req.session.destroy();
     res.clearCookie("AuthenticationState");
     res.render("signout", { title: "Logged Out" });
@@ -206,7 +205,7 @@ router.route("/user/:id")
   .get(async (req, res) => {
     try {
       // verify that url param is a valid object id
-      req.params.id = validateObjectId(req.params.id, "ID url param");
+      req.params.id = validateObjectId(req.params.id, "ID URL param");
     } catch (e) {
       res.status(400).render('error', { title: "Error 404", error: e });
     }
@@ -227,9 +226,9 @@ router.route("/user/:id/profile")
   .get(async (req, res) => {
     try {
       // verify that url param is a valid object id
-      req.params.id = validateObjectId(req.params.id, "ID url param");
+      req.params.id = validateObjectId(req.params.id, "ID URL param");
     } catch (e) {
-      res.status(400).render('error', { title: "Error 404", error: e });
+      res.status(404).render('error', { title: "Error 404", error: e });
     }
 
     // attempt to get user's profile page
@@ -247,7 +246,7 @@ router.route("/user/:id/profile")
   })// delete the user account
   .delete(async (req, res) => {
     try {
-      req.params.id = validateObjectId(req.params.id, "ID url param");
+      req.params.id = validateObjectId(req.params.id, "ID URL param");
       await removeAccount(req.params.id);
       // destroy session so they’re logged out
       req.session.destroy(err => {
