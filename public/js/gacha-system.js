@@ -153,17 +153,19 @@ async function requestCharacterData(characterId) {
         console.error(e);
     }
 }
-// loadMusic("digimonOP", "/public/music/digimonFrontierOP.mp3")
+loadMusic("digimonOP", "/public/music/digimonFrontierOP.mp3")
 loadSprite("banner", "/public/images/gachaBanner.png"); // load banner image as a sprite
 loadSprite("blackBG", "/public/images/abstractBlackBG.png");
 loadFont("digiFont", "/public/fonts/PixelDigivolve.otf", 8, 8);
 
-// play("digimonOP", {
-//     volume: 0.1,
-//     speed: 1,
-//     loop: true,
-// })
+const bgMusic = play("digimonOP", {
+    volume: 0.05,
+    speed: 1,
+    loop: true,
+    paused: true,
+})
 scene("Gacha", async () => {
+    bgMusic.paused = false;
     // add gacha's banner
     add([
         sprite("banner"),
@@ -217,6 +219,7 @@ scene("Gacha", async () => {
 
 
     onUpdate(() => {
+
         normalCounter.text = `Normal: ${normalTicketCount}`; // on every frame, it keeps the counter up-to-date
         goldenCounter.text = `Golden: ${goldenTicketCount}`; // on every frame, it keeps the counter up-to-date
 
