@@ -1,7 +1,7 @@
 import { users, collectionIndex, gacha } from "./config/mongoCollections.js";
 import { ObjectId } from "mongodb";
 import random from 'simple-random-number-generator';
-
+import moment from 'moment';
 /**
  * Verifies that the given string is not undefined, empty, not of type string, nor just whitespace, and also returns the string trimmed with trim().
  */
@@ -403,4 +403,54 @@ export const getPullHistory = async (userId) => {
     const user = await userCollection.findOne({ _id: ObjectId.createFromHexString(userId) });
     if (!user) throw `No user with id: ${userId}.`;
     return user.pull_history;
+}
+
+/**
+ * Sets the user's 'cooldown' field with a given number of hours. Supports decimals.
+ */
+export const setCooldownTime = async (userId, hours) => {
+    // verify that user id is a valid Object ID and string
+    userId = validateObjectId(userId, "User ID");
+    // verify that hours is a valid number
+    if (!hours) throw "Must supply an amount of time in hours.";
+    if (typeof (hours) !== 'number'
+        || Number.isNaN(hours)
+        || hours < 1) {
+        throw "Hours must be a positive number of least 1";
+    }
+
+    // check if user exists
+    const userCollection = await users();
+    const user = await userCollection.findOne({ _id: ObjectId.createFromHexString(userId) });
+    if (!user) throw `No user with id: ${userId}.`;
+
+    // update cooldown time with given hours
+    const newCooldownTime = moment().add(hours, 'hours').toISOString(true);
+    const updateInfo = await userCollection.updateOne({ _id: ObjectId.createFromHexString(userId) }, { $set: { "metadata.ticket_count.cooldown": newCooldownTime } });
+    if (updateInfo.modifiedCount === 0) {
+        throw `Could not update the cooldown time for user with id: ${userId}.`;
+    }
+
+    return newCooldownTime // returns the cooldown time
+
+}
+/**
+ * Check if the cooldown time for the user with the given id has been reached.
+ */
+export const checkCooldownTime = async (userId) => {
+    // verify that user id is a valid Object ID and string
+    userId = validateObjectId(userId, "User ID");
+    // verify that hours is a valid number
+}
+
+try {
+    console.log(await setCooldownTime("6822c42050bac9e34edd6b20", 1))
+} catch (e) {
+    console.log(e)
+}
+
+try {
+
+} catch (e) {
+    console.log(e)
 }

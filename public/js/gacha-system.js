@@ -619,3 +619,16 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates, tickets }) => {
         }
     })
 });
+
+// User gets a free ticket a 24 hours; therefore, when this script loads, it should check if enough time has elapsed
+async function checkFreeTicket() {
+    const requestConfig = {
+        url: '/metadata',
+        method: 'GET',
+        // success: (response) => {
+        //     if (response.ticket_count.time)
+        // }
+    }
+    $.ajax(requestConfig);
+}
+checkFreeTicket();

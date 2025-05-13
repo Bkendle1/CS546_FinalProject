@@ -47,7 +47,7 @@ export const register = async (
         golden: 0,
         normal: 3, // default starting ticket
         timestamp: null,
-        cooldown: null,
+        cooldown: null, // set cooldown time for next free ticket
       },
       experience: {
         curr_exp: 0,

@@ -95,7 +95,7 @@ router
 
 router
     .route('/:id/pull_history')
-    // TODO display the user's recent pull history  
+    // Display the user's recent pull history  
     .get(async (req, res) => {
         try {
             var userId = helpers.validateObjectId(req.params.id, "ID URL param");
@@ -112,4 +112,11 @@ router
         }
 
     })
+router
+    .route('/free_ticket')
+    .post(async (req, res) => {
+        // updates the user's ticket count by 1
+
+        // update the cooldown time by the cooldown amount
+    });
 export default router;
