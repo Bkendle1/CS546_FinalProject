@@ -309,6 +309,11 @@ scene("GachaDisplaySingle", async ({ pulled, duplicates, leveledUp }) => {
         pos(center()),
         anchor("center"),
     ]);
+    if (leveledUp !== 0) {
+        alert(`You leveled up and got ${leveledUp} ${leveledUp > 1 ? `tickets!` : `ticket!`}`);
+    }
+
+
     // get the pulled character's index information
     const charInfo = await requestCharacterData(pulled);
     loadSprite(charInfo.name, charInfo.image); // load the sprite for the corresponding character
@@ -455,7 +460,7 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates, leveledUp }) => {
     //     pos(center()),
     // ])
     if (leveledUp !== 0) {
-        alert(`You leveled up and got ${leveledUp} ${levelUp > 1 ? `tickets!` : `tickets!`}`);
+        alert(`You leveled up and got ${leveledUp} ${leveledUp > 1 ? `tickets!` : `ticket!`}`);
     }
 
     let infoDisplayed = false; // boolean that's set if a character's info is being displayed

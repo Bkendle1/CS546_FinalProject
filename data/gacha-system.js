@@ -295,7 +295,7 @@ export const gachaPull = async (userId, pullCount, pullType) => {
         const EXP_GAIN = 50; // amount of experience points earned per pull
         // update exp per pull to keep track how many times the user leveled up per pull in case it was more than once
         for (let i = 0; i < pullCount; i++) {
-            let leveledUp = levelUpPlayer(userId, EXP_GAIN);
+            let leveledUp = await levelUpPlayer(userId, EXP_GAIN);
             if (leveledUp) {
                 pulledCharacters.leveledUp++; // increment leveled up counter
             }
