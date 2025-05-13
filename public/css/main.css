@@ -117,3 +117,22 @@ a:hover {
 .pull-details {
     text-indent: 2em;
 }
+
+.profileLink {
+    margin-top: 20px;
+    margin-bottom: 30px;
+}
+
+.deleteBtn {
+    box-shadow: 0 8px 14px 0 #8f59c555;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 10px 15px;
+    color: red;
+    margin-top: 10px;
+    display: block;
+    height: 20%;
+    width: 15%;
+    margin-bottom: 10px;
+    font-size: 18px;
+}
