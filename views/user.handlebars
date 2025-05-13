@@ -7,4 +7,16 @@
     <a href="/collectionInventory">Inventory</a>
     <a href="/collectionIndex">Index</a>
     <a href="/gacha">Gacha</a>
+
+    <audio controls hidden loop id="sound">
+        <source src="/public/music/digimonTamersSlash.mp3" type="audio/mp3">
+    </audio>
+    <script>
+        const audio = document.getElementById("sound");
+        audio.removeAttribute("muted");
+        window.addEventListener("click", () => {
+            audio.play()
+            audio.volume = 0.05
+        })
+    </script>
 </div>

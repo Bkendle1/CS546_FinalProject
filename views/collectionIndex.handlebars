@@ -1,12 +1,23 @@
-<div class="collectionIndex">    
+<div class="collectionIndex">
     <h1>Collection Index</h1>
 
     {{#if error}}
-        <p class="error">{{error}}</p>
+    <p class="error">{{error}}</p>
     {{/if}}
 
     <a href="/gacha">Back to Gacha</a>
 
     <canvas id="index-canvas" width="1380"></canvas>
     <script type="module" src="/public/js/index-system.js"></script>
+    <audio controls hidden loop id="sound">
+        <source src="/public/music/digimonAdventureOST2.mp3" type="audio/mp3">
+    </audio>
+    <script>
+        const audio = document.getElementById("sound");
+        audio.removeAttribute("muted");
+        window.addEventListener("click", () => {
+            audio.play()
+            audio.volume = 0.05
+        })
+    </script>
 </div>

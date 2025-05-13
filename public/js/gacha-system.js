@@ -34,6 +34,17 @@ const BUTTON_TEXT_COLOR = "#28262C" // hexcolor for text of buttons
 const BULK_PULL_COUNT = 5; // number of pulls for a bulk pull. IF YOU CHANGE THIS VALUE THEN MAKE SURE TO ALSO CHANGE THIS CONSTANT IN THE CORRESPONDING ROUTER JS FILE
 const DISABLED_BUTTON_COLOR = "#36454F" // hexcolor for a disabled button
 const TEXT_COLOR = "#00FFE7" // hexcolor for general text
+loadSprite("banner", "/public/images/gachaBanner.png"); // load banner image as a sprite
+loadSprite("blackBG", "/public/images/abstractBlackBG.png");
+loadFont("digiFont", "/public/fonts/PixelDigivolve.otf", 8, 8);
+loadMusic("digimonButterfly", "/public/music/digimonAdventureOST_butterfly.mp3")
+const bgMusic = play("digimonButterfly", {
+    volume: 0.2,
+    speed: 1,
+    loop: true,
+    paused: true,
+})
+
 // Create a button with the given text, at the give position, that executes the given callback function when clicked on
 function addBtn(str, position, callback) {
     // create button
@@ -154,10 +165,9 @@ async function requestCharacterData(characterId) {
     }
 }
 
-loadSprite("banner", "/public/images/gachaBanner.png"); // load banner image as a sprite
-loadSprite("blackBG", "/public/images/abstractBlackBG.png");
-loadFont("digiFont", "/public/fonts/PixelDigivolve.otf", 8, 8);
 scene("Gacha", async () => {
+    bgMusic.paused = false;
+    bgMusic.volume = 0.2;
     // add gacha's banner
     add([
         sprite("banner"),
@@ -207,10 +217,10 @@ scene("Gacha", async () => {
     const goldenBulkBtn = addBtn("Golden x5", vec2(width() - 300, height() - 250), () => {
         requestPull("golden", BULK_PULL_COUNT); // request a golden bulk pull
     });
-    // TODO: Menu
 
 
     onUpdate(() => {
+
         normalCounter.text = `Normal: ${normalTicketCount}`; // on every frame, it keeps the counter up-to-date
         goldenCounter.text = `Golden: ${goldenTicketCount}`; // on every frame, it keeps the counter up-to-date
 
@@ -314,6 +324,7 @@ scene("GachaDisplaySingle", async ({ pulled, duplicates, tickets }) => {
         alertMsg = `You leveled up and got ${tickets.normal} ${tickets.normal > 1 ? `normal tickets!` : `normal ticket!`}.`
         normalTicketCount += tickets.normal // increment normal ticket count
         alert(alertMsg);
+
     }
     if (tickets.golden !== 0) {
         alertMsg = `You leveled up and got ${tickets.golden} ${tickets.golden > 1 ? `golden tickets!` : `golden ticket!`}.`
@@ -538,12 +549,10 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates, tickets }) => {
         zoomIn(display, 0.75)                               // have rectangle zoom in 
         displayImg.sprite = `${character.name}`;            // display character's image
         displayDesc.text = `${character.description}`;      // display character's description
-        // displayNewBadge.hidden = true;
         if (dup_currency !== 0) {
             displayDupCurrency.text = `Duplicate: +${dup_currency}`;
         } else {
             displayDupCurrency.text = "";
-            // displayNewBadge.hidden = false;
         }
         // button to go back to bulk pull results
         addBtn("Back", vec2(width() - 640, height() - 60), () => {

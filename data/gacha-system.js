@@ -2,7 +2,7 @@ import * as helpers from "../helpers.js";
 import { users, collectionIndex, gacha } from "../config/mongoCollections.js";
 import { ObjectId } from "mongodb";
 import weighted from "weighted";
-import { getEntryById, markCollected } from "./collectionIndex.js";
+import { getEntryById, markCollected, getAllIndexEntries } from "./collectionIndex.js";
 import { addCharacterToInventory, levelUpPlayer } from "./collectionInventory.js";
 
 /**  Given the user's id, the size of the pull (should be either 1 or 5), and ticket type. Check if player has enough tickets to pull with. Ticket type is case-insensitive.
@@ -372,4 +372,25 @@ export const addCharacterToGacha = async (name, pull_rate, duplicate_currency) =
     gachaCharacter._id = gachaCharacter._id.toString();     // convert new character id to string before returning object
 
     return gachaCharacter; // return object of new gacha character
+}
+
+/**
+ * Checks if the user with the given id has collected all the characters and returns a boolean reflecting that.
+ */
+export const collectedAll = async (userId) => {
+    // verify that user id is valid object id 
+    userId = helpers.validateObjectId(userId, "User ID");
+    // verify that a user exists with that id
+    const userCollection = await users();
+    const user = await userCollection.findOne({ _id: ObjectId.createFromHexString(userId) });
+    if (!user) throw `No user with that id: ${userId}.`;
+
+    const indexEntries = await getAllIndexEntries();
+    const metadata = await helpers.getUserMetadata(userId);
+
+    if (indexEntries.length === metadata.obtained_count) {
+        return true;
+    } else {
+        return false;
+    }
 }

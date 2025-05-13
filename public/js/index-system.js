@@ -2,15 +2,14 @@ import kaplay from "https://unpkg.com/kaplay@3001/dist/kaplay.mjs";
 
 // Initialize Kaplay
 const indexCanvas = document.querySelector("#index-canvas");
-kaplay({ 
+kaplay({
     canvas: indexCanvas,
-    width: indexCanvas.width, 
+    width: indexCanvas.width,
     background: "#E6E6FA",
     loadingScreen: true
 });
 
 const TEXT_COLOR = "#BB00E6" // hexcolor for general text
-
 async function fetchEntries() {
     const res = await fetch("/collectionIndex/entries");
     if (!res.ok) {
@@ -23,10 +22,10 @@ async function fetchEntries() {
 fetchEntries()
     .then(async entries => {
         for (const e of entries) {
-        const url = e.image && e.image.startsWith("http")
-            ? e.image
-            : "https://via.placeholder.com";
-        loadSprite(e._id, url);
+            const url = e.image && e.image.startsWith("http")
+                ? e.image
+                : "https://via.placeholder.com";
+            loadSprite(e._id, url);
         }
         await Promise.all(spritePromises);
         go("Index");
@@ -43,8 +42,8 @@ scene("Index", async () => {
     }
 
     const cols = 4;
-    const rows = Math.ceil(entries.length/cols);
-    const spacingX = canvas.width  / cols;
+    const rows = Math.ceil(entries.length / cols);
+    const spacingX = canvas.width / cols;
     const spacingY = 550;
     indexCanvas.height = spacingY * rows;
 
@@ -52,15 +51,15 @@ scene("Index", async () => {
         const entry = entries[idx];
         const row = Math.floor(idx / cols);
         const col = idx % cols;
-        const x = spacingX * col + spacingX/2;
-        const y = spacingY * row + spacingY/2;
+        const x = spacingX * col + spacingX / 2;
+        const y = spacingY * row + spacingY / 2;
 
         // create the bakcground for each character
         add([
-            rect(280,450,{radius: 8}),
-            pos(x,y), 
+            rect(280, 450, { radius: 8 }),
+            pos(x, y),
             anchor("center"),
-            outline(2), 
+            outline(2),
             color("#FFFFFF"),
             z(0)
         ]);
@@ -77,7 +76,8 @@ scene("Index", async () => {
 
         // name
         add([
-            text(entry.name,{size: 16}),
+            text(entry.name, { size: 16 }),
+            // pos(x - spacingX/4, y + spacingY/4),
             pos(x, y + 10),
             anchor("center"),
             color(TEXT_COLOR),
@@ -87,7 +87,8 @@ scene("Index", async () => {
 
         // rarity
         add([
-            text(entry.rarity,{size: 16}),
+            text(entry.rarity, { size: 16 }),
+            // pos(x - spacingX/4, y + spacingY/4 + 20),
             pos(x, y + 30),
             anchor("center"),
             color(TEXT_COLOR),
@@ -99,7 +100,7 @@ scene("Index", async () => {
         const descriptionLines = entry.description.match(/.{1,30}(?=\s|$)/g);
         descriptionLines.forEach((line, i) => {
             add([
-                text(line.trim(), {size: 10}),
+                text(line.trim(), { size: 10 }),
                 pos(x, y + 55 + i * 15),
                 anchor("center"),
                 color(TEXT_COLOR),
@@ -111,7 +112,7 @@ scene("Index", async () => {
         // collected flag
         if (entry.collected) {
             add([
-                text("✔️",{size: 16}),
+                text("✔️", { size: 16 }),
                 pos(x + 50, y - 150),
                 anchor("center"),
                 layer("ui"),
@@ -119,7 +120,7 @@ scene("Index", async () => {
             ]);
         } else {
             add([
-                text("❌",{size: 16}),
+                text("❌", { size: 16 }),
                 pos(x + 50, y - 150),
                 anchor("center"),
                 layer("ui"),

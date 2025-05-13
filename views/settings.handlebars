@@ -7,4 +7,15 @@
     JS--}}
 
     <script src="/public/js/user_settings.js"></script>
+    <audio controls hidden loop id="sound">
+        <source src="/public/music/digimonAdventure2_OST4.mp3" type="audio/mp3">
+    </audio>
+    <script>
+        const audio = document.getElementById("sound");
+        audio.removeAttribute("muted");
+        window.addEventListener("click", () => {
+            audio.play()
+            audio.volume = 0.05
+        })
+    </script>
 </div>
