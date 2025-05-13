@@ -38,7 +38,7 @@ router
         // attempt to make a single normal pull
         try {
             const character = await gachaData.gachaPull(userId, 1, "normal");
-            res.json({ pulled: character.pulled[0], duplicates: character.duplicates[0] }); // gachaPull returns an array even if it was a single pull
+            res.json({ pulled: character.pulled[0], duplicates: character.duplicates[0], leveledUp: character.leveledUp }); // gachaPull returns an object containing an array for pulled characters (even if its 1), an array for duplicates, and how many times the user leveled up because of this pull
         } catch (e) {
             // user doesn't have enough tickets (this shouldn't happen as the button that makes this request should've been disabled)
             console.log(e);
@@ -57,7 +57,7 @@ router
         // attempt to make a bulk normal pull
         try {
             const characters = await gachaData.gachaPull(userId, BULK_PULL_COUNT, "normal");
-            res.json({ pulled: characters.pulled, duplicates: characters.duplicates }); // gachaPull returns an array
+            res.json({ pulled: characters.pulled, duplicates: characters.duplicates, leveledUp: characters.leveledUp }); // gachaPull returns an object containing an array for pulled characters (even if its 1), an array for duplicates, and how many times the user leveled up because of this pull
         } catch (e) {
             // user doesn't have enough tickets (this shouldn't happen as the button that makes this request should've been disabled)
             res.status(500).render("error", { title: "Error: 500", error: e });
@@ -71,7 +71,7 @@ router
         // attempt to make a single, golden pull
         try {
             const character = await gachaData.gachaPull(userId, 1, "golden");
-            res.json({ pulled: character.pulled[0], duplicates: character.duplicates[0] });  // gachaPull returns an array even if it was a single pull
+            res.json({ pulled: character.pulled[0], duplicates: character.duplicates[0], leveledUp: character.leveledUp });  // gachaPull returns an object containing an array for pulled characters (even if its 1), an array for duplicates, and how many times the user leveled up because of this pull
         } catch (e) {
             // user doesn't have enough tickets (this shouldn't happen as the button that makes this request should've been disabled)
             res.status(500).render('error', { title: "Error: 500", error: e });
@@ -86,7 +86,7 @@ router
         // attempt to make a bulk, golden pull
         try {
             const characters = await gachaData.gachaPull(userId, BULK_PULL_COUNT, "golden");
-            res.json({ pulled: characters.pulled, duplicates: characters.duplicates }); // return the array of all the pulled characters and array of bools
+            res.json({ pulled: characters.pulled, duplicates: characters.duplicates, leveledUp: characters.leveledUp }); // gachaPull returns an object containing an array for pulled characters (even if its 1), an array for duplicates, and how many times the user leveled up because of this pull
         } catch (e) {
             // user doesn't have enough tickets (this shouldn't happen as the button that makes this request should've been disabled)
             res.status(500).render('error', { title: "Error: 500", error: e });

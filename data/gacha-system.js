@@ -3,7 +3,7 @@ import { users, collectionIndex, gacha } from "../config/mongoCollections.js";
 import { ObjectId } from "mongodb";
 import weighted from "weighted";
 import { getEntryById, markCollected } from "./collectionIndex.js";
-import { addCharacterToInventory } from "./collectionInventory.js";
+import { addCharacterToInventory, levelUpPlayer } from "./collectionInventory.js";
 
 /**  Given the user's id, the size of the pull (should be either 1 or 5), and ticket type. Check if player has enough tickets to pull with. Ticket type is case-insensitive.
 */
@@ -293,14 +293,14 @@ export const gachaPull = async (userId, pullCount, pullType) => {
 
         // Give user experience for pulling character(s)
         const EXP_GAIN = 50; // amount of experience points earned per pull
-        const userCollection = await users();
-        const user = await userCollection.findOne({ _id: ObjectId.createFromHexString(userId) });
-        if (!user) throw `No user with id: ${userId}.`;
-
-        const updateInfo = await userCollection.updateOne({ _id: ObjectId.createFromHexString(userId) }, { $inc: { "metadata.experience.curr_exp": EXP_GAIN * pullCount } })
-        if (updateInfo.modifiedCount === 0) {
-            throw `Could not update the current experience of user with id: ${userId}.`;
+        // update exp per pull to keep track how many times the user leveled up per pull in case it was more than once
+        for (let i = 0; i < pullCount; i++) {
+            let leveledUp = levelUpPlayer(userId, EXP_GAIN);
+            if (leveledUp) {
+                pulledCharacters.leveledUp++; // increment leveled up counter
+            }
         }
+
         // Update pull history with pulled character(s). Include the character's name, rarity, timestamp of pull, and image
         await updatePullHistory(userId, pulledCharacters.pulled);
 

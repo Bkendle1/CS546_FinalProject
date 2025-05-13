@@ -83,9 +83,9 @@ function requestPull(pullType, pullCount) {
         success: (response) => {
             // check if it was a single or bulk pull 
             if (pullCount === 1) {
-                go("GachaDisplaySingle", { pulled: response.pulled, duplicates: response.duplicates }); // after the player does a pull, render this new scene that displays their new character
+                go("GachaDisplaySingle", { pulled: response.pulled, duplicates: response.duplicates, leveledUp: response.leveledUp }); // after the player does a pull, render this new scene that displays their new character
             } else {
-                go("GachaDisplayBulk", { pulled: response.pulled, duplicates: response.duplicates }); // after the player does a pull, render this new scene that displays their new characters
+                go("GachaDisplayBulk", { pulled: response.pulled, duplicates: response.duplicates, leveledUp: response.leveledUp }); // after the player does a pull, render this new scene that displays their new characters
             }
         }
     };
@@ -301,7 +301,7 @@ const BADGE_BG_COLOR = "#0D3B66" // background color for the new badge
 const BADGE_TXT_COLOR = "#F8F991" // hex code for text in the new badge
 
 // This scene takes two arguments, one for the pulled character, and a bool that states whether or not they're a duplicate
-scene("GachaDisplaySingle", async ({ pulled, duplicates }) => {
+scene("GachaDisplaySingle", async ({ pulled, duplicates, leveledUp }) => {
     // render scene's background
     add([
         sprite("blackBG"),
@@ -371,7 +371,7 @@ scene("GachaDisplaySingle", async ({ pulled, duplicates }) => {
 });
 
 // scene takes two arrays, one for the pulled characters, and another that's the same size which stores a bool to determine whether or not they're a duplicate
-scene("GachaDisplayBulk", async ({ pulled, duplicates }) => {
+scene("GachaDisplayBulk", async ({ pulled, duplicates, leveledUp }) => {
     const DISPLAY_BG_COLOR = "#57467B"; // background color of the board displaying individual character info
     // render scene's background
     add([
@@ -445,6 +445,19 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates }) => {
             }
         }
     )
+
+    // leveled up notification
+
+    // const leveledUpNotification = add([
+    //     rect(800, 600),
+    //     color(DISPLAY_BG_COLOR),
+    //     outline(5),
+    //     anchor("center"),
+    //     pos(center()),
+    // ])
+    if (leveledUp !== 0) {
+
+    }
 
     let infoDisplayed = false; // boolean that's set if a character's info is being displayed
     const display = add([
