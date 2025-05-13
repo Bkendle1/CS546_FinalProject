@@ -3,7 +3,7 @@ import { users, collectionIndex, gacha } from "../config/mongoCollections.js";
 import { ObjectId } from "mongodb";
 import weighted from "weighted";
 import { getEntryById, markCollected } from "./collectionIndex.js";
-import { addCharacterToInventory } from "./collectionInventory.js";
+import { addCharacterToInventory, levelUpPlayer } from "./collectionInventory.js";
 
 /**  Given the user's id, the size of the pull (should be either 1 or 5), and ticket type. Check if player has enough tickets to pull with. Ticket type is case-insensitive.
 */
@@ -228,9 +228,12 @@ export const gachaPull = async (userId, pullCount, pullType) => {
     // check if user has enough tickets for this pull type (either golden or normal)
     let pulledCharacters = { // object that stores the pulled characters and whether they were duplicates
         pulled: [], // store pulled characters in an array
-        duplicates: [] // array of currency amounts corresponding to the pulled character's duplicate currency (if the character is new then its value is 0) 
+        duplicates: [], // array of currency amounts corresponding to the pulled character's duplicate currency (if the character is new then its value is 0)
+        normal: 0, // counter for how many times the player leveled up and got a normal ticket (in case they level up more than once)
+        golden: 0, // counter for how many times the player leveled up and got a golden ticket (in case they level up more than once)
     };
 
+    // check if user exists and if so, can they do this specific gacha pull
     if (await canPull(userId, pullCount, pullType)) {
         // get array of all characters in gacha collection
         let gachaCharacters = await getAllGachaCharacters();
@@ -286,6 +289,26 @@ export const gachaPull = async (userId, pullCount, pullType) => {
                 // Give user the corresponding duplicate currency
                 pulledCharacters.duplicates.push(character.duplicate_currency); // push character's duplicate currency amount
                 console.log(await helpers.updateCurrencyCount(userId, character.duplicate_currency));
+            }
+        }
+
+        // Give user experience for pulling character(s)
+        const EXP_GAIN = 50; // amount of experience points earned per pull
+        const metadata = await helpers.getUserMetadata(userId);
+        let curr_level = metadata.experience.level; // keep track of current level
+        // update exp per pull to keep track how many times the user leveled up per pull in case it was more than once
+        for (let i = 0; i < pullCount; i++) {
+            let leveledUp = await levelUpPlayer(userId, EXP_GAIN);
+            // check if user leveled up as a result of the exp gain
+            if (leveledUp) {
+                curr_level += 1; // increment level counter
+                // if user's current level is a multiple of 10, give them a golden ticket
+                if (curr_level % 10 === 0) {
+                    pulledCharacters.golden++;
+                } else {
+                    // otherwise, give them a normal ticket
+                    pulledCharacters.normal++;
+                }
             }
         }
 

@@ -83,9 +83,9 @@ function requestPull(pullType, pullCount) {
         success: (response) => {
             // check if it was a single or bulk pull 
             if (pullCount === 1) {
-                go("GachaDisplaySingle", { pulled: response.pulled, duplicates: response.duplicates }); // after the player does a pull, render this new scene that displays their new character
+                go("GachaDisplaySingle", { pulled: response.pulled, duplicates: response.duplicates, tickets: { normal: response.normal, golden: response.golden } }); // after the player does a pull, render this new scene that displays their new character
             } else {
-                go("GachaDisplayBulk", { pulled: response.pulled, duplicates: response.duplicates }); // after the player does a pull, render this new scene that displays their new characters
+                go("GachaDisplayBulk", { pulled: response.pulled, duplicates: response.duplicates, tickets: { normal: response.normal, golden: response.golden } }); // after the player does a pull, render this new scene that displays their new characters
             }
         }
     };
@@ -130,6 +130,14 @@ function requestPull(pullType, pullCount) {
     }
 };
 
+async function fetchBalance() {
+    const res = await fetch("/shop/balance");
+    if (!res.ok) {
+        throw "Error: Balance fetch failed- " + res.status;
+    }
+    const data = await res.json();
+    return data.balance;
+}
 
 /**
  * Get the data of a single character using a route for the collectionIndex collection. 
@@ -149,8 +157,8 @@ async function requestCharacterData(characterId) {
 loadSprite("banner", "/public/images/gachaBanner.png"); // load banner image as a sprite
 loadSprite("blackBG", "/public/images/abstractBlackBG.png");
 loadFont("digiFont", "/public/fonts/PixelDigivolve.otf", 8, 8);
-scene("Gacha", () => {
-    // render gacha's banner
+scene("Gacha", async () => {
+    // add gacha's banner
     add([
         sprite("banner"),
         scale(1.1),
@@ -173,6 +181,14 @@ scene("Gacha", () => {
         pos(vec2(width() - 200, 90)),
         anchor("center"),
     ]);
+    let currency = await fetchBalance();
+    // add user's currency count
+    const currencyCounter = add([
+        text(`Currency: ${currency}`, { font: "digiFont" }),
+        color(TEXT_COLOR),
+        pos(vec2(width() / 2, 90)),
+        anchor("center"),
+    ])
 
     // add button for single normal pull
     const normalSingleBtn = addBtn("Normal x1", vec2(width() - 1000, height() - 500), () => {
@@ -285,7 +301,7 @@ const BADGE_BG_COLOR = "#0D3B66" // background color for the new badge
 const BADGE_TXT_COLOR = "#F8F991" // hex code for text in the new badge
 
 // This scene takes two arguments, one for the pulled character, and a bool that states whether or not they're a duplicate
-scene("GachaDisplaySingle", async ({ pulled, duplicates }) => {
+scene("GachaDisplaySingle", async ({ pulled, duplicates, tickets }) => {
     // render scene's background
     add([
         sprite("blackBG"),
@@ -293,6 +309,18 @@ scene("GachaDisplaySingle", async ({ pulled, duplicates }) => {
         pos(center()),
         anchor("center"),
     ]);
+    let alertMsg = "";
+    if (tickets.normal !== 0) {
+        alertMsg = `You leveled up and got ${tickets.normal} ${tickets.normal > 1 ? `normal tickets!` : `normal ticket!`}.`
+        alert(alertMsg);
+    }
+    if (tickets.golden !== 0) {
+        alertMsg = `You leveled up and got ${tickets.golden} ${tickets.golden > 1 ? `golden tickets!` : `golden ticket!`}.`
+        alert(alertMsg);
+    }
+
+
+
     // get the pulled character's index information
     const charInfo = await requestCharacterData(pulled);
     loadSprite(charInfo.name, charInfo.image); // load the sprite for the corresponding character
@@ -355,7 +383,7 @@ scene("GachaDisplaySingle", async ({ pulled, duplicates }) => {
 });
 
 // scene takes two arrays, one for the pulled characters, and another that's the same size which stores a bool to determine whether or not they're a duplicate
-scene("GachaDisplayBulk", async ({ pulled, duplicates }) => {
+scene("GachaDisplayBulk", async ({ pulled, duplicates, tickets }) => {
     const DISPLAY_BG_COLOR = "#57467B"; // background color of the board displaying individual character info
     // render scene's background
     add([
@@ -429,6 +457,26 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates }) => {
             }
         }
     )
+
+    // leveled up notification
+    // const leveledUpNotification = add([
+    //     rect(800, 600),
+    //     color(DISPLAY_BG_COLOR),
+    //     outline(5),
+    //     anchor("center"),
+    //     pos(center()),
+    // ]);
+
+    let alertMsg = "";
+    if (tickets.normal !== 0) {
+        alertMsg = `You leveled up and got ${tickets.normal} ${tickets.normal > 1 ? `normal tickets!` : `normal ticket!`}.`
+        alert(alertMsg);
+    }
+    if (tickets.golden !== 0) {
+        alertMsg = `You leveled up and got ${tickets.golden} ${tickets.golden > 1 ? `golden tickets!` : `golden ticket!`}.`
+        alert(alertMsg);
+    }
+
 
     let infoDisplayed = false; // boolean that's set if a character's info is being displayed
     const display = add([

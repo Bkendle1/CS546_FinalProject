@@ -1,17 +1,18 @@
-import {Router} from 'express';
+import { Router } from 'express';
 const router = Router();
 import { collectionInventoryData } from '../data/index.js';
 import * as helpers from "../helpers.js";
+import xss from "xss";
 
 // GET: the user inventory
 router.route('/').get(async (req, res) => {
     try {
         let inventory = await collectionInventoryData.getUserInventory(req.session.user.userId);
-        res.render('collectionInventory',{title:"My Inventory", inventory: JSON.stringify(inventory), user: JSON.stringify(req.session.user)});
+        res.render('collectionInventory', { title: "My Inventory", inventory: JSON.stringify(inventory), user: JSON.stringify(req.session.user) });
     } catch (e) {
         res.status(500).render('error', {
-          title: "Error: Inventory can not be viewed",
-          error: e.toString()
+            title: "Error: Inventory can not be viewed",
+            error: e.toString()
         });
     }
 });
@@ -19,7 +20,7 @@ router.route('/').get(async (req, res) => {
 // GET: the character info 
 router.route('/:characterId').get(async (req, res) => {
     try {
-        let character = await collectionInventoryData.getCharacterFromInventory(req.session.user.userId,req.params.characterId);
+        let character = await collectionInventoryData.getCharacterFromInventory(req.session.user.userId, req.params.characterId);
         res.status(200).json(character);
     } catch (e) {
         res.status(500).render('error', {
@@ -31,15 +32,16 @@ router.route('/:characterId').get(async (req, res) => {
 
 // POST: update character nickname
 router.route('/:characterId/nickname').post(async (req, res) => {
+
     try {
-        let nickname = req.body.nickname;
-        nickname = helpers.validateNickName(nickname);
+        let cleanNickname = xss(req.body.nickname);
+        cleanNickname = helpers.validateNickName(cleanNickname);
 
-        let result = await collectionInventoryData.updateCharacterNickname(req.session.user.userId,req.params.characterId,nickname);
-        res.status(200).json({success:true});
+        let result = await collectionInventoryData.updateCharacterNickname(req.session.user.userId, req.params.characterId, cleanNickname);
+        res.status(200).json({ success: true });
 
-    } catch (e) {   
-        res.status(400).json({error: e.toString()});
+    } catch (e) {
+        res.status(400).json({ error: e.toString() });
     }
 });
 
@@ -66,10 +68,10 @@ router.route('/:characterId/nickname').post(async (req, res) => {
 // POST: feed character 
 router.route('/:characterId/feed').post(async (req, res) => {
     try {
-        let result = await collectionInventoryData.feedCharacter(req.session.user.userId,req.params.characterId);
+        let result = await collectionInventoryData.feedCharacter(req.session.user.userId, req.params.characterId);
         res.status(200).json(result);
-    } catch (e) {   
-        res.status(400).json({error: e.toString()});
+    } catch (e) {
+        res.status(400).json({ error: e.toString() });
     }
 });
 

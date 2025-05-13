@@ -1,9 +1,19 @@
 <div class="gacha">
     <h1>Welcome to the Gacha System!</h1>
-    <a href="/shop">Shop</a>
-    <a href="/collectionInventory">Inventory</a>
-    <a href="/collectionIndex">Index</a>
-    <a id="signoutLink" href="/signout">Sign out</a>
-    <canvas id="canvas"></canvas> {{! where the game screen will be }}
+
+    <label for="options">Options</label>
+    <select name="options" id="options">
+        <option value="" selected>Where do you want to go?</option>
+        <option value="/collectionInventory">Inventory
+        </option>
+        <option value="/collectionIndex">Index</option>
+        <option value="/user/{{user_id}}">Settings</option>
+        <option value="/gacha/{{user_id}}/pull_history">Pull History</option>
+        <option value="/shop">Shop</option>
+        <option value="/signout">Sign Out</option>
+    </select>
+
+    <canvas id="canvas"> </canvas> {{! where the game screen will be }}
+    <script type="module" src="/public/js/user_settings.js"></script>
     <script type="module" src="/public/js/gacha-system.js"></script>
 </div>

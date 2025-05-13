@@ -10,7 +10,7 @@ router
     .route('/')
     .get(async (req, res) => {
         // render the gacha template 
-        res.render('gacha', { title: "Gacha System" })
+        res.render('gacha', { title: "Gacha System", user_id: req.session.user.userId })
     });
 
 // this route is used so the game can get user's ticket information
@@ -38,9 +38,10 @@ router
         // attempt to make a single normal pull
         try {
             const character = await gachaData.gachaPull(userId, 1, "normal");
-            res.json({ pulled: character.pulled[0], duplicates: character.duplicates[0] }); // gachaPull returns an array even if it was a single pull
+            res.json({ pulled: character.pulled[0], duplicates: character.duplicates[0], normal: character.normal, golden: character.golden }); // gachaPull returns an object containing an array for pulled characters (even if its 1), an array for duplicates, and how many of each ticket the user got for because of this pull
         } catch (e) {
             // user doesn't have enough tickets (this shouldn't happen as the button that makes this request should've been disabled)
+            console.log(e);
             res.status(500).render('error', {
                 title: "Error: 500",
                 error: e.toString()
@@ -56,7 +57,7 @@ router
         // attempt to make a bulk normal pull
         try {
             const characters = await gachaData.gachaPull(userId, BULK_PULL_COUNT, "normal");
-            res.json({ pulled: characters.pulled, duplicates: characters.duplicates }); // gachaPull returns an array
+            res.json({ pulled: characters.pulled, duplicates: characters.duplicates, normal: characters.normal, golden: characters.golden }); // gachaPull returns an object containing an array for pulled characters (even if its 1), an array for duplicates, and how many of each ticket the user got for because of this pull
         } catch (e) {
             // user doesn't have enough tickets (this shouldn't happen as the button that makes this request should've been disabled)
             res.status(500).render("error", { title: "Error: 500", error: e });
@@ -70,7 +71,7 @@ router
         // attempt to make a single, golden pull
         try {
             const character = await gachaData.gachaPull(userId, 1, "golden");
-            res.json({ pulled: character.pulled[0], duplicates: character.duplicates[0] });  // gachaPull returns an array even if it was a single pull
+            res.json({ pulled: character.pulled[0], duplicates: character.duplicates[0], normal: character.normal, golden: character.golden });  // gachaPull returns an object containing an array for pulled characters (even if its 1), an array for duplicates, and how many of each ticket the user got for because of this pull
         } catch (e) {
             // user doesn't have enough tickets (this shouldn't happen as the button that makes this request should've been disabled)
             res.status(500).render('error', { title: "Error: 500", error: e });
@@ -85,10 +86,30 @@ router
         // attempt to make a bulk, golden pull
         try {
             const characters = await gachaData.gachaPull(userId, BULK_PULL_COUNT, "golden");
-            res.json({ pulled: characters.pulled, duplicates: characters.duplicates }); // return the array of all the pulled characters and array of bools
+            res.json({ pulled: characters.pulled, duplicates: characters.duplicates, normal: characters.normal, golden: characters.golden }); // gachaPull returns an object containing an array for pulled characters (even if its 1), an array for duplicates, and how many of each ticket the user got for because of this pull
         } catch (e) {
             // user doesn't have enough tickets (this shouldn't happen as the button that makes this request should've been disabled)
             res.status(500).render('error', { title: "Error: 500", error: e });
         }
     });
+
+router
+    .route('/:id/pull_history')
+    // TODO display the user's recent pull history  
+    .get(async (req, res) => {
+        try {
+            var userId = helpers.validateObjectId(req.params.id, "ID URL param");
+        } catch (e) {
+            res.status(404).render('error', { title: "Error 404", error: e });
+        }
+
+        // attempt to render user pull history
+        try {
+            const pull_history = await helpers.getPullHistory(userId);
+            res.render('history', { pullHistory: pull_history });
+        } catch (e) {
+            res.status(404).render('error', { title: "Error 404", error: e });
+        }
+
+    })
 export default router;

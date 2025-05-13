@@ -1,4 +1,4 @@
-import { users, collectionIndex, gacha } from "./config/mongoCollections.js";
+import { users, collectionIndex, gacha, collectionInventory } from "./config/mongoCollections.js";
 import { ObjectId } from "mongodb";
 import random from 'simple-random-number-generator';
 
@@ -319,7 +319,7 @@ export const getCurrentDateAndTime = () => {
 /**
  * Given a number, verify that it is valid (positive whole number)
  */
-export function validateNumber(number,parameterName) {
+export function validateNumber(number, parameterName) {
     if (number === undefined || number === null) {
         throw new Error(`${parameterName} missing!`);
     }
@@ -354,16 +354,16 @@ export function calculateIncome(rarity, level = 1) {
     rarity = rarity.toLowerCase().trim();
 
     if (rarity === "common") {
-        baseIncome = 50;
+        baseIncome = 5;
     }
     else if (rarity === "uncommon") {
-        baseIncome = 100;
+        baseIncome = 20;
     }
     else if (rarity === "rare") {
-        baseIncome = 200;
+        baseIncome = 35;
     }
     else if (rarity === "legendary") {
-        baseIncome = 500;
+        baseIncome = 50;
     }
     else {
         throw new Error("Invalid rarity given");
@@ -378,7 +378,9 @@ export function calculateIncome(rarity, level = 1) {
 /**
  * Given userId, return metadata of user 
  */
-export const getUserMetadata = async (userId) => { 
+export const getUserMetadata = async (userId) => {
+    // validate userID
+    userId = validateObjectId(userId, "User ID");
     // get reference to user
     let userCollection = await users();
     let user = await userCollection.findOne({ _id: ObjectId.createFromHexString(userId) });
@@ -389,6 +391,29 @@ export const getUserMetadata = async (userId) => {
 
     return user.metadata;
 }
+/**
+ * Given the array of characters, calculate the total passive income based on rarity and level
+ */
+export function calculatePassiveIncome(characters, minutes) { 
+  let totalIncome = 0;
 
+  for (let char of characters) {
+    let incomeRate = calculateIncome(char.rarity,char.experience.level);
+    totalIncome += incomeRate * minutes;
+  }
 
+  return Math.floor(totalIncome);
+}
 
+/**
+ * Returns an array storing the pull history of the user with the given ID. 
+ */
+export const getPullHistory = async (userId) => {
+    // verify user id is a valid Object ID
+    userId = validateObjectId(userId, "User ID");
+    // get reference to user
+    const userCollection = await users();
+    const user = await userCollection.findOne({ _id: ObjectId.createFromHexString(userId) });
+    if (!user) throw `No user with id: ${userId}.`;
+    return user.pull_history;
+}

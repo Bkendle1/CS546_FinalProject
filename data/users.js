@@ -1,9 +1,11 @@
 //import mongo collections, bcrypt and implement the following data functions
 
-import { users } from "../config/mongoCollections.js";
+import { users, collectionInventory } from "../config/mongoCollections.js";
 import bcrypt from "bcrypt";
 import { validateUsername, validatePassword, validateEmail } from "../helpers.js";
 import { ExpressHandlebars } from "express-handlebars";
+import * as helpers from "../helpers.js";
+import { ObjectId } from "mongodb";
 // import { ObjectId } from 'mongodb';
 
 export const register = async (
@@ -52,7 +54,8 @@ export const register = async (
         exp_capacity: 100, // default capacity
         level: 1
       },
-      obtained_count: 0
+      obtained_count: 0,
+      timestampOfLastPassiveIncome: new Date().toISOString()
     },
     pull_history: []
   };
@@ -61,6 +64,18 @@ export const register = async (
   const insertNewUser = await usersCollection.insertOne(newUser);
   if (!insertNewUser.acknowledged || !insertNewUser.insertedId) {
     throw new Error("Could not add user");
+  }
+
+  // create the user's inventory document
+  let newInventory = {
+    user_id: insertNewUser.insertedId,
+    obtained: []
+  };
+  // insert the user's inventory document
+  const inventoryCollection = await collectionInventory();
+  const insertNewInventory = await inventoryCollection.insertOne(newInventory);
+  if (!insertNewInventory.acknowledged || !insertNewInventory.insertedId) {
+    throw new Error("Could not add user's inventory.");
   }
 
   return { registrationCompleted: true };
@@ -100,8 +115,57 @@ export const login = async (email, password) => {
     email: targetUser.email,
     image: targetUser.image,
     metadata: targetUser.metadata,
-    pull_history: targetUser.pull_history
+    pull_history: targetUser.pull_history,
+    timestampOfLastPassiveIncome: targetUser.timestampOfLastPassiveIncome
   }
 
   return returnUser;
 };
+
+/**
+ * Delete the documents related to the user with the given id. Specifically, delete their documents in the user collection and inventory collection. Returns an object containing both deleted documents and a bool to state that the deletion was successful.
+ */
+export const removeAccount = async (userId) => {
+  // verify that userId is a valid string and ObjectId
+  userId = helpers.validateObjectId(userId, "User ID");
+
+  // check that user with that id exists in the user collection
+  const userCollection = await users();
+  const user = await userCollection.findOne({ _id: ObjectId.createFromHexString(userId) });
+  if (!user) throw `No user with the id of: ${userId}`;
+  const deleteInfo1 = await userCollection.findOneAndDelete({ _id: ObjectId.createFromHexString(userId) });
+  if (!deleteInfo1) throw `Could not delete user account with id ${userId}.`;
+
+  // check if there's an inventory collection for the user
+  const inventoryCollection = await collectionInventory();
+  const inventory = await inventoryCollection.findOne({ user_id: ObjectId.createFromHexString(userId) });
+  if (!inventory) throw `Could not find the inventory of user with id: ${userId}.`;
+
+  // delete user's inventory document
+  const deleteInfo2 = await inventoryCollection.findOneAndDelete({ user_id: ObjectId.createFromHexString(userId) });
+  if (!deleteInfo2) throw `Could not delete the inventory fo the user with id ${userId}.`;
+
+  return { ...deleteInfo1, ...deleteInfo2, deleted: true } // remove account was succesful
+}
+
+/**
+ * Returns an object with the user's name, profile picture, level and collection count.
+ */
+export const getUserById = async (userId) => {
+  // verify that userId is a valid string and object id
+  userId = helpers.validateObjectId(userId, "User ID");
+
+  // verify that user exists with that id
+  const userCollection = await users();
+  const user = await userCollection.findOne({ _id: ObjectId.createFromHexString(userId) });
+  if (!user) throw `No user with id: ${userId}.`;
+
+  // get user's info, i.e. their username, profile picture, level and collection count
+  const userInfo = {
+    username: user.username,
+    profilePic: user.image,
+    level: user.metadata.experience.level,
+    obtained: user.metadata.obtained_count
+  }
+  return userInfo; // return user info
+}

@@ -1,52 +1,62 @@
-import express from "express";
-import session from "express-session";
+import express from 'express';
+import session from 'express-session';
 const app = express();
-import constructorMethod from "./routes/index.js";
-import { ensureLogin, redirectToGachaIfLoggedIn } from "./middleware.js";
-import exphbs from "express-handlebars";
+import constructorMethod from './routes/index.js';
+import { ensureLogin, redirectToGachaIfLoggedIn, passiveIncome } from './middleware.js';
+import exphbs from 'express-handlebars';
 app.use(express.json());
 
 
 app.use(session({
-    name: "AuthenticationState",
-    secret: "some secret string!",
+    name: 'AuthenticationState',
+    secret: 'some secret string!',
     resave: false,
     saveUninitialized: false
 }));
 
-app.get("/", redirectToGachaIfLoggedIn);
-app.get("/register", redirectToGachaIfLoggedIn);
+app.use((req, res, next) => {
+    res.locals.user = req.session.user || null;
+    res.locals.userId = req.session.user ? req.session.user.userId : null;
+    next();
+});
+
+app.get('/', redirectToGachaIfLoggedIn);
+app.get('/register', redirectToGachaIfLoggedIn);
 
 // ensureLogin should apply to every other route besides / and /register but we dont have them yet
-app.get("/shop",ensureLogin);
-app.get("/shop/items",ensureLogin);
-app.get("/shop/purchase",ensureLogin);
-app.get("/shop/balance",ensureLogin);
+app.get('/shop', ensureLogin);
+app.get('/shop/items', ensureLogin);
+app.get('/shop/purchase', ensureLogin);
+app.get('/shop/balance', ensureLogin);
 
-app.get("/collectionIndex",ensureLogin);
-app.get("/collectionIndex/entries",ensureLogin);
-app.get("/collectionIndex/entries/:id",ensureLogin);
+app.get('/collectionIndex', ensureLogin);
+app.get('/collectionIndex/entries', ensureLogin);
+app.get('/collectionIndex/entries/:id', ensureLogin);
 
-app.get("/collectionInventory",ensureLogin);
-app.get("/collectionInventory/:characterId",ensureLogin);
-app.get("/collectionInventory/:characterId/nickname",ensureLogin);
-app.get("/collectionInventory/:characterId/feed",ensureLogin);
+app.get('/collectionInventory', ensureLogin);
+app.get('/collectionInventory/:characterId', ensureLogin);
+app.get('/collectionInventory/:characterId/nickname', ensureLogin);
+app.get('/collectionInventory/:characterId/feed', ensureLogin);
 
-app.get("/gacha",ensureLogin);
-app.get("/gacha/tickets",ensureLogin);
-app.get("/gacha/normal",ensureLogin);
-app.get("/gacha/normal/bulk",ensureLogin);
-app.get("/gacha/golden",ensureLogin);
-app.get("/gacha/golden/bulk",ensureLogin);
+app.get('/gacha',ensureLogin);
+app.get('/gacha/tickets',ensureLogin);
+app.get('/gacha/normal',ensureLogin);
+app.get('/gacha/normal/bulk',ensureLogin);
+app.get('/gacha/golden',ensureLogin);
+app.get('/gacha/golden/bulk',ensureLogin);
+app.get('/gacha/:id/pull_history', ensureLogin);
 
-app.get("/metadata",ensureLogin);
-app.get("/signout",ensureLogin);
+app.get('/user/:id', ensureLogin);
+app.get('/user/:id/profile', ensureLogin);
+app.get('/user/:id/upload-pic', ensureLogin);
+app.get('/metadata', ensureLogin);
+app.get('/signout', ensureLogin);
+app.use(passiveIncome);
 
-
-app.use("/public", express.static("public"));
+app.use('/public', express.static('public'));
 app.use(express.urlencoded({ extended: true }));
-app.engine("handlebars", exphbs.engine({ 
-    defaultLayout: "main",
+app.engine('handlebars', exphbs.engine({
+    defaultLayout: 'main',
     helpers: {
         range: (from, to) => {
             let arr = [];
@@ -57,7 +67,7 @@ app.engine("handlebars", exphbs.engine({
         }
     }
 }));
-app.set("view engine", "handlebars");
+app.set('view engine', 'handlebars');
 
 constructorMethod(app);
 
