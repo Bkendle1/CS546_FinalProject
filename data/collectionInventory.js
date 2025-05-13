@@ -30,6 +30,11 @@ export const addCharacterToInventory = async (userId, characterId) => {
     return false;
   }
 
+  // check if user with that id exists
+  const userCollection = await users();
+  const user = await userCollection.findOne({ _id: ObjectId.createFromHexString(userId) });
+  if (!user) throw `No user with id: ${userId} found.`;
+
   let newCharacter = {
     _id: new ObjectId(String(characterId)),
     name: character.name,
@@ -44,6 +49,7 @@ export const addCharacterToInventory = async (userId, characterId) => {
     }
   };
 
+  // Add new character 
   let result = await inventoryCollection.updateOne(
     { user_id: new ObjectId(String(userId)) },
     { $push: { obtained: newCharacter } },
@@ -52,6 +58,15 @@ export const addCharacterToInventory = async (userId, characterId) => {
 
   if (!result.acknowledged) {
     throw new Error("Character could not be added");
+  }
+
+  // Update their obtained count by 1
+  const updateInfo = userCollection.updateOne(
+    { _id: ObjectId.createFromHexString(userId) },
+    { $inc: { "metadata.obtained_count": 1 } }
+  );
+  if (updateInfo.modifiedCount === 0) {
+    throw new Error(`Could not update the obtained count of the user with id: ${userId}.`);
   }
 
   return newCharacter;
@@ -71,7 +86,7 @@ export const updateCharacterNickname = async (userId, characterId, nickname) => 
       user_id: new ObjectId(String(userId)),
       "obtained._id": new ObjectId(String(characterId))
     },
-    {$set: {"obtained.$.nickname": nickname}}
+    { $set: { "obtained.$.nickname": nickname } }
   );
 
   if (result.modifiedCount === 0) {
@@ -190,7 +205,7 @@ export const levelUpPlayer = async (userId, gainedExperience) => {
 
   // check if user exists 
   let userCollection = await users();
-  let user = await userCollection.findOne({_id: new ObjectId(String(userId))});
+  let user = await userCollection.findOne({ _id: new ObjectId(String(userId)) });
 
   if (!user) {
     throw new Error("User not found");
@@ -214,34 +229,36 @@ export const levelUpPlayer = async (userId, gainedExperience) => {
     if (currentLevel % 10 === 0) { // golden
       ticketGained = "golden";
       let result = await userCollection.updateOne(
-          {_id: new ObjectId(String(userId))},
-          {$inc: {"metadata.ticket_count.golden": 1} }
+        { _id: new ObjectId(String(userId)) },
+        { $inc: { "metadata.ticket_count.golden": 1 } }
       );
-        
+
       if (result.modifiedCount === 0) {
-          throw new Error("Golden ticket could not be granted");
+        throw new Error("Golden ticket could not be granted");
       }
     }
     else { // normal
       ticketGained = "normal";
       let result = await userCollection.updateOne(
-          {_id: new ObjectId(String(userId))},
-          {$inc: {"metadata.ticket_count.normal": 1} }
+        { _id: new ObjectId(String(userId)) },
+        { $inc: { "metadata.ticket_count.normal": 1 } }
       );
-        
+
       if (result.modifiedCount === 0) {
-          throw new Error("Normal ticket could not be granted");
+        throw new Error("Normal ticket could not be granted");
       }
     }
   }
 
   let result = await userCollection.updateOne(
-    {_id: new ObjectId(String(userId))},
-    {$set: {
-      "metadata.experience.curr_exp": currentExpAmount,
-      "metadata.experience.exp_capacity": currentExpCapacity,
-      "metadata.experience.level": currentLevel
-    }}
+    { _id: new ObjectId(String(userId)) },
+    {
+      $set: {
+        "metadata.experience.curr_exp": currentExpAmount,
+        "metadata.experience.exp_capacity": currentExpCapacity,
+        "metadata.experience.level": currentLevel
+      }
+    }
   );
 
   if (result.modifiedCount === 0) {
@@ -260,7 +277,7 @@ export const feedCharacter = async (userId, characterId) => {
 
   // get the user
   let userCollection = await users();
-  let user = await userCollection.findOne({_id: new ObjectId(String(userId))});
+  let user = await userCollection.findOne({ _id: new ObjectId(String(userId)) });
 
   if (!user) {
     throw new Error("User not found");
@@ -275,8 +292,8 @@ export const feedCharacter = async (userId, characterId) => {
 
   // update the food count by decrementing by 1
   let updateUserFoodCount = await userCollection.updateOne(
-    {_id: new ObjectId(String(userId))},
-    {$inc: {"metadata.food_count": -1}}
+    { _id: new ObjectId(String(userId)) },
+    { $inc: { "metadata.food_count": -1 } }
   );
 
   if (updateUserFoodCount.modifiedCount === 0) {
@@ -287,11 +304,11 @@ export const feedCharacter = async (userId, characterId) => {
   // fixed amount of exp per food for leveling character and player
   let gainedExperiencePerFoodForCharacter = 30;
   let gainedExperiencePerFoodForPlayer = 50;
-  
+
 
   // call levelUpCharacter and levelUpPlayer
   let levelCharacter = await levelUpCharacter(userId, characterId, gainedExperiencePerFoodForCharacter);
   let levelPlayer = await levelUpPlayer(userId, gainedExperiencePerFoodForPlayer);
   // console.log(`Level: ${user.metadata.experience.level}`);
-  return {playerLeveledUp: levelPlayer, characterLeveledUp: levelCharacter};
+  return { playerLeveledUp: levelPlayer, characterLeveledUp: levelCharacter };
 }
