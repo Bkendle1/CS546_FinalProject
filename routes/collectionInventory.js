@@ -20,6 +20,11 @@ router.route('/').get(async (req, res) => {
 // GET: the character info 
 router.route('/:characterId').get(async (req, res) => {
     try {
+        req.params.characterId = helpers.validateObjectId(req.params.characterId, "Character ID");
+    } catch (e) {
+        return res.status(400).json({ error: e.toString() });
+    }
+    try {
         let character = await collectionInventoryData.getCharacterFromInventory(req.session.user.userId, req.params.characterId);
         res.status(200).json(character);
     } catch (e) {
@@ -32,7 +37,11 @@ router.route('/:characterId').get(async (req, res) => {
 
 // POST: update character nickname
 router.route('/:characterId/nickname').post(async (req, res) => {
-
+    try {
+        req.params.characterId = helpers.validateObjectId(req.params.characterId, "Character ID");
+    } catch (e) {
+        return res.status(400).json({ error: e.toString() });
+    }
     try {
         let cleanNickname = xss(req.body.nickname);
         cleanNickname = helpers.validateNickName(cleanNickname);
