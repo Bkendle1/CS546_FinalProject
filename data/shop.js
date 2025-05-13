@@ -32,9 +32,8 @@ export async function addItemToShop(name, cost, description, image) {
     return result.insertedId.toString();
 }
 
-
 /**
- * Fetches all shop items.
+ * Gets all shop items.
  */
 export async function getAllItems() {
     const shopCol = await shop();
@@ -49,7 +48,7 @@ export async function getAllItems() {
 }
 
 /**
- * Fetches a single item by its name. Name is case-insensitive.
+ * Gets a single item by its name. Name is case-insensitive.
  */
 export async function getOneItem(name) {
     name = validateString(name, "Item name");

@@ -9,7 +9,7 @@ import {
 import { addCharacterToGacha } from "./gacha-system.js";
 
 /**
- * Inserts a new character into the collection-index. Name and rarity are case-insensitive.
+ * Inserts a new character into the collection index. Name and rarity are case-insensitive.
  */
 export async function addIndexEntry(name, rarity, image, description) {
     name = validateString(name, "Name");
@@ -26,6 +26,7 @@ export async function addIndexEntry(name, rarity, image, description) {
         throw "Error: " + name + " is already in the index collection.";
     }
 
+    // create new entry
     const newEntry = {
         name,
         rarity,
@@ -46,7 +47,7 @@ export async function addIndexEntry(name, rarity, image, description) {
 }
 
 /**
- * Get every character entry in the collection‑index.
+ * Get every character entry in the collection index.
  */
 export async function getAllIndexEntries() {
     const indexCol = await collectionIndex();
@@ -62,7 +63,7 @@ export async function getAllIndexEntries() {
 }
 
 /**
- * Fetch a single character entry by its ID.
+ * Get a single character entry by its ID.
  */
 export async function getEntryById(id) {
     id = validateObjectId(id, "Index Entry ID");
@@ -99,10 +100,10 @@ export async function markCollected(id) {
 
     const result = await indexCol.updateOne(
         { _id: ObjectId.createFromHexString(id) },
-        { $set: { collected: true } }
+        { $set: { collected: true } } // update collected flag
     );
     console.log(result);
-    if (result.modifiedCount === 0) {
+    if (result.modifiedCount == 0) {
         throw "Error: Could not mark character " + id + " as collected.";
     }
     return true; // character has been successfully marked as collected
