@@ -190,9 +190,8 @@ function createCharacterProfile(character,position) {
     return profile;
 }   
 
-// for the main inventory 
-scene("Inventory",() => {
-    // render inventory's banner
+// Function: does the actual rendering of the inventory
+function renderInventory() {
     add([
         sprite("inventoryBG"),
         pos(width()/2, height()/2),
@@ -227,7 +226,24 @@ scene("Inventory",() => {
         anchor("center"),
         color("#FF8A1C")
     ])
-    
+}
+
+// for the main inventory 
+scene("Inventory",() => {
+    // ensure get most up to date metadata and then render 
+    $.ajax({
+            method: 'GET',
+            url: `/metadata`
+    })
+    .then(function (updatedMetaData) {
+        userData.metadata = updatedMetaData;
+        renderInventory();
+    })
+    .fail (function (e) {
+        let msg = e.responseJSON.error || "Refreshing user metadata has failed";
+        alert(msg);
+        renderInventory();
+    });
 });
 
 // for user interaction -- nickname and leveling up 
@@ -375,14 +391,26 @@ scene("CharacterInteraction",(character) => {
             if (response.playerLeveledUp === true) {
                 alert("Player has leveled up! You have earned a ticket!");
             }
-            return $.ajax({
-                method: 'GET',
-                url: `/collectionInventory/${character._id}`
-            });
+            // need to refresh the character and the food counter 
+            return $.when(
+                            // for character
+                            $.ajax({
+                                method: 'GET',
+                                url: `/collectionInventory/${character._id}`
+                            }),
+                            // for food counter
+                            $.ajax({
+                                method: 'GET',
+                                url: `/metadata`
+                            })
+                        );             
         })
-        .then(function (updatedCharacter) {
+        .then(function (characterResult,metadataResult) {    
+            let updatedCharacter = characterResult[0];
+            let updatedMetaData = metadataResult[0];
             let charIndex = inventoryData.obtained.findIndex((charac) => charac._id === updatedCharacter._id);
             inventoryData.obtained[charIndex] = updatedCharacter;
+            userData.metadata = updatedMetaData;
             go("CharacterInteraction",updatedCharacter);
         })
         .fail (function (e) {
@@ -390,6 +418,14 @@ scene("CharacterInteraction",(character) => {
                 alert(msg);
         });
     },16);
+
+    let foodCount = userData.metadata.food_count;
+    add([
+        text(`Food Counter: ${foodCount}`,{size: 25}),
+        pos(1200,100),
+        anchor("center"),
+        color("#FF8A1C")
+    ])
 });
 
 go("Inventory");
