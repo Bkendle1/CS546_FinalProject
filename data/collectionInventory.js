@@ -261,10 +261,6 @@ export const levelUpPlayer = async (userId, gainedExperience) => {
     }
   );
 
-  if (result.modifiedCount === 0) {
-    throw new Error("User could not level up");
-  }
-
   return leveledUp;
 }
 

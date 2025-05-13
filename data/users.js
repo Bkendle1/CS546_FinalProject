@@ -54,7 +54,8 @@ export const register = async (
         exp_capacity: 100, // default capacity
         level: 1
       },
-      obtained_count: 0
+      obtained_count: 0,
+      timestampOfLastPassiveIncome: new Date().toISOString()
     },
     pull_history: []
   };
@@ -114,7 +115,8 @@ export const login = async (email, password) => {
     email: targetUser.email,
     image: targetUser.image,
     metadata: targetUser.metadata,
-    pull_history: targetUser.pull_history
+    pull_history: targetUser.pull_history,
+    timestampOfLastPassiveIncome: targetUser.timestampOfLastPassiveIncome
   }
 
   return returnUser;

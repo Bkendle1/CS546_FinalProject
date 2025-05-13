@@ -2,7 +2,7 @@ import express from 'express';
 import session from 'express-session';
 const app = express();
 import constructorMethod from './routes/index.js';
-import { ensureLogin, redirectToGachaIfLoggedIn } from './middleware.js';
+import { ensureLogin, redirectToGachaIfLoggedIn, passiveIncome } from './middleware.js';
 import exphbs from 'express-handlebars';
 app.use(express.json());
 
@@ -42,6 +42,7 @@ app.get('/gacha/golden/bulk',ensureLogin);
 app.get('/metadata',ensureLogin);
 app.get('/signout',ensureLogin);
 
+app.use(passiveIncome);
 
 app.use('/public', express.static('public'));
 app.use(express.urlencoded({ extended: true }));
