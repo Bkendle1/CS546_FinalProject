@@ -12,7 +12,9 @@ if (deleteBtn) {
             if (!response.ok) {
                 throw response.status.message;
             } else {
+                console.log("bruh")
                 const response = await fetch('/signout') // send GET /signout
+                console.log(response);
             }
 
         }

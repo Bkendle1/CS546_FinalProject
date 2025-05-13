@@ -190,6 +190,7 @@ router.route("/register")
 router.route("/signout").get(async (req, res) => {
   //code here for GET
   try {
+    console.log("in /signout")
     req.session.destroy();
     res.clearCookie("AuthenticationState");
     res.render("signout", { title: "Logged Out" });
