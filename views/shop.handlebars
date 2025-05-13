@@ -5,7 +5,10 @@
         <p class="error">{{error}}</p>
     {{/if}}
 
-    <p id="user-balance">Current Balance: {{user.metadata.currency}}</p>
+    <p id="user-currency">Currency: {{user.metadata.currency}}</p>
+    <p id="user-food">Food: {{user.metadata.food_count}}</p>
+    <p id="user-tickets-normal"> Normal Tickets: {{user.metadata.ticket_count.normal}}</p> 
+    <p id="user-tickets-golden"> Golden Tickets: {{user.metadata.ticket_count.golden}}</p>
 
     <canvas id="shop-canvas" width="800" height="600"></canvas>
     <form id="purchase-form" action="/shop/purchase" method="POST" style="display:none">

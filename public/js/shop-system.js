@@ -24,13 +24,12 @@ async function fetchShopItems() {
     return await res.json();
 }
 
-async function fetchBalance() {
-    const res = await fetch("/shop/balance");
+async function fetchMetadata() {
+    const res = await fetch("/metadata");
     if (!res.ok) {
-        throw "Error: Balance fetch failed- " + res.status;
+        throw "Error: Metadata fetch failed- " + res.status;
     }
-    const data = await res.json();
-    return data.balance;
+    return await res.json();
 }
 
 // preload sprites then start
@@ -52,13 +51,21 @@ scene("Shop", async () => {
     let items, balance;
     try {
         items = await fetchShopItems();
-        balance = await fetchBalance();
     } catch (e) {
         console.error(e);
         return;
     }
 
-    document.getElementById("user-balance").textContent = "Current Balance: " + balance;
+    // Update live metadata UI
+    try {
+        const md = await fetchMetadata();
+        document.getElementById("user-currency").textContent = "Currency: " + md.currency;
+        document.getElementById("user-food").textContent = "Food: " + md.food_count;
+        document.getElementById("user-tickets-normal").textContent = "Normal Tickets: " + md.ticket_count.normal;
+        document.getElementById("user-tickets-golden").textContent = "Golden Tickets: " + md.ticket_count.golden;
+    } catch (e) {
+        console.error(e);
+    }
 
     const cols = 3;
     const rows = Math.ceil(items.length / cols);
@@ -85,10 +92,9 @@ scene("Shop", async () => {
 
         // character sprite
         add([
-            sprite(item._id),
+            sprite(item._id, {width: 128, height: 128}),
             pos(x, y - 60),
             anchor("center"),
-            scale(0.5),
             layer("sprite"),
             z(3)
         ]);
