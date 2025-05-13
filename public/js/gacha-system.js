@@ -447,7 +447,6 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates, leveledUp }) => {
     )
 
     // leveled up notification
-
     // const leveledUpNotification = add([
     //     rect(800, 600),
     //     color(DISPLAY_BG_COLOR),
@@ -456,7 +455,7 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates, leveledUp }) => {
     //     pos(center()),
     // ])
     if (leveledUp !== 0) {
-
+        alert(`You leveled up and got ${leveledUp} ${levelUp > 1 ? `tickets!` : `tickets!`}`);
     }
 
     let infoDisplayed = false; // boolean that's set if a character's info is being displayed
