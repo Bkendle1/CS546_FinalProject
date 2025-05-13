@@ -153,12 +153,12 @@ async function requestCharacterData(characterId) {
         console.error(e);
     }
 }
-loadMusic("digimonOP", "/public/music/digimonFrontierOP.mp3")
+loadMusic("digimonButterfly", "/public/music/digimonAdventureOST_butterfly.mp3")
 loadSprite("banner", "/public/images/gachaBanner.png"); // load banner image as a sprite
 loadSprite("blackBG", "/public/images/abstractBlackBG.png");
 loadFont("digiFont", "/public/fonts/PixelDigivolve.otf", 8, 8);
 
-const bgMusic = play("digimonOP", {
+const bgMusic = play("digimonButterfly", {
     volume: 0.05,
     speed: 1,
     loop: true,
