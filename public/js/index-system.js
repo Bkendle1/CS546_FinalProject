@@ -78,7 +78,6 @@ scene("Index", async () => {
         // name
         add([
             text(entry.name,{size: 16}),
-            // pos(x - spacingX/4, y + spacingY/4),
             pos(x, y + 10),
             anchor("center"),
             color(TEXT_COLOR),
@@ -89,7 +88,6 @@ scene("Index", async () => {
         // rarity
         add([
             text(entry.rarity,{size: 16}),
-            // pos(x - spacingX/4, y + spacingY/4 + 20),
             pos(x, y + 30),
             anchor("center"),
             color(TEXT_COLOR),

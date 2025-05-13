@@ -48,7 +48,7 @@ fetchShopItems()
     .catch(console.error);
 
 scene("Shop", async () => {
-    let items, balance;
+    let items
     try {
         items = await fetchShopItems();
     } catch (e) {
@@ -102,7 +102,6 @@ scene("Shop", async () => {
         // name label
         add([
             text(item.name, {size: 16}),
-            // pos(x - spacingX / 4, y + spacingY / 4),
             pos(x, y + 10),
             anchor("center"),
             color(TEXT_COLOR),
@@ -113,7 +112,6 @@ scene("Shop", async () => {
         // cost label
         add([
             text("Cost:" + item.cost, {size: 16}),
-            // pos(x - spacingX / 4, y + spacingY / 4),
             pos(x, y + 30),
             anchor("center"),
             color(TEXT_COLOR),
