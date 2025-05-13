@@ -1,0 +1,18 @@
+<div class="inventory">
+    <h1>My Inventory</h1>
+    <div class="inventory-navigation-links">
+        <a href="/gacha" class="navigationLink">Gacha</a>
+        <a href="/shop" class="navigationLink">Shop</a>
+    </div>
+    {{!-- input for nickname, but keep it hidden initially --}}
+    <label for="nickname">
+        Nickname:
+    </label>
+    <input type="text" id="nickname-input" style="display: none"> 
+    <canvas id="inventory-canvas"></canvas> 
+    <script>
+        window.inventoryData = {{{inventory}}}; // pass inventoryData to the game
+    </script>
+    <script type="module" src="../public/js/inventory-system.js"></script>
+</div>
+
