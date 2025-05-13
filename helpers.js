@@ -468,14 +468,3 @@ export const checkTicketCooldownTime = async (userId) => {
     }
 }
 
-try {
-    console.log(await setTicketCooldownTime("6823a44a586ba2f348cd714c", 0.0002)) // equivalent to setting the cooldown time to be 1 second ahead
-} catch (e) {
-    console.log(e)
-}
-
-// try {
-//     console.log(await checkTicketCooldownTime("6823a44a586ba2f348cd714c"))
-// } catch (e) {
-//     console.log(e)
-// }
