@@ -434,6 +434,7 @@ export const setTicketCooldownTime = async (userId, hours) => {
     return newCooldownTime // returns the cooldown time
 
 }
+
 /**
  * Check if the cooldown time for the user with the given id has been reached. If so, it updates the user's normal ticket count by 1 and updates the cooldown time to be 24 hours from the current time. It also updates the timestamp that stores the last time the user received a free ticket.
  */
@@ -451,7 +452,7 @@ export const checkTicketCooldownTime = async (userId) => {
     if (!lastFreeTicketReceived) {
         lastFreeTicketReceived = moment(); // if the user never received a free ticket before, use the current time instead 
     }
-    const difference = cooldownTime.diff(lastFreeTicketReceived, 'hours') + 1; // for some reason, the difference is off by 1
+    const difference = cooldownTime.diff(lastFreeTicketReceived, 'hours'); // compute difference between the two times
     // check if 24 hours have passed since the cooldown time
     if (difference >= 24) {
         console.log(await updateTicketCount(userId, 'normal', 1)); // give user 1 normal ticket
