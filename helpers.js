@@ -406,9 +406,9 @@ export const getPullHistory = async (userId) => {
 }
 
 /**
- * Sets the user's 'cooldown' field with a given number of hours. Supports decimals.
+ * Sets the user's 'cooldown' field with a given number of hours. Supports decimals. Returns the cooldown time as an ISOString.
  */
-export const setCooldownTime = async (userId, hours) => {
+export const setTicketCooldownTime = async (userId, hours) => {
     // verify that user id is a valid Object ID and string
     userId = validateObjectId(userId, "User ID");
     // verify that hours is a valid number
@@ -425,7 +425,7 @@ export const setCooldownTime = async (userId, hours) => {
     if (!user) throw `No user with id: ${userId}.`;
 
     // update cooldown time with given hours
-    const newCooldownTime = moment().add(hours, 'hours').toISOString(true);
+    const newCooldownTime = moment().add(hours, 'hours').toISOString();
     const updateInfo = await userCollection.updateOne({ _id: ObjectId.createFromHexString(userId) }, { $set: { "metadata.ticket_count.cooldown": newCooldownTime } });
     if (updateInfo.modifiedCount === 0) {
         throw `Could not update the cooldown time for user with id: ${userId}.`;
@@ -435,22 +435,26 @@ export const setCooldownTime = async (userId, hours) => {
 
 }
 /**
- * Check if the cooldown time for the user with the given id has been reached.
+ * Check if the cooldown time for the user with the given id has been reached. If so, it updates the user's normal ticket count by 1 and updates the cooldown time to be 24 hours from the current time.
  */
-export const checkCooldownTime = async (userId) => {
+export const checkTicketCooldownTime = async (userId) => {
     // verify that user id is a valid Object ID and string
     userId = validateObjectId(userId, "User ID");
-    // verify that hours is a valid number
-}
+    // check if user exists with that id
+    const userCollection = await users();
+    const user = await userCollection.findOne({ _id: ObjectId.createFromHexString(userId) });
+    if (!user) throw `No user with id: ${userId}.`;
 
-try {
-    console.log(await setCooldownTime("6822c42050bac9e34edd6b20", 1))
-} catch (e) {
-    console.log(e)
-}
-
-try {
-
-} catch (e) {
-    console.log(e)
+    // check if cooldown time has passed and, if so, give user their free ticket and update their cooldown time with a new time 
+    const cooldownTime = moment(user.metadata.ticket_count.cooldown); // get cooldown time as a moment instance
+    const currTime = moment(); // get current time as a moment instance
+    const difference = cooldownTime.diff(currTime, 'hours') + 1; // for some reason, the difference is off by 1
+    // cooldown time lasts for 24 hours
+    if (difference >= 24) {
+        console.log(await updateTicketCount(userId, 'normal', 1));
+        await setTicketCooldownTime(userId, 24); // update cooldown time to be another 24 hours from now
+        return 0; // return 0 to show cooldown time has passed
+    } else {
+        return difference; // return the number of hours that have elapsed since the cooldown time
+    }
 }

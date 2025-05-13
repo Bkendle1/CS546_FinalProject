@@ -2,7 +2,7 @@
 
 import { users, collectionInventory } from "../config/mongoCollections.js";
 import bcrypt from "bcrypt";
-import { validateUsername, validatePassword, validateEmail } from "../helpers.js";
+import { validateUsername, validatePassword, validateEmail, setTicketCooldownTime } from "../helpers.js";
 import { ExpressHandlebars } from "express-handlebars";
 import * as helpers from "../helpers.js";
 import { ObjectId } from "mongodb";
@@ -47,7 +47,7 @@ export const register = async (
         golden: 0,
         normal: 3, // default starting ticket
         timestamp: null,
-        cooldown: null, // set cooldown time for next free ticket
+        cooldown: null,
       },
       experience: {
         curr_exp: 0,
@@ -63,6 +63,13 @@ export const register = async (
   const insertNewUser = await usersCollection.insertOne(newUser);
   if (!insertNewUser.acknowledged || !insertNewUser.insertedId) {
     throw new Error("Could not add user");
+  }
+
+  // update the user's ticket cooldown timer
+  const cooldown = await setTicketCooldownTime(insertNewUser.insertedId);
+  const updateInfo = usersCollection.updateOne({ _id: ObjectId.createFromHexString(userId) }, { $set: { "metadata.ticket_count.cooldown": cooldown } });
+  if (updateInfo.modifiedCount === 0) {
+    throw `Could not update the cooldown time for user with id: ${userId}.`
   }
 
   // create the user's inventory document
