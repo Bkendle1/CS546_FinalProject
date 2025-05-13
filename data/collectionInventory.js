@@ -1,6 +1,7 @@
 import { collectionInventory, collectionIndex, users } from '../config/mongoCollections.js';
 import * as helpers from "../helpers.js";
 import { ObjectId } from "mongodb";
+import { getAllIndexEntries } from './collectionIndex.js';
 
 // Function: Takes in a userId and characterId and returns the newCharacter if added 
 // and returns false if not added (meaning it is a duplicate)
@@ -49,7 +50,7 @@ export const addCharacterToInventory = async (userId, characterId) => {
     { upsert: true } // create new document if does not exist
   );
 
-  if (result.modifiedCount === 0) {
+  if (!result.acknowledged) {
     throw new Error("Character could not be added");
   }
 
@@ -70,7 +71,7 @@ export const updateCharacterNickname = async (userId, characterId, nickname) => 
       user_id: new ObjectId(String(userId)),
       "obtained._id": new ObjectId(String(characterId))
     },
-    { $set: { "obtained.$.nickname": nickname } }
+    {$set: {"obtained.$.nickname": nickname}}
   );
 
   if (result.modifiedCount === 0) {
@@ -181,6 +182,76 @@ export const getCharacterFromInventory = async (userId, characterId) => {
   return character;
 }
 
+// Given a userId and amount of experience gained, level up the player (bc of feeding or gacha pulls)
+export const levelUpPlayer = async (userId, gainedExperience) => {
+  // validation
+  userId = helpers.validateObjectId(userId, "User ID");
+  gainedExperience = helpers.validateNumber(gainedExperience, "Experience");
+
+  // check if user exists 
+  let userCollection = await users();
+  let user = await userCollection.findOne({_id: new ObjectId(String(userId))});
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  // variables
+  let currentExpAmount = user.metadata.experience.curr_exp + gainedExperience;
+  let currentLevel = user.metadata.experience.level;
+  let currentExpCapacity = user.metadata.experience.exp_capacity;
+  let ticketGained = "normal";
+  let leveledUp = false;
+
+  // level up when we have enough experience
+  while (currentExpAmount >= currentExpCapacity) {
+    currentExpAmount -= currentExpCapacity;
+    currentLevel++;
+    leveledUp = true;
+    currentExpCapacity = Math.floor(currentExpCapacity * 1.1); // increment capacity by 10% each level up
+
+    // if level by 10 levels = 1 golden, else: 1 normal
+    if (currentLevel % 10 === 0) { // golden
+      ticketGained = "golden";
+      let result = await userCollection.updateOne(
+          {_id: new ObjectId(String(userId))},
+          {$inc: {"metadata.ticket_count.golden": 1} }
+      );
+        
+      if (result.modifiedCount === 0) {
+          throw new Error("Golden ticket could not be granted");
+      }
+    }
+    else { // normal
+      ticketGained = "normal";
+      let result = await userCollection.updateOne(
+          {_id: new ObjectId(String(userId))},
+          {$inc: {"metadata.ticket_count.normal": 1} }
+      );
+        
+      if (result.modifiedCount === 0) {
+          throw new Error("Normal ticket could not be granted");
+      }
+    }
+  }
+
+  let result = await userCollection.updateOne(
+    {_id: new ObjectId(String(userId))},
+    {$set: {
+      "metadata.experience.curr_exp": currentExpAmount,
+      "metadata.experience.exp_capacity": currentExpCapacity,
+      "metadata.experience.level": currentLevel
+    }}
+  );
+
+  if (result.modifiedCount === 0) {
+    throw new Error("User could not level up");
+  }
+
+  return leveledUp;
+}
+
+
 // Function: Given userId and characterId, call levelUpCharacter everytime a piece of food is consumed
 export const feedCharacter = async (userId, characterId) => {
   // validation 
@@ -189,7 +260,7 @@ export const feedCharacter = async (userId, characterId) => {
 
   // get the user
   let userCollection = await users();
-  let user = await userCollection.findOne({ _id: new ObjectId(String(userId)) });
+  let user = await userCollection.findOne({_id: new ObjectId(String(userId))});
 
   if (!user) {
     throw new Error("User not found");
@@ -204,19 +275,24 @@ export const feedCharacter = async (userId, characterId) => {
 
   // update the food count by decrementing by 1
   let updateUserFoodCount = await userCollection.updateOne(
-    { _id: new ObjectId(String(userId)) },
-    { $inc: { "metadata.food_count": -1 } }
+    {_id: new ObjectId(String(userId))},
+    {$inc: {"metadata.food_count": -1}}
   );
 
   if (updateUserFoodCount.modifiedCount === 0) {
-    throw new Error("Food count could not be updated after consumtion");
+    throw new Error("Food count could not be updated after consumption");
   }
+  // console.log(`Food Count after Consumption: ${user.metadata.food_count}`);
 
-  // fixed amount of exp per food
-  let gainedExperiencePerFood = 30;
+  // fixed amount of exp per food for leveling character and player
+  let gainedExperiencePerFoodForCharacter = 30;
+  let gainedExperiencePerFoodForPlayer = 50;
+  
 
-  // call levelUpCharacter
-  let result = await levelUpCharacter(userId, characterId, gainedExperiencePerFood);
-  return result;
+  // call levelUpCharacter and levelUpPlayer
+  let levelCharacter = await levelUpCharacter(userId, characterId, gainedExperiencePerFoodForCharacter);
+  let levelPlayer = await levelUpPlayer(userId, gainedExperiencePerFoodForPlayer);
+  // console.log(`Level: ${user.metadata.experience.level}`);
+  return {playerLeveledUp: levelPlayer, characterLeveledUp: levelCharacter};
 }
 

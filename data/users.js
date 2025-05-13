@@ -39,17 +39,17 @@ export const register = async (
     password: hashedPassword,
     image: null,
     metadata: {
-      currency: 0,
-      food_count: 0,
+      currency: 200, // default starting curreny amount
+      food_count: 10, // default starting food amount
       ticket_count: {
         golden: 0,
-        normal: 3, // default starting ticket, could be changed later 
+        normal: 3, // default starting ticket
         timestamp: null,
         cooldown: null,
       },
       experience: {
         curr_exp: 0,
-        exp_capacity: 100, // default capacity, could be changed later 
+        exp_capacity: 100, // default capacity
         level: 1
       },
       obtained_count: 0
