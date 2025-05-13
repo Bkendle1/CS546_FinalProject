@@ -10,7 +10,7 @@ router
     .route('/')
     .get(async (req, res) => {
         // render the gacha template 
-        res.render('gacha', { title: "Gacha System" })
+        res.render('gacha', { title: "Gacha System", user_id: req.session.user.userId })
     });
 
 // this route is used so the game can get user's ticket information

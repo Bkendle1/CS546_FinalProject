@@ -1,8 +1,8 @@
-import { Router } from "express";
+import e, { Router } from "express";
 const router = Router();
-import { register, login } from "../data/users.js";
+import { register, login, getUserById, removeAccount } from "../data/users.js";
 import xss from "xss";
-import { validateUsername, validatePassword, validateEmail, getUserMetadata } from "../helpers.js";
+import { validateUsername, validatePassword, validateEmail, getUserMetadata, validateObjectId } from "../helpers.js";
 
 router.route("/").get(async (req, res) => {
   //code here for GET
@@ -188,6 +188,7 @@ router.route("/register")
 router.route("/signout").get(async (req, res) => {
   //code here for GET
   try {
+    console.log("in /signout")
     req.session.destroy();
     res.clearCookie("AuthenticationState");
     res.render("signout", { title: "Logged Out" });
@@ -198,6 +199,76 @@ router.route("/signout").get(async (req, res) => {
       error: e.toString()
     });
   }
+});
+
+router.route("/user/:id")
+  // render webpage that lets the user choose to view their account or delete it  
+  .get(async (req, res) => {
+    try {
+      // verify that url param is a valid object id
+      req.params.id = validateObjectId(req.params.id, "ID url param");
+    } catch (e) {
+      res.status(400).render('error', { title: "Error 404", error: e });
+    }
+
+    // attempt to render user settings page
+    try {
+      res.render('settings', { title: "User Settings", userId: req.params.id });
+    } catch (e) {
+      res.status(404).render("error", {
+        title: "Error: 404",
+        error: e.toString()
+      });
+    }
+  })
+
+router.route("/user/:id/profile")
+  // Get user's profile
+  .get(async (req, res) => {
+    try {
+      // verify that url param is a valid object id
+      req.params.id = validateObjectId(req.params.id, "ID url param");
+    } catch (e) {
+      res.status(400).render('error', { title: "Error 404", error: e });
+    }
+
+    // attempt to get user's profile page
+    try {
+      // check that a user exists with that id and get relevant data
+      const user = await getUserById(req.params.id);
+      // render user handlebar with relevant data
+      res.render('user', { title: `${user.username}'s Page`, username: user.username, profilePic: user.profilePic, level: user.level, obtained: user.obtained });
+    } catch (e) {
+      res.status(404).render("error", {
+        title: "Error: 404",
+        error: e.toString()
+      });
+    }
+  })// delete the user account
+  .delete(async (req, res) => {
+    try {
+      req.params.id = validateObjectId(req.params.id, "ID url param");
+      await removeAccount(req.params.id);
+      // destroy session so they’re logged out
+      req.session.destroy(err => {
+        if (err) {
+          console.error(err);
+          return res.status(500).render("error", {
+            title: "Logout failed",
+            error: e.toString()
+          });
+        }
+        res.clearCookie("AuthenticationState");
+        // tell the client we succeeded
+        res.json({ success: true });
+      });
+    } catch (e) {
+      console.log(e);
+      res.status(404).render("error", {
+        title: "Error: 404",
+        error: e.toString()
+      });
+    }
 });
 
 router.route("/metadata").get(async (req, res) => {

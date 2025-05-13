@@ -295,4 +295,3 @@ export const feedCharacter = async (userId, characterId) => {
   // console.log(`Level: ${user.metadata.experience.level}`);
   return {playerLeveledUp: levelPlayer, characterLeveledUp: levelCharacter};
 }
-
