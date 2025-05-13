@@ -255,7 +255,7 @@ router.route("/user/:id/profile")
           console.error(err);
           return res.status(500).render("error", {
             title: "Logout failed",
-            error: e.toString()
+            error: err.toString()
           });
         }
         res.clearCookie("AuthenticationState");
@@ -269,7 +269,7 @@ router.route("/user/:id/profile")
         error: e.toString()
       });
     }
-});
+  });
 
 router.route("/metadata").get(async (req, res) => {
   //code here for GET
@@ -277,7 +277,7 @@ router.route("/metadata").get(async (req, res) => {
     let metadata = await getUserMetadata(req.session.user.userId);
     return res.status(200).json(metadata);
   } catch (e) {
-    res.status(500).json({error: e.toString()});
+    res.status(500).json({ error: e.toString() });
   }
 });
 
