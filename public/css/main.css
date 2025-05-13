@@ -1,5 +1,11 @@
+@font-face {
+    font-family: digiFont;
+    src: url("/public/fonts/PixelDigivolve.otf");
+}
+
 * {
     box-sizing: border-box;
+    font-family: digiFont
 }
 
 html,
@@ -44,7 +50,7 @@ footer {
     position: absolute;
     top: 50px;
     left: 35%;
-    z-index: 1000; 
+    z-index: 1000;
     padding: 10px;
     border-radius: 8px;
     color: rgb(97, 216, 253);
@@ -61,8 +67,7 @@ footer {
 
 .labelA,
 .inputA,
-.buttonA
-{
+.buttonA {
     margin-top: 10px;
     display: block;
     width: 100%;

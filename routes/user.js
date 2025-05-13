@@ -188,7 +188,6 @@ router.route("/register")
 router.route("/signout").get(async (req, res) => {
   //code here for GET
   try {
-    console.log("in /signout")
     req.session.destroy();
     res.clearCookie("AuthenticationState");
     res.render("signout", { title: "Logged Out" });
@@ -269,7 +268,7 @@ router.route("/user/:id/profile")
         error: e.toString()
       });
     }
-});
+  });
 
 router.route("/metadata").get(async (req, res) => {
   //code here for GET
@@ -277,7 +276,7 @@ router.route("/metadata").get(async (req, res) => {
     let metadata = await getUserMetadata(req.session.user.userId);
     return res.status(200).json(metadata);
   } catch (e) {
-    res.status(500).json({error: e.toString()});
+    res.status(500).json({ error: e.toString() });
   }
 });
 

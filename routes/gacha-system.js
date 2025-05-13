@@ -92,4 +92,11 @@ router
             res.status(500).render('error', { title: "Error: 500", error: e });
         }
     });
+
+router
+    .route('/:id/pull_history')
+    // TODO display the user's recent pull history  
+    .get(async (req, res) => {
+
+    })
 export default router;
