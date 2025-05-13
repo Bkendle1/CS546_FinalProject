@@ -228,7 +228,8 @@ export const gachaPull = async (userId, pullCount, pullType) => {
     // check if user has enough tickets for this pull type (either golden or normal)
     let pulledCharacters = { // object that stores the pulled characters and whether they were duplicates
         pulled: [], // store pulled characters in an array
-        duplicates: [] // array of currency amounts corresponding to the pulled character's duplicate currency (if the character is new then its value is 0) 
+        duplicates: [], // array of currency amounts corresponding to the pulled character's duplicate currency (if the character is new then its value is 0)
+        leveledUp: 0 // counter for how many times the player leveled up (in case they level up more than once)
     };
 
     // check if user exists and if so, can they do this specific gacha pull
