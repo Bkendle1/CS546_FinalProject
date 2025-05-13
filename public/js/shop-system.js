@@ -10,6 +10,13 @@ kaplay({
 });
 
 const TEXT_COLOR = "#BB00E6" // hexcolor for general text
+loadMusic("digimonBraveHeart", "/public/music/digimonBraveHeart.mp3")
+const bgMusic = play("digimonBraveHeart", {
+    volume: 0.2,
+    speed: 1,
+    loop: true,
+    paused: true,
+})
 
 // hide form on cancel
 document.getElementById("pf-cancel").addEventListener("click", () => {
@@ -37,10 +44,10 @@ fetchShopItems()
     .then(async items => {
         // preload each sprite (with fallback)
         for (const i of items) {
-        const url = i.image && i.image.startsWith("http")
-            ? i.image
-            : "https://via.placeholder.com";
-        loadSprite(i._id, url);
+            const url = i.image && i.image.startsWith("http")
+                ? i.image
+                : "https://via.placeholder.com";
+            loadSprite(i._id, url);
         }
         await Promise.all(spritePromises);
         go("Shop");
@@ -48,6 +55,10 @@ fetchShopItems()
     .catch(console.error);
 
 scene("Shop", async () => {
+    bgMusic.paused = false;
+    bgMusic.volume = 0.2;
+
+
     let items, balance;
     try {
         items = await fetchShopItems();
@@ -82,17 +93,17 @@ scene("Shop", async () => {
 
         // create the bakcground for each item
         add([
-            rect(280,450,{radius: 8}),
-            pos(x,y), 
+            rect(280, 450, { radius: 8 }),
+            pos(x, y),
             anchor("center"),
-            outline(2), 
+            outline(2),
             color("#FFFFFF"),
             z(0)
         ]);
 
         // character sprite
         add([
-            sprite(item._id, {width: 128, height: 128}),
+            sprite(item._id, { width: 128, height: 128 }),
             pos(x, y - 60),
             anchor("center"),
             layer("sprite"),
@@ -101,7 +112,7 @@ scene("Shop", async () => {
 
         // name label
         add([
-            text(item.name, {size: 16}),
+            text(item.name, { size: 16 }),
             // pos(x - spacingX / 4, y + spacingY / 4),
             pos(x, y + 10),
             anchor("center"),
@@ -112,7 +123,7 @@ scene("Shop", async () => {
 
         // cost label
         add([
-            text("Cost:" + item.cost, {size: 16}),
+            text("Cost:" + item.cost, { size: 16 }),
             // pos(x - spacingX / 4, y + spacingY / 4),
             pos(x, y + 30),
             anchor("center"),
@@ -125,7 +136,7 @@ scene("Shop", async () => {
         const descriptionLines = item.description.match(/.{1,30}(?=\s|$)/g);
         descriptionLines.forEach((line, i) => {
             add([
-                text(line.trim(), {size: 10}),
+                text(line.trim(), { size: 10 }),
                 pos(x, y + 55 + i * 15),
                 anchor("center"),
                 color(TEXT_COLOR),
@@ -136,7 +147,7 @@ scene("Shop", async () => {
 
         // BUY button
         const buyBtn = add([
-            text("Buy", {size: 18}),
+            text("Buy", { size: 18 }),
             pos(x, y + 180),
             anchor("center"),
             color(TEXT_COLOR),

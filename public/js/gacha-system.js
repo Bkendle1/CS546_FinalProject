@@ -34,6 +34,17 @@ const BUTTON_TEXT_COLOR = "#28262C" // hexcolor for text of buttons
 const BULK_PULL_COUNT = 5; // number of pulls for a bulk pull. IF YOU CHANGE THIS VALUE THEN MAKE SURE TO ALSO CHANGE THIS CONSTANT IN THE CORRESPONDING ROUTER JS FILE
 const DISABLED_BUTTON_COLOR = "#36454F" // hexcolor for a disabled button
 const TEXT_COLOR = "#00FFE7" // hexcolor for general text
+loadSprite("banner", "/public/images/gachaBanner.png"); // load banner image as a sprite
+loadSprite("blackBG", "/public/images/abstractBlackBG.png");
+loadFont("digiFont", "/public/fonts/PixelDigivolve.otf", 8, 8);
+loadMusic("digimonButterfly", "/public/music/digimonAdventureOST_butterfly.mp3")
+const bgMusic = play("digimonButterfly", {
+    volume: 0.2,
+    speed: 1,
+    loop: true,
+    paused: true,
+})
+
 // Create a button with the given text, at the give position, that executes the given callback function when clicked on
 function addBtn(str, position, callback) {
     // create button
@@ -153,19 +164,10 @@ async function requestCharacterData(characterId) {
         console.error(e);
     }
 }
-loadMusic("digimonButterfly", "/public/music/digimonAdventureOST_butterfly.mp3")
-loadSprite("banner", "/public/images/gachaBanner.png"); // load banner image as a sprite
-loadSprite("blackBG", "/public/images/abstractBlackBG.png");
-loadFont("digiFont", "/public/fonts/PixelDigivolve.otf", 8, 8);
 
-const bgMusic = play("digimonButterfly", {
-    volume: 0.05,
-    speed: 1,
-    loop: true,
-    paused: true,
-})
 scene("Gacha", async () => {
     bgMusic.paused = false;
+    bgMusic.volume = 0.2;
     // add gacha's banner
     add([
         sprite("banner"),
@@ -215,7 +217,6 @@ scene("Gacha", async () => {
     const goldenBulkBtn = addBtn("Golden x5", vec2(width() - 300, height() - 250), () => {
         requestPull("golden", BULK_PULL_COUNT); // request a golden bulk pull
     });
-    // TODO: Menu
 
 
     onUpdate(() => {
