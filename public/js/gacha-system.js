@@ -153,10 +153,16 @@ async function requestCharacterData(characterId) {
         console.error(e);
     }
 }
-
+// loadMusic("digimonOP", "/public/music/digimonFrontierOP.mp3")
 loadSprite("banner", "/public/images/gachaBanner.png"); // load banner image as a sprite
 loadSprite("blackBG", "/public/images/abstractBlackBG.png");
 loadFont("digiFont", "/public/fonts/PixelDigivolve.otf", 8, 8);
+
+// play("digimonOP", {
+//     volume: 0.1,
+//     speed: 1,
+//     loop: true,
+// })
 scene("Gacha", async () => {
     // add gacha's banner
     add([
@@ -313,16 +319,13 @@ scene("GachaDisplaySingle", async ({ pulled, duplicates, tickets }) => {
     if (tickets.normal !== 0) {
         alertMsg = `You leveled up and got ${tickets.normal} ${tickets.normal > 1 ? `normal tickets!` : `normal ticket!`}.`
         normalTicketCount += tickets.normal // increment normal ticket count
-        // alert(alertMsg);
-        new Notification(alertMsg);
+        alert(alertMsg);
 
     }
     if (tickets.golden !== 0) {
         alertMsg = `You leveled up and got ${tickets.golden} ${tickets.golden > 1 ? `golden tickets!` : `golden ticket!`}.`
         goldenTicketCount += tickets.golden // increment golden ticket count
-        // alert(alertMsg);
-        new Notification(alertMsg);
-
+        alert(alertMsg);
     }
 
 
@@ -477,14 +480,12 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates, tickets }) => {
     if (tickets.normal !== 0) {
         alertMsg = `You leveled up and got ${tickets.normal} ${tickets.normal > 1 ? `normal tickets!` : `normal ticket!`}.`
         normalTicketCount += tickets.normal // increment normal ticket count
-        // alert(alertMsg);
-        new Notification(alertMsg);
+        alert(alertMsg);
     }
     if (tickets.golden !== 0) {
         alertMsg = `You leveled up and got ${tickets.golden} ${tickets.golden > 1 ? `golden tickets!` : `golden ticket!`}.`
         goldenTicketCount += tickets.golden // increment golden ticket count
-        // alert(alertMsg);
-        new Notification(alertMsg);
+        alert(alertMsg);
     }
 
 
@@ -645,12 +646,3 @@ async function checkFreeTicket() {
     $.ajax(requestConfig);
 }
 checkFreeTicket(); // when the script loads, check if the user got their free ticket 
-
-// Ask the player if they want notifications
-window.addEventListener("DOMContentLoaded", async () => {
-    if ("Notification" in window && Notification.permission === "default") {
-        alert("Accept notifications to get notified when leveling up!");
-        let promise = await Notification.requestPermission();
-    }
-
-});
