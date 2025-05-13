@@ -2,6 +2,7 @@ import {Router} from 'express';
 const router = Router();
 import { collectionInventoryData } from '../data/index.js';
 import * as helpers from "../helpers.js";
+import xss from "xss";
 
 // GET: the user inventory
 router.route('/').get(async (req, res) => {
