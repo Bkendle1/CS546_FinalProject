@@ -1,4 +1,19 @@
 {{!-- Used to display pull history --}}
 <div class="history">
-    {{#foreach}}
+    <a href="/gacha">Back to Gacha</a>
+    {{!-- Iterate over each pull --}}
+    {{#each pullHistory}}
+    {{!-- Display the pull type --}}
+    <p id="pullType" class="history">Pull type: {{this.pull_type}}</p>
+    {{!-- Iterate over each pulled character --}}
+    {{#each this.pulled}}
+    <div class="pull-details"> {{!-- Display each character's details --}}
+        <p id="name" class="history">Name: {{this.name}}</p> {{!-- Display character's name --}}
+        <img src="{{this.image}}" alt="{{this.name}}'s image"> {{!-- Display character's image --}}
+        <p id="rarity" class="history">Rarity: {{this.rarity}}</p> {{!-- Display character's rarity --}}
+        <p id="timestamp" class="history">Timestamp: {{this.timestamp}}</p> {{!-- Display time the character was pulled
+        --}}
+    </div>
+    {{/each}}
+    {{/each}}
 </div>

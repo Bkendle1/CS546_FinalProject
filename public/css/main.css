@@ -112,3 +112,8 @@ a:hover {
     font-weight: bolder;
     font-size: 20pt;
 }
+
+/* styling for each pull's details */
+.pull-details {
+    text-indent: 2em;
+}
