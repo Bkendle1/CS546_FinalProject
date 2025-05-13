@@ -114,9 +114,18 @@ router
     })
 router
     .route('/free_ticket')
-    .post(async (req, res) => {
-        // updates the user's ticket count by 1
-
-        // update the cooldown time by the cooldown amount
+    // checks if user gets a free ticket via an expired cooldown time
+    .get(async (req, res) => {
+        // checks if ticket cooldown time as been reached, and update ticket count, cooldown time, and ticket timestamp
+        try {
+            const difference = await helpers.checkTicketCooldownTime(req.session.user.userId);
+            if (difference <= 0) {
+                res.json({ free_ticket: true, timeRemaining: difference }); // return a bool stating the cooldown time has been reached 
+            } else {
+                res.json({ free_ticket: false, timeRemaining: difference });// return a bool stating the cooldown time has not been reached 
+            }
+        } catch (e) {
+            res.status(404).render('error', { title: "Error 404", error: e });
+        }
     });
 export default router;

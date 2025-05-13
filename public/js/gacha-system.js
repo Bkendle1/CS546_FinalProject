@@ -623,12 +623,17 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates, tickets }) => {
 // User gets a free ticket a 24 hours; therefore, when this script loads, it should check if enough time has elapsed
 async function checkFreeTicket() {
     const requestConfig = {
-        url: '/metadata',
+        url: '/gacha/free_ticket',
         method: 'GET',
-        // success: (response) => {
-        //     if (response.ticket_count.time)
-        // }
+        success: (response) => {
+            if (response.free_ticket) {
+                alert(`You got your daily free normal ticket!`);
+                normalTicketCount++; // update counter to reflect new ticket count
+            } else {
+                console.log(`There's still ${response.timeRemaining * 1000} seconds left.`);
+            }
+        }
     }
     $.ajax(requestConfig);
 }
-checkFreeTicket();
+checkFreeTicket(); // when the script loads, check if the user got their free ticket 
