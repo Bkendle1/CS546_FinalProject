@@ -375,5 +375,20 @@ export function calculateIncome(rarity, level = 1) {
     return income;
 }
 
+/**
+ * Given userId, return metadata of user 
+ */
+export const getUserMetadata = async (userId) => { 
+    // get reference to user
+    let userCollection = await users();
+    let user = await userCollection.findOne({ _id: ObjectId.createFromHexString(userId) });
+    // if user doesn't exist, throw
+    if (!user) {
+        throw "User does not exist."
+    }
+
+    return user.metadata;
+}
+
 
 
