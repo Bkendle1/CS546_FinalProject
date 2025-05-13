@@ -49,9 +49,6 @@ app.get('/gacha/:id/pull_history', ensureLogin);
 app.get('/user/:id', ensureLogin);
 app.get('/user/:id/profile', ensureLogin);
 app.get('/user/:id/upload-pic', ensureLogin);
-app.get('/metadata',ensureLogin);
-app.get('/signout',ensureLogin);
-
 app.get('/metadata', ensureLogin);
 app.get('/signout', ensureLogin);
 app.use(passiveIncome);
