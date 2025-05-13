@@ -7,6 +7,8 @@ import {
 import { users } from "../config/mongoCollections.js";
 import { ObjectId } from "mongodb";
 import xss from "xss";
+import * as helpers from '../helpers.js';
+
 /**
  * GET /shop
  */
@@ -43,9 +45,11 @@ router.get("/items", async (req, res) => {
 router.post("/purchase", async (req, res) => {
     try {
         const userId = req.session.user.userId;
-        const cleanItemName = xss(req.body.itemName);
-        const cleanQuantity = xss(req.body.quantity);
-        await purchaseItem(userId, cleanItemName, parseInt(cleanQuantity, 10));
+        const cleanItemName = helpers.validateString(xss(req.body.itemName), "Item Name");
+        const cleanQuantity1 = parseInt(xss(req.body.quantity), 10);
+        const cleanQuantity2 = helpers.validatePositiveInteger(cleanQuantity1, "Quantity");
+        
+        await purchaseItem(userId, cleanItemName, cleanQuantity2);
         res.redirect("/shop");
     } catch (e) {
         const items = await getAllItems();

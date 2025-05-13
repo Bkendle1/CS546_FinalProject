@@ -98,7 +98,7 @@ router
     // Display the user's recent pull history  
     .get(async (req, res) => {
         try {
-            var userId = helpers.validateObjectId(req.params.id, "ID URL param");
+            req.params.id = helpers.validateObjectId(req.params.id, "ID URL param");
         } catch (e) {
             res.status(404).render('error', { title: "Error 404", error: e });
         }
