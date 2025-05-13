@@ -229,7 +229,8 @@ export const gachaPull = async (userId, pullCount, pullType) => {
     let pulledCharacters = { // object that stores the pulled characters and whether they were duplicates
         pulled: [], // store pulled characters in an array
         duplicates: [], // array of currency amounts corresponding to the pulled character's duplicate currency (if the character is new then its value is 0)
-        leveledUp: 0 // counter for how many times the player leveled up (in case they level up more than once)
+        normal: 0, // counter for how many times the player leveled up and got a normal ticket (in case they level up more than once)
+        golden: 0, // counter for how many times the player leveled up and got a golden ticket (in case they level up more than once)
     };
 
     // check if user exists and if so, can they do this specific gacha pull
@@ -293,11 +294,21 @@ export const gachaPull = async (userId, pullCount, pullType) => {
 
         // Give user experience for pulling character(s)
         const EXP_GAIN = 50; // amount of experience points earned per pull
+        const metadata = await helpers.getUserMetadata(userId);
+        let curr_level = metadata.experience.level; // keep track of current level
         // update exp per pull to keep track how many times the user leveled up per pull in case it was more than once
         for (let i = 0; i < pullCount; i++) {
             let leveledUp = await levelUpPlayer(userId, EXP_GAIN);
+            // check if user leveled up as a result of the exp gain
             if (leveledUp) {
-                pulledCharacters.leveledUp++; // increment leveled up counter
+                curr_level += 1; // increment level counter
+                // if user's current level is a multiple of 10, give them a golden ticket
+                if (curr_level % 10 === 0) {
+                    pulledCharacters.golden++;
+                } else {
+                    // otherwise, give them a normal ticket
+                    pulledCharacters.normal++;
+                }
             }
         }
 
