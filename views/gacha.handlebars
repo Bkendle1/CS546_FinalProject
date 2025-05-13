@@ -1,5 +1,8 @@
 <div class="gacha">
     <h1>Welcome to the Gacha System!</h1>
+    {{#if user}}
+        {{{hasUploaded user}}}
+    {{/if}}
 
     <label for="options">Options</label>
     <select name="options" id="options">

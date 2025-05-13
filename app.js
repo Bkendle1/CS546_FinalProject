@@ -64,6 +64,12 @@ app.engine('handlebars', exphbs.engine({
                 arr.push(i);
             }
             return arr;
+        },
+        hasUploaded: (user) => {
+            if (user && user.image) {
+                return `<img src="${user.image}" width="60" height="60"/>`;
+            }
+            return;
         }
     }
 }));

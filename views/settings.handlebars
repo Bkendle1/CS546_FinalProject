@@ -1,10 +1,13 @@
 {{!-- Used to display user settings --}}
 <div class="settings">
-    <a href="/user/{{userId}}/profile" id="profileLink">Profile Page</a>
-    <button id="deleteBtn" type="submit">Delete Account</button> {{!-- This link doesn't really do anything as its
-    handled by
-    client-side
-    JS--}}
+    {{#if user}}
+        {{{hasUploaded user}}}
+    {{/if}}
+
+    <ul>
+        <a href="/user/{{userId}}/profile" id="profileLink">Profile Page</a>
+        <p><button id="deleteBtn" type="submit">Delete Account</button></p> {{!-- This link doesn't really do anything as its handled by client-side JS--}}
+    </ul>
 
     <script src="/public/js/user_settings.js"></script>
 </div>
