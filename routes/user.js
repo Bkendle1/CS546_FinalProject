@@ -189,7 +189,6 @@ router.route("/register")
 router.route("/signout").get(async (req, res) => {
   //code here for GET
   try {
-    console.log("in /signout")
     req.session.destroy();
     res.clearCookie("AuthenticationState");
     res.render("signout", { title: "Logged Out" });
@@ -207,7 +206,7 @@ router.route("/user/:id")
   .get(async (req, res) => {
     try {
       // verify that url param is a valid object id
-      req.params.id = validateObjectId(req.params.id, "ID url param");
+      req.params.id = validateObjectId(req.params.id, "ID URL param");
     } catch (e) {
       res.status(400).render('error', { title: "Error 404", error: e });
     }
@@ -228,9 +227,9 @@ router.route("/user/:id/profile")
   .get(async (req, res) => {
     try {
       // verify that url param is a valid object id
-      req.params.id = validateObjectId(req.params.id, "ID url param");
+      req.params.id = validateObjectId(req.params.id, "ID URL param");
     } catch (e) {
-      res.status(400).render('error', { title: "Error 404", error: e });
+      res.status(404).render('error', { title: "Error 404", error: e });
     }
 
     // attempt to get user's profile page
@@ -248,7 +247,7 @@ router.route("/user/:id/profile")
   })// delete the user account
   .delete(async (req, res) => {
     try {
-      req.params.id = validateObjectId(req.params.id, "ID url param");
+      req.params.id = validateObjectId(req.params.id, "ID URL param");
       await removeAccount(req.params.id);
       // destroy session so they’re logged out
       req.session.destroy(err => {
@@ -270,7 +269,7 @@ router.route("/user/:id/profile")
         error: e.toString()
       });
     }
-});
+  });
 
 router.route("/user/:id/upload-pic").post(uploadPic, async (req, res) => {
     try {
@@ -295,7 +294,7 @@ router.route("/metadata").get(async (req, res) => {
     let metadata = await getUserMetadata(req.session.user.userId);
     return res.status(200).json(metadata);
   } catch (e) {
-    res.status(500).json({error: e.toString()});
+    res.status(500).json({ error: e.toString() });
   }
 });
 
