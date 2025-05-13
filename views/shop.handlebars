@@ -5,15 +5,28 @@
         <p class="error">{{error}}</p>
     {{/if}}
 
-    <p id="user-balance">Current Balance: {{user.metadata.currency}}</p>
+    <p id="user-currency">Currency: {{user.metadata.currency}}</p>
+    <p id="user-food">Food: {{user.metadata.food_count}}</p>
+    <p id="user-tickets-normal"> Normal Tickets: {{user.metadata.ticket_count.normal}}</p> 
+    <p id="user-tickets-golden"> Golden Tickets: {{user.metadata.ticket_count.golden}}</p>
 
     <canvas id="shop-canvas" width="800" height="600"></canvas>
     <form id="purchase-form" action="/shop/purchase" method="POST" style="display:none">
-    <input type="hidden" name="itemName" id="pf-itemName" />
-    <input type="hidden" name="quantity"  value="1" />
+        <h2>Purchase <span id="pf-itemLabel"></span></h2>
+        <input type="hidden" name="itemName" id="pf-itemName" />
+        <label for="pf-quantity">Quantity:</label>
+        <select id="pf-quantity" name="quantity">
+            {{#each (range 1 10)}}
+                <option value="{{this}}">{{this}}</option>
+            {{/each}}
+        </select>
+        <div>
+            <button type="submit">Confirm</button>
+            <button type="button" id="pf-cancel">Cancel</button>
+        </div>
     </form>
 
     <a href="/gacha">Back to Gacha</a>
 
-    <script type="module" src="/public/js/shop.js"></script>
+    <script type="module" src="/public/js/shop-system.js"></script>
 </div>
