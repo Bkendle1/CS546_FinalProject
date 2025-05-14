@@ -4,10 +4,8 @@
         {{{hasUploaded user}}}
     {{/if}}
 
-    <ul>
-        <a href="/user/{{userId}}/profile" id="profileLink">Profile Page</a>
-        <p><button id="deleteBtn" type="submit">Delete Account</button></p> {{!-- This link doesn't really do anything as its handled by client-side JS--}}
-    </ul>
+    <p><a href="/user/{{userId}}/profile" id="profileLink">Profile Page</a></p>
+    <p><button id="deleteBtn" type="submit">Delete Account</button></p> {{!-- This link doesn't really do anything as its handled by client-side JS--}}
 
     <script src="/public/js/user_settings.js"></script>
 </div>
