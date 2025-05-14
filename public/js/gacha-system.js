@@ -17,29 +17,13 @@ kaplay({
 async function checkEndgame() {
     let response = await fetch("/gacha/checkCollected");
     if (!response.ok) throw response.status.message;
-    response = await fetch("/collectionInventory/656f0000000000000000ed9a/");
-    if (!response.ok) throw response.status.message;
-    const data = await response.json()
-    go("GachaDisplaySingle", { pulled: data._id, duplicates: 0, tickets: { normal: 0, golden: 0 } });
-    // const requestConfig = {
-    //     url: '/gacha/checkCollected',
-    //     method: "GET",
-    //     success: (response) => {
-    //         console.log(response)
-    //         if (response.hasCollected) {
-    //             const requestConfig = {
-    //                 url: "/collectionInventory/656f0000000000000000ed9a/",
-    //                 method: "GET",
-    //                 success: (response) => {
-    //                     console.log(response)
-    //                     go("GachaDisplaySingle", { pulled: response._id, duplicates: 0, tickets: { normal: 0, golden: 0 } });
-    //                 }
-    //             }
-    //             $.ajax(requestConfig);
-    //         }
-    //     }
-    // }
-    // $.ajax(requestConfig);
+    let data = await response.json()
+    if (data.hasCollected) {
+        response = await fetch("/collectionInventory/656f0000000000000000ed9a/");
+        if (!response.ok) throw response.status.message;
+        data = await response.json()
+        go("GachaDisplaySingle", { pulled: data._id, duplicates: 0, tickets: { normal: 0, golden: 0 } });
+    }
 }
 
 
@@ -187,7 +171,6 @@ async function fetchBalance() {
 async function requestCharacterData(characterId) {
     // Make a GET request to /collectionIndex/entries/:id
     try {
-        console.log(characterId)
         const url = `/collectionIndex/entries/${characterId}`;
         const response = await fetch(url);
         if (!response.ok) throw response.status.message;
@@ -402,7 +385,6 @@ scene("GachaDisplaySingle", async ({ pulled, duplicates, tickets }) => {
         pos(vec2(550, 10))
     ]);
     // If character isn't a duplicate, display a badge that says they're new
-    console.log(duplicates)
     if (duplicates === 0) {
         const newBadge = character.add([
             rect(200, 75, { radius: 5 }),
