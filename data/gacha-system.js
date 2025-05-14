@@ -471,7 +471,7 @@ export const grantEndgameCharacter = async (userId) => {
         _id: endgameCharacterId,
         name: "Patrick Hill",
         rarity: "legendary",
-        image: "/public/images/professorHill.png",
+        image: "https://media-hosting.imagekit.io/30287ac28ebb45af/professorHill.png?Expires=1841793798&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=3Edl6ppSbtYPaVh1Lmaq-IL6PVMgOGQWsMZcXA4gEjWwxdwm9RckbzuQhYxxlVNf~jHQFRGa1WorVgcsNBx70X4B7IW6sPcMr9ttPAMcgO4sHR9J7Nwxok2ggRNlAvekZfzFaUvIddoy9tHCBevv8AyfRMdocbLlmysA~7~B2prp0FIjemw71KI0Za08SuMfaLjlNbUpS7RTWMyXa4PlCGFFBnt4XczfVUQcMbK-JmfPs05WOC11dbxZpZr8GzYK9SdUORNWGKO6MaAVIUKhOf4WuWk1qIo7xTHiA8ikWrwzgReIQQJLInv1Fd0YFpoy~UNRMhbPOGA0OsgZIraUcA__",
         description: "Patrick Hill has worked as a professional software developer since 1998. He holds an Associate in Applied Science in Computer Programming and Systems from LaGuardia Community College, a Bachelor of Business Administration with a concentration in Computer Information Systems and a minor in Psychology from Baruch College, and a Master of Science in Computer Science from Stevens Institute of Technology. He is very proud that he graduated with a 4.0 GPA from his studies at Stevens.",
         collected: true
     }
