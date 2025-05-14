@@ -448,12 +448,12 @@ export const grantEndgameCharacter = async (userId) => {
         name: "Patrick Hill",
         nickname: "Patrick Hill",
         rarity: "legendary",
-        image: "/public/images/professorHill.png",
+        image: "https://media-hosting.imagekit.io/30287ac28ebb45af/professorHill.png?Expires=1841793798&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=3Edl6ppSbtYPaVh1Lmaq-IL6PVMgOGQWsMZcXA4gEjWwxdwm9RckbzuQhYxxlVNf~jHQFRGa1WorVgcsNBx70X4B7IW6sPcMr9ttPAMcgO4sHR9J7Nwxok2ggRNlAvekZfzFaUvIddoy9tHCBevv8AyfRMdocbLlmysA~7~B2prp0FIjemw71KI0Za08SuMfaLjlNbUpS7RTWMyXa4PlCGFFBnt4XczfVUQcMbK-JmfPs05WOC11dbxZpZr8GzYK9SdUORNWGKO6MaAVIUKhOf4WuWk1qIo7xTHiA8ikWrwzgReIQQJLInv1Fd0YFpoy~UNRMhbPOGA0OsgZIraUcA__",
         experience: {
             curr_exp: 0,
             exp_capacity: 999,
             level: 1,
-            income: 1000
+            income: 500
         }
     };
 

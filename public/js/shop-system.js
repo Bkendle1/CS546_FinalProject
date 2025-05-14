@@ -49,7 +49,6 @@ fetchShopItems()
                 : "https://via.placeholder.com";
             loadSprite(i._id, url);
         }
-        await Promise.all(spritePromises);
         go("Shop");
     })
     .catch(console.error);

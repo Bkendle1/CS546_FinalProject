@@ -27,7 +27,6 @@ fetchEntries()
                 : "https://via.placeholder.com";
             loadSprite(e._id, url);
         }
-        await Promise.all(spritePromises);
         go("Index");
     })
     .catch(console.error);
