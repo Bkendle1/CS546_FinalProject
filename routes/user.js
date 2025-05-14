@@ -1,6 +1,6 @@
 import e, { Router } from "express";
 const router = Router();
-import { register, login, getUserById, removeAccount, updateProfilePic } from "../data/users.js";
+import { register, login, getUserById, removeAccount, updateProfilePic, addRating } from "../data/users.js";
 import xss from "xss";
 import { validateUsername, validatePassword, validateEmail, getUserMetadata, validateObjectId } from "../helpers.js";
 import { uploadPic } from "../middleware.js";
@@ -296,6 +296,26 @@ router.route("/metadata").get(async (req, res) => {
   } catch (e) {
     res.status(500).json({ error: e.toString() });
   }
+});
+
+router.post("/user/:id/rate", async (req, res) => {
+    try {
+        const userId = validateObjectId(req.params.id, "User ID");
+        const rated = await addRating(userId, req.body.rating);
+        const user = await getUserById(userId);
+        return res.render("settings", {
+            userId,
+            user: req.session.user,
+            username: user.username,
+            level: user.level,
+            obtained: user.obtained,
+            ratings: rated
+        });
+    } catch (e) {
+        res.status(400).render("error", { 
+            error: e.toString() 
+        });
+    }
 });
 
 //export router
