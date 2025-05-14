@@ -7,6 +7,7 @@ The name of the game is to pull all the characters in the index. In order to pul
 Get all the characters and you'll be handomsly rewarded.
 
 ## How to run application 
-1. Run seed file using command: npm run seed 
-2. Run application using command: npm run start 
-3. Press the local host link and enjoy 
+1. Install needed packages using command: npm i
+2. Run seed file using command: npm run seed 
+3. Run application using command: npm run start 
+4. Press the local host link and enjoy !!
