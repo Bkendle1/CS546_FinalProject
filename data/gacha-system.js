@@ -397,7 +397,7 @@ export const hasEndgame = async (userId) => {
 
 
 /**
- * Checks if the user with the given id has collected all the characters and has not yet gained the endgame character, returns a boolean reflecting that.
+ * Checks if the user with the given id has collected all the characters and has not yet gained the endgame character, returns false if either the character already has the endgame character or if they don't have all the characters and returns true only if they have all the characters except the endgame character.
  */
 export const collectedAll = async (userId) => {
     // verify that user id is valid object id 
@@ -431,10 +431,10 @@ export const grantEndgameCharacter = async (userId) => {
     const userCollection = await users();
     const inventoryCollection = await collectionInventory();
     // const user = await userCollection.findOne({ _id: ObjectId.createFromHexString(userId) });
-    
+
     // check if endgame character already exists in inventory 
     const endgameCharacterId = new ObjectId("656f0000000000000000ed9a");
-    const endgameCharacterExists = await inventoryCollection.findOne({ 
+    const endgameCharacterExists = await inventoryCollection.findOne({
         user_id: ObjectId.createFromHexString(userId),
         "obtained._id": endgameCharacterId
     });
@@ -442,28 +442,46 @@ export const grantEndgameCharacter = async (userId) => {
     if (endgameCharacterExists) {
         return false;
     }
-
+    // create endgame character for inventory 
     let endgameCharacter = {
-      _id: endgameCharacterId,
-      name: "Patrick Hill",
-      nickname: "Patrick Hill",
-      rarity: "legendary",
-      image: "/public/images/professorHill.png",
-      experience: {
-        curr_exp: 0,
-        exp_capacity: 999,
-        level: 1,
-        income: 1000
-      }
+        _id: endgameCharacterId,
+        name: "Patrick Hill",
+        nickname: "Patrick Hill",
+        rarity: "legendary",
+        image: "/public/images/professorHill.png",
+        experience: {
+            curr_exp: 0,
+            exp_capacity: 999,
+            level: 1,
+            income: 1000
+        }
     };
-    
+
     let result = await inventoryCollection.updateOne(
-      {user_id: new ObjectId(String(userId))},
-      {$push: {obtained: endgameCharacter}},
+        { user_id: new ObjectId(String(userId)) },
+        { $push: { obtained: endgameCharacter } },
     );
 
     if (result.modifiedCount === 0) {
-      throw new Error("Grant endgame character has failed");
+        throw new Error("Grant endgame character has failed");
+    }
+
+    // create endgame character for index
+    let endgameIndexEntry = {
+        _id: endgameCharacterId,
+        name: "Patrick Hill",
+        rarity: "legendary",
+        image: "/public/images/professorHill.png",
+        description: "Patrick Hill has worked as a professional software developer since 1998. He holds an Associate in Applied Science in Computer Programming and Systems from LaGuardia Community College, a Bachelor of Business Administration with a concentration in Computer Information Systems and a minor in Psychology from Baruch College, and a Master of Science in Computer Science from Stevens Institute of Technology. He is very proud that he graduated with a 4.0 GPA from his studies at Stevens.",
+        collected: true
+    }
+
+    const indexCollection = await collectionIndex();
+    const entry = await indexCollection.findOne({ _id: endgameCharacterId });
+    if (entry) throw `User with id: ${userId} already has the endgame character.`;
+    const insertInfo = await indexCollection.insertOne(endgameIndexEntry);
+    if (!insertInfo.acknowledged || !insertInfo.insertedId) {
+        throw `Could not insert the endgame character into the index.`;
     }
 
     return true;

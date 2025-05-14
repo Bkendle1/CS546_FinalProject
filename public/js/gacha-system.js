@@ -156,6 +156,7 @@ async function fetchBalance() {
 async function requestCharacterData(characterId) {
     // Make a GET request to /collectionIndex/entries/:id
     try {
+        console.log(characterId)
         const url = `/collectionIndex/entries/${characterId}`;
         const response = await fetch(url);
         if (!response.ok) throw response.status.message;
@@ -331,8 +332,6 @@ scene("GachaDisplaySingle", async ({ pulled, duplicates, tickets }) => {
         goldenTicketCount += tickets.golden // increment golden ticket count
         alert(alertMsg);
     }
-
-
 
     // get the pulled character's index information
     const charInfo = await requestCharacterData(pulled);
@@ -632,7 +631,33 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates, tickets }) => {
         }
     })
 });
-
+/**
+ * Check if user has collected all characters and can receive the endgame character.
+ */
+async function checkEndgame() {
+    const requestConfig = {
+        url: '/gacha/checkCollected',
+        method: "GET",
+        success: (response) => {
+            // console.log(response.hasCollected);
+            console.log(response)
+            if (response.hasCollected) {
+                const requestConfig = {
+                    url: "/collectionInventory/656f0000000000000000ed9a/",
+                    method: "GET",
+                    success: (response) => {
+                        console.log(response)
+                        go("GachaDisplaySingle", { pulled: response.character, duplicates: 0, tickets: { normal: 0, golden: 0 } });
+                    }
+                }
+                $.ajax(requestConfig);
+            }
+            // go("GachaDisplaySingle", { pulled: response.pulled, duplicates: response.duplicates, tickets: { normal: response.normal, golden: response.golden } }); // after the player does a pull, render this new scene that displays their new character
+        }
+    }
+    $.ajax(requestConfig);
+}
+checkEndgame();
 // User gets a free ticket a 24 hours; therefore, when this script loads, it should check if enough time has elapsed
 async function checkFreeTicket() {
     const requestConfig = {
