@@ -1,7 +1,16 @@
 {{!-- Used to display a user's profile information --}}
 <div class="user">
     <h1>Hello {{username}}!</h1>
-    <img src="{{profilePic}}" alt="userPic">
+
+    <h2>Current Picture:</h2>
+    <img src="{{user.image}}" alt="Profile Picture" width="128" height="128" />
+
+    <h3>Upload Profile Picture</h3>
+    <form id="pic-form" action="/user/{{userId}}/upload-pic" method="POST" enctype="multipart/form-data">
+        <input type="file" name="profilePic" accept="image/*" required />
+        <button type="submit">Upload</button>
+    </form>
+
     <p>You're level {{level}} and have obtained {{obtained}} characters!</p>
     <a href="/shop">Shop</a>
     <a href="/collectionInventory">Inventory</a>

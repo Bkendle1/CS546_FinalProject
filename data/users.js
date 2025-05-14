@@ -177,3 +177,20 @@ export const getUserById = async (userId) => {
   }
   return userInfo; // return user info
 }
+
+/**
+ * Update a user’s profile picture filename in their document.
+ */
+export const updateProfilePic = async (userId, filename) => {
+    userId = helpers.validateObjectId(userId, "User ID");
+    filename = helpers.validateString(filename, "Filename");
+    const usersCol = await users();
+    const result = await usersCol.updateOne(
+        { _id: ObjectId.createFromHexString(userId) },
+        { $set: { image: `/public/uploads/${filename}` } }
+    );
+    if (result.modifiedCount == 0) {
+        throw "Error: Could not update profile image.";
+    }
+    return true;
+};

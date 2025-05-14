@@ -1,8 +1,9 @@
 import e, { Router } from "express";
 const router = Router();
-import { register, login, getUserById, removeAccount } from "../data/users.js";
+import { register, login, getUserById, removeAccount, updateProfilePic } from "../data/users.js";
 import xss from "xss";
 import { validateUsername, validatePassword, validateEmail, getUserMetadata, validateObjectId } from "../helpers.js";
+import { uploadPic } from "../middleware.js";
 
 router.route("/").get(async (req, res) => {
   //code here for GET
@@ -269,6 +270,23 @@ router.route("/user/:id/profile")
       });
     }
   });
+
+router.route("/user/:id/upload-pic").post(uploadPic, async (req, res) => {
+    try {
+        const userId = validateObjectId(req.params.id, "User ID");
+        if (!req.file) {
+            throw "Error: No file uploaded.";
+        }
+        await updateProfilePic(userId, req.file.filename);
+        // update session immediately
+        req.session.user.image = `/public/uploads/${req.file.filename}`;
+        res.redirect(`/user/${userId}/profile`);
+    } catch (e) {
+        res.status(400).render("error", { 
+            error: e.toString() 
+        });
+    }
+});
 
 router.route("/metadata").get(async (req, res) => {
   //code here for GET

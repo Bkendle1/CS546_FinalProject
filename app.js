@@ -38,12 +38,12 @@ app.get('/collectionInventory/:characterId', ensureLogin);
 app.get('/collectionInventory/:characterId/nickname', ensureLogin);
 app.get('/collectionInventory/:characterId/feed', ensureLogin);
 
-app.get('/gacha',ensureLogin);
-app.get('/gacha/tickets',ensureLogin);
-app.get('/gacha/normal',ensureLogin);
-app.get('/gacha/normal/bulk',ensureLogin);
-app.get('/gacha/golden',ensureLogin);
-app.get('/gacha/golden/bulk',ensureLogin);
+app.get('/gacha', ensureLogin);
+app.get('/gacha/tickets', ensureLogin);
+app.get('/gacha/normal', ensureLogin);
+app.get('/gacha/normal/bulk', ensureLogin);
+app.get('/gacha/golden', ensureLogin);
+app.get('/gacha/golden/bulk', ensureLogin);
 app.get('/gacha/:id/pull_history', ensureLogin);
 app.get('/gacha/free_ticket', ensureLogin);
 app.get('/gacha/checkCollected', ensureLogin);
