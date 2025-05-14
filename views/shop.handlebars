@@ -13,7 +13,7 @@
     <canvas id="shop-canvas" width="800" height="600"></canvas>
     <form id="purchase-form" action="/shop/purchase" method="POST" style="display:none">
         <h2>Purchase <span id="pf-itemLabel"></span></h2>
-        <input type="hidden" name="itemName" id="pf-itemName" />
+        <input type="hidden" name="itemName" id="pf-itemName">
         <label for="pf-quantity">Quantity:</label>
         <select id="pf-quantity" name="quantity">
             {{#each (range 1 10)}}
@@ -26,7 +26,7 @@
         </div>
     </form>
 
-    <a href="/gacha">Back to Gacha</a>
+    <p><a href="/gacha">Back to Gacha</a></p>
 
     <script type="module" src="/public/js/shop-system.js"></script>
 </div>
