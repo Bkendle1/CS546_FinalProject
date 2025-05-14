@@ -220,8 +220,8 @@ export const rarityToPullRate = (rarity) => {
     // set the rates of all rarities
     const commonRates = { max: 0.99, min: 0.80 };
     const uncommonRates = { max: 0.64, min: 0.50 };
-    const rareRates = { max: 0.30, min: 0.20 };
-    const legendaryRates = { max: 0.1, min: 0.01 };
+    const rareRates = { max: 0.45, min: 0.40 };
+    const legendaryRates = { max: 0.35, min: 0.3 };
     const PRECISION = 4; // how many significant digits to keep from the pull rate
     let pullRate = 0;
     // return a pull rate within the range of the corresponding rarities
