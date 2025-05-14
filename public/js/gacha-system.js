@@ -11,6 +11,37 @@ kaplay({
     loadingScreen: true,
     background: "#000000" // default background color
 });
+/**
+ * Check if user has collected all characters and can receive the endgame character.
+ */
+async function checkEndgame() {
+    let response = await fetch("/gacha/checkCollected");
+    if (!response.ok) throw response.status.message;
+    response = await fetch("/collectionInventory/656f0000000000000000ed9a/");
+    if (!response.ok) throw response.status.message;
+    const data = await response.json()
+    go("GachaDisplaySingle", { pulled: data._id, duplicates: 0, tickets: { normal: 0, golden: 0 } });
+    // const requestConfig = {
+    //     url: '/gacha/checkCollected',
+    //     method: "GET",
+    //     success: (response) => {
+    //         console.log(response)
+    //         if (response.hasCollected) {
+    //             const requestConfig = {
+    //                 url: "/collectionInventory/656f0000000000000000ed9a/",
+    //                 method: "GET",
+    //                 success: (response) => {
+    //                     console.log(response)
+    //                     go("GachaDisplaySingle", { pulled: response._id, duplicates: 0, tickets: { normal: 0, golden: 0 } });
+    //                 }
+    //             }
+    //             $.ajax(requestConfig);
+    //         }
+    //     }
+    // }
+    // $.ajax(requestConfig);
+}
+
 
 let normalTicketCount = 0;
 let goldenTicketCount = 0;
@@ -166,9 +197,13 @@ async function requestCharacterData(characterId) {
     }
 }
 
+
 scene("Gacha", async () => {
-    bgMusic.paused = false;
-    bgMusic.volume = 0.2;
+    setTimeout(async () => {
+        await checkEndgame(); // check if user can receive end game reward
+        bgMusic.paused = false;
+        bgMusic.volume = 0.2;
+    }, 500)
     // add gacha's banner
     add([
         sprite("banner"),
@@ -631,33 +666,7 @@ scene("GachaDisplayBulk", async ({ pulled, duplicates, tickets }) => {
         }
     })
 });
-/**
- * Check if user has collected all characters and can receive the endgame character.
- */
-async function checkEndgame() {
-    const requestConfig = {
-        url: '/gacha/checkCollected',
-        method: "GET",
-        success: (response) => {
-            // console.log(response.hasCollected);
-            console.log(response)
-            if (response.hasCollected) {
-                const requestConfig = {
-                    url: "/collectionInventory/656f0000000000000000ed9a/",
-                    method: "GET",
-                    success: (response) => {
-                        console.log(response)
-                        go("GachaDisplaySingle", { pulled: response.character, duplicates: 0, tickets: { normal: 0, golden: 0 } });
-                    }
-                }
-                $.ajax(requestConfig);
-            }
-            // go("GachaDisplaySingle", { pulled: response.pulled, duplicates: response.duplicates, tickets: { normal: response.normal, golden: response.golden } }); // after the player does a pull, render this new scene that displays their new character
-        }
-    }
-    $.ajax(requestConfig);
-}
-checkEndgame();
+
 // User gets a free ticket a 24 hours; therefore, when this script loads, it should check if enough time has elapsed
 async function checkFreeTicket() {
     const requestConfig = {
