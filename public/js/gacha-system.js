@@ -7,10 +7,10 @@ kaplay({
     font: "sans-serif", // in-game font
     crisp: false, // makes pixels sharp
     canvas: document.querySelector("#canvas"), // canvas element to use
-    // letterbox: true, // scales the canvas to maintain aspect ratio
     loadingScreen: true,
     background: "#000000" // default background color
 });
+
 /**
  * Check if user has collected all characters and can receive the endgame character.
  */
