@@ -98,7 +98,7 @@ router
     // Display the user's recent pull history  
     .get(async (req, res) => {
         try {
-            req.params.id = helpers.validateObjectId(req.params.id, "ID URL param");
+            var userId = helpers.validateObjectId(req.params.id, "ID URL param");
         } catch (e) {
             res.status(404).render('error', { title: "Error 404", error: e });
         }
@@ -106,12 +106,14 @@ router
         // attempt to render user pull history
         try {
             const pull_history = await helpers.getPullHistory(userId);
-            res.render('history', { pullHistory: pull_history });
+            res.render('history', { 
+                title: "Pull History",
+                pullHistory: pull_history });
         } catch (e) {
             res.status(404).render('error', { title: "Error 404", error: e });
         }
-
     })
+
 router
     .route('/free_ticket')
     // checks if user gets a free ticket via an expired cooldown time
