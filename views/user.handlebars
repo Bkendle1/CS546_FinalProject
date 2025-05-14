@@ -3,15 +3,17 @@
     <h1>Hello {{username}}!</h1>
 
     <h2>Current Picture:</h2>
-    <img src="{{user.image}}" alt="Profile Picture" width="128" height="128" />
+    <img src="{{user.image}}" alt="<Profile Pic Here>" width="200" height="200">
 
     <h3>Upload Profile Picture</h3>
     <form id="pic-form" action="/user/{{userId}}/upload-pic" method="POST" enctype="multipart/form-data">
-        <input type="file" name="profilePic" accept="image/*" required />
-        <button type="submit">Upload</button>
+        <label for="profilePic">Choose a new picture:</label>
+        <input type="file" id="profilePic" name="profilePic" accept="image/*" required>
+        <button type="submit">Upload Pic</button>
     </form>
 
-    <p>You're level {{level}} and have obtained {{obtained}} characters!</p>
+    <h3>You're level {{level}} and have obtained {{obtained}} characters!</h3>
+
     <a href="/shop">Shop</a>
     <a href="/collectionInventory">Inventory</a>
     <a href="/collectionIndex">Index</a>

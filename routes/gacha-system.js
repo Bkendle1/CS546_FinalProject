@@ -107,12 +107,15 @@ router
         // attempt to render user pull history
         try {
             const pull_history = await helpers.getPullHistory(userId);
-            res.render('history', { pullHistory: pull_history });
+            res.render('history', {
+                title: "Pull History",
+                pullHistory: pull_history
+            });
         } catch (e) {
             res.status(404).render('error', { title: "Error 404", error: e });
         }
-
     })
+
 router
     .route('/free_ticket')
     // checks if user gets a free ticket via an expired cooldown time
@@ -137,12 +140,12 @@ router
         try {
             const userId = req.session.user.userId;
             const collected = await gachaData.collectedAll(userId);
-            
+
             if (collected) {
                 await gachaData.grantEndgameCharacter(userId);
             }
 
-            res.status(200).json({hasCollected: collected});
+            res.status(200).json({ hasCollected: collected });
         } catch (e) {
             res.status(404).render('error', { title: "Error 404", error: e });
         }

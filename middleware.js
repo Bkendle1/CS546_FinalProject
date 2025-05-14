@@ -18,6 +18,16 @@ export const redirectToGachaIfLoggedIn = (req, res, next) => {
   next();
 }
 
+// middleware for uploading profile pic
+const uploadDir = path.join(process.cwd(), "public", "uploads");
+const storage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, uploadDir),
+  filename: (_req, file, cb) => {
+    cb(null, Date.now() + "-" + file.originalname);
+  }
+});
+export const uploadPic = multer({ storage }).single("profilePic");
+
 // Function: auto update currency counter based on passive from the characters
 export const passiveIncome = async (req, res, next) => {
   // ensure update only takes place when user is logged in (not signed out!!)
@@ -68,11 +78,3 @@ export const passiveIncome = async (req, res, next) => {
 
   next();
 }
-const uploadDir = path.join(process.cwd(), "public", "uploads");
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, uploadDir),
-  filename: (_req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
-  }
-});
-export const uploadPic = multer({ storage }).single("profilePic");
