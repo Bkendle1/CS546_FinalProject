@@ -3,6 +3,7 @@ const router = Router();
 import { gachaData } from '../data/index.js';
 import * as helpers from '../helpers.js';
 import { ObjectId } from 'mongodb';
+import { collectedAll, grantEndgameCharacter } from '../data/gacha-system.js';
 
 const BULK_PULL_COUNT = 5; // number of pulls for a bulk pull. IF YOU CHANGE THIS VALUE THEN MAKE SURE TO ALSO CHANGE THIS CONSTANT IN THE CORRESPONDING CLIENT-SIDE JS FILE
 
@@ -124,6 +125,24 @@ router
             } else {
                 res.json({ free_ticket: false, timeRemaining: difference });// return a bool stating the cooldown time has not been reached 
             }
+        } catch (e) {
+            res.status(404).render('error', { title: "Error 404", error: e });
+        }
+    });
+
+router
+    .route('/checkCollected')
+    // checks if user has collected all possible characters, if so, grant endgame reward
+    .get(async (req, res) => {
+        try {
+            const userId = req.session.user.userId;
+            const collected = await gachaData.collectedAll(userId);
+            
+            if (collected) {
+                await gachaData.grantEndgameCharacter(userId);
+            }
+
+            res.status(200).json({hasCollected: collected});
         } catch (e) {
             res.status(404).render('error', { title: "Error 404", error: e });
         }

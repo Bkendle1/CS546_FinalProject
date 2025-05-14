@@ -1,5 +1,5 @@
 import * as helpers from "../helpers.js";
-import { users, collectionIndex, gacha } from "../config/mongoCollections.js";
+import { users, collectionIndex, collectionInventory, gacha } from "../config/mongoCollections.js";
 import { ObjectId } from "mongodb";
 import weighted from "weighted";
 import { getEntryById, markCollected, getAllIndexEntries } from "./collectionIndex.js";
@@ -375,7 +375,29 @@ export const addCharacterToGacha = async (name, pull_rate, duplicate_currency) =
 }
 
 /**
- * Checks if the user with the given id has collected all the characters and returns a boolean reflecting that.
+ * Checks if the user with given id has already achieved endgame and has the endgame character in their inventory
+ */
+export const hasEndgame = async (userId) => {
+    const endgameCharacterId = new ObjectId("656f0000000000000000ed9a");
+    userId = helpers.validateObjectId(userId, "User ID");
+    const inventoryCollection = await collectionInventory();
+    const inventory = await inventoryCollection.findOne({ user_id: ObjectId.createFromHexString(userId) });
+    if (!inventory) throw `No inventory with that id `;
+
+    let endgameAchieved = false;
+
+    for (let char of inventory.obtained) {
+        if (char._id.toString() === endgameCharacterId.toString()) {
+            endgameAchieved = true;
+        }
+    }
+
+    return endgameAchieved;
+}
+
+
+/**
+ * Checks if the user with the given id has collected all the characters and has not yet gained the endgame character, returns false if either the character already has the endgame character or if they don't have all the characters and returns true only if they have all the characters except the endgame character.
  */
 export const collectedAll = async (userId) => {
     // verify that user id is valid object id 
@@ -387,10 +409,83 @@ export const collectedAll = async (userId) => {
 
     const indexEntries = await getAllIndexEntries();
     const metadata = await helpers.getUserMetadata(userId);
+    const endgameAchieved = await hasEndgame(userId);
 
     if (indexEntries.length === metadata.obtained_count) {
-        return true;
+        if (!endgameAchieved) {
+            return true;
+        }
+        else {
+            return false;
+        }
     } else {
         return false;
     }
 }
+
+/**
+ * 
+ */
+export const grantEndgameCharacter = async (userId) => {
+    userId = helpers.validateObjectId(userId, "User ID");
+    const userCollection = await users();
+    const inventoryCollection = await collectionInventory();
+    // const user = await userCollection.findOne({ _id: ObjectId.createFromHexString(userId) });
+
+    // check if endgame character already exists in inventory 
+    const endgameCharacterId = new ObjectId("656f0000000000000000ed9a");
+    const endgameCharacterExists = await inventoryCollection.findOne({
+        user_id: ObjectId.createFromHexString(userId),
+        "obtained._id": endgameCharacterId
+    });
+
+    if (endgameCharacterExists) {
+        return false;
+    }
+    // create endgame character for inventory 
+    let endgameCharacter = {
+        _id: endgameCharacterId,
+        name: "Patrick Hill",
+        nickname: "Patrick Hill",
+        rarity: "legendary",
+        image: "/public/images/professorHill.png",
+        experience: {
+            curr_exp: 0,
+            exp_capacity: 999,
+            level: 1,
+            income: 1000
+        }
+    };
+
+    let result = await inventoryCollection.updateOne(
+        { user_id: new ObjectId(String(userId)) },
+        { $push: { obtained: endgameCharacter } },
+    );
+
+    if (result.modifiedCount === 0) {
+        throw new Error("Grant endgame character has failed");
+    }
+
+    // create endgame character for index
+    let endgameIndexEntry = {
+        _id: endgameCharacterId,
+        name: "Patrick Hill",
+        rarity: "legendary",
+        image: "/public/images/professorHill.png",
+        description: "Patrick Hill has worked as a professional software developer since 1998. He holds an Associate in Applied Science in Computer Programming and Systems from LaGuardia Community College, a Bachelor of Business Administration with a concentration in Computer Information Systems and a minor in Psychology from Baruch College, and a Master of Science in Computer Science from Stevens Institute of Technology. He is very proud that he graduated with a 4.0 GPA from his studies at Stevens.",
+        collected: true
+    }
+
+    const indexCollection = await collectionIndex();
+    const entry = await indexCollection.findOne({ _id: endgameCharacterId });
+    if (entry) throw `User with id: ${userId} already has the endgame character.`;
+    const insertInfo = await indexCollection.insertOne(endgameIndexEntry);
+    if (!insertInfo.acknowledged || !insertInfo.insertedId) {
+        throw `Could not insert the endgame character into the index.`;
+    }
+
+    return true;
+}
+
+
+

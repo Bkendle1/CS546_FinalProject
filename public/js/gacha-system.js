@@ -11,6 +11,21 @@ kaplay({
     loadingScreen: true,
     background: "#000000" // default background color
 });
+/**
+ * Check if user has collected all characters and can receive the endgame character.
+ */
+async function checkEndgame() {
+    let response = await fetch("/gacha/checkCollected");
+    if (!response.ok) throw response.status.message;
+    let data = await response.json()
+    if (data.hasCollected) {
+        response = await fetch("/collectionInventory/656f0000000000000000ed9a/");
+        if (!response.ok) throw response.status.message;
+        data = await response.json()
+        go("GachaDisplaySingle", { pulled: data._id, duplicates: 0, tickets: { normal: 0, golden: 0 } });
+    }
+}
+
 
 let normalTicketCount = 0;
 let goldenTicketCount = 0;
@@ -165,9 +180,13 @@ async function requestCharacterData(characterId) {
     }
 }
 
+
 scene("Gacha", async () => {
-    bgMusic.paused = false;
-    bgMusic.volume = 0.2;
+    setTimeout(async () => {
+        await checkEndgame(); // check if user can receive end game reward
+        bgMusic.paused = false;
+        bgMusic.volume = 0.2;
+    }, 500)
     // add gacha's banner
     add([
         sprite("banner"),
@@ -332,8 +351,6 @@ scene("GachaDisplaySingle", async ({ pulled, duplicates, tickets }) => {
         alert(alertMsg);
     }
 
-
-
     // get the pulled character's index information
     const charInfo = await requestCharacterData(pulled);
     loadSprite(charInfo.name, charInfo.image); // load the sprite for the corresponding character
@@ -368,7 +385,6 @@ scene("GachaDisplaySingle", async ({ pulled, duplicates, tickets }) => {
         pos(vec2(550, 10))
     ]);
     // If character isn't a duplicate, display a badge that says they're new
-    console.log(duplicates)
     if (duplicates === 0) {
         const newBadge = character.add([
             rect(200, 75, { radius: 5 }),
