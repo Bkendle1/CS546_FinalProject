@@ -55,7 +55,8 @@ export const register = async (
         level: 1
       },
       obtained_count: 0,
-      timestampOfLastPassiveIncome: new Date().toISOString()
+      timestampOfLastPassiveIncome: new Date().toISOString(),
+      ratings: []
     },
     pull_history: []
   };
@@ -194,3 +195,24 @@ export const updateProfilePic = async (userId, filename) => {
     }
     return true;
 };
+
+/**
+ * Add a rating between 1 and 5
+ */
+export async function addRating(userId, rating) {
+    userId = helpers.validateObjectId(userId, "User ID");
+    rating = parseInt(rating, 10);
+    if (![1,2,3,4,5].includes(rating)) {
+        throw "Error: Rating must be an integer between 1 and 5.";
+    }
+
+    const usersCol = await users();
+    const update = await usersCol.updateOne(
+        { _id: ObjectId.createFromHexString(userId) },
+        { $push: { "metadata.ratings": rating } }
+    );
+    if (update.modifiedCount == 0) {
+        throw "Error: Could not save your rating.";
+    }
+    return rating;
+}

@@ -22,5 +22,17 @@
     <p><button id="deleteBtn" type="submit">Delete Account</button></p> {{!-- This link doesn't really do anything as
     its handled by client-side JS--}}
 
+    <h3>Rate our Gacha Game</h3>
+    <form id="rate-form" action="/user/{{userId}}/rate" method="POST">
+        <label for="rating">Your rating (1-5):</label>
+        <select id="rating" name="rating" required>
+            <option value="">select</option>
+            {{#each (range 1 5)}}
+                <option value="{{this}}">{{this}}</option>
+            {{/each}}
+        </select>
+        <button type="submit">Submit Rating</button>
+    </form>
+
     <script src="/public/js/user_settings.js"></script>
 </div>
